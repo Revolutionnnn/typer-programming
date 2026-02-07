@@ -104,7 +104,7 @@ func (db *DB) SaveProgress(req models.ProgressRequest) (*models.Progress, error)
 			BestWPM:      req.WPM,
 			BestAccuracy: req.Accuracy,
 			Attempts:     1,
-			LastAttempt:   now,
+			LastAttempt:  now,
 			CreatedAt:    now,
 			UpdatedAt:    now,
 		}, nil
@@ -140,7 +140,7 @@ func (db *DB) SaveProgress(req models.ProgressRequest) (*models.Progress, error)
 		BestWPM:      bestWPM,
 		BestAccuracy: bestAccuracy,
 		Attempts:     existing.Attempts + 1,
-		LastAttempt:   now,
+		LastAttempt:  now,
 		UpdatedAt:    now,
 	}, nil
 }
