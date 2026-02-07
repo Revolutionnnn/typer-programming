@@ -1,0 +1,24 @@
+# ── Development/Testing stage ──
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY apps/web-angular/package.json apps/web-angular/package-lock.json* ./
+
+# Install dependencies
+RUN npm ci
+
+# Copy source code
+COPY apps/web-angular/ .
+
+# Ensure src dir has open permissions so mounted volumes are readable
+RUN chmod -R 777 /app/src && \
+    chmod -R 777 /app/node_modules/.cache 2>/dev/null || true && \
+    mkdir -p /app/.angular/cache && chmod -R 777 /app/.angular
+
+# Expose Angular dev server port
+EXPOSE 4200
+
+# Start dev server with hot reload (poll for Docker volume changes)
+CMD ["npx", "ng", "serve", "--host", "0.0.0.0", "--poll", "2000"]

@@ -1,0 +1,17 @@
+{
+  "id": "go-structs-01",
+  "title": "Structs en Go",
+  "language": "go",
+  "concept": "structs",
+  "description": "Crea tipos de datos personalizados con structs.",
+  "explanation": [
+    "Un struct agrupa campos relacionados.",
+    "Es similar a una clase pero sin herencia.",
+    "Se crea con 'type NombreStruct struct { }'."
+  ],
+  "code": "package main\n\nimport \"fmt\"\n\ntype Person struct {\n\tName string\n\tAge  int\n}\n\nfunc main() {\n\tp := Person{Name: \"Alice\", Age: 30}\n\tfmt.Println(p.Name, \"is\", p.Age, \"years old\")\n}",
+  "mode": "strict",
+  "difficulty": "beginner",
+  "order": 10,
+  "tags": ["basics", "structs"]
+}

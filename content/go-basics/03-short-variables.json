@@ -1,0 +1,17 @@
+{
+  "id": "go-short-variables-01",
+  "title": "Variables cortas con :=",
+  "language": "go",
+  "concept": "short-variables",
+  "description": "Usa la declaración corta := para crear variables.",
+  "explanation": [
+    "El operador ':=' declara e inicializa una variable.",
+    "Go infiere el tipo automáticamente.",
+    "Solo se puede usar dentro de funciones."
+  ],
+  "code": "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tname := \"Gopher\"\n\tage := 10\n\tactive := true\n\tfmt.Println(name, age, active)\n}",
+  "mode": "strict",
+  "difficulty": "beginner",
+  "order": 3,
+  "tags": ["basics", "variables", "short-declaration"]
+}

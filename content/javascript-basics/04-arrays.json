@@ -1,0 +1,17 @@
+{
+  "id": "js-arrays-04",
+  "title": "Arrays en JavaScript",
+  "language": "javascript",
+  "concept": "arrays",
+  "description": "Aprende a trabajar con arrays y sus métodos más útiles.",
+  "explanation": [
+    "Los arrays se crean con corchetes [] y pueden contener cualquier tipo.",
+    "Métodos como map(), filter() y forEach() son fundamentales.",
+    "JavaScript tiene arrays dinámicos — no necesitas definir el tamaño."
+  ],
+  "code": "const fruits = [\"apple\", \"banana\", \"cherry\"];\n\nfruits.push(\"orange\");\nconsole.log(`Fruits: ${fruits}`);\nconsole.log(`Count: ${fruits.length}`);\n\nconst upper = fruits.map(f => f.toUpperCase());\nconsole.log(`Upper: ${upper}`);\n\nfruits.forEach((fruit, i) => {\n  console.log(`  ${i + 1}. ${fruit}`);\n});",
+  "mode": "strict",
+  "difficulty": "beginner",
+  "order": 4,
+  "tags": ["basics", "arrays", "collections"]
+}

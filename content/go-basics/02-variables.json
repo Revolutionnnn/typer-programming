@@ -1,0 +1,17 @@
+{
+  "id": "go-variables-01",
+  "title": "Variables en Go",
+  "language": "go",
+  "concept": "variables",
+  "description": "Aprende a declarar variables en Go.",
+  "explanation": [
+    "En Go usamos 'var' para declarar variables.",
+    "Una variable guarda un valor en memoria.",
+    "Go infiere el tipo automáticamente cuando usas '='."
+  ],
+  "code": "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tvar name string = \"Go\"\n\tvar age int = 15\n\tfmt.Println(name, age)\n}",
+  "mode": "strict",
+  "difficulty": "beginner",
+  "order": 2,
+  "tags": ["basics", "variables"]
+}

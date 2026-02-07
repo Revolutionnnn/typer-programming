@@ -1,0 +1,17 @@
+{
+  "id": "js-variables-02",
+  "title": "Variables en JavaScript",
+  "language": "javascript",
+  "concept": "variables",
+  "description": "Aprende las diferentes formas de declarar variables en JavaScript.",
+  "explanation": [
+    "'const' declara una variable que no puede ser reasignada.",
+    "'let' declara una variable que puede cambiar de valor.",
+    "Evita usar 'var' en código moderno — usa 'const' y 'let'."
+  ],
+  "code": "const name = \"JavaScript\";\nlet version = 2026;\nlet isModern = true;\n\nconsole.log(`Language: ${name}`);\nconsole.log(`Version: ${version}`);\nconsole.log(`Modern: ${isModern}`);\n\nversion = 2027;\nconsole.log(`Updated: ${version}`);",
+  "mode": "strict",
+  "difficulty": "beginner",
+  "order": 2,
+  "tags": ["basics", "variables"]
+}

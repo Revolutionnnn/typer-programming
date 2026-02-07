@@ -1,0 +1,28 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - CONTENT_DIR=/app/content
+    volumes:
+      - api-data:/app/data
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.web
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./apps/web-angular/src:/app/src:z
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  api-data:

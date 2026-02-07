@@ -1,0 +1,17 @@
+{
+  "id": "go-if-else-01",
+  "title": "Condicionales if/else",
+  "language": "go",
+  "concept": "conditionals",
+  "description": "Aprende a usar if y else para tomar decisiones.",
+  "explanation": [
+    "El 'if' ejecuta código solo si la condición es verdadera.",
+    "El 'else' se ejecuta cuando la condición es falsa.",
+    "En Go, las condiciones NO llevan paréntesis."
+  ],
+  "code": "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tage := 18\n\tif age >= 18 {\n\t\tfmt.Println(\"Adult\")\n\t} else {\n\t\tfmt.Println(\"Minor\")\n\t}\n}",
+  "mode": "strict",
+  "difficulty": "beginner",
+  "order": 5,
+  "tags": ["basics", "conditionals", "if-else"]
+}

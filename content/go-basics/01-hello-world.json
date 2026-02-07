@@ -1,0 +1,17 @@
+{
+  "id": "go-hello-world-01",
+  "title": "Hola Mundo en Go",
+  "language": "go",
+  "concept": "hello-world",
+  "description": "Escribe tu primer programa en Go.",
+  "explanation": [
+    "Todo programa en Go comienza con 'package main'.",
+    "La función 'main' es el punto de entrada del programa.",
+    "Usamos 'fmt.Println' para imprimir texto en la consola."
+  ],
+  "code": "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Println(\"Hello, World!\")\n}",
+  "mode": "strict",
+  "difficulty": "beginner",
+  "order": 1,
+  "tags": ["basics", "hello-world"]
+}

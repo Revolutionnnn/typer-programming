@@ -1,0 +1,17 @@
+{
+  "id": "go-for-loop-01",
+  "title": "Bucles con for",
+  "language": "go",
+  "concept": "loops",
+  "description": "Go solo tiene un tipo de bucle: for.",
+  "explanation": [
+    "En Go, 'for' es el único bucle (no hay while ni do-while).",
+    "La sintaxis clásica es: for init; condition; post { }.",
+    "También se puede usar como while: for condition { }."
+  ],
+  "code": "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tfor i := 0; i < 5; i++ {\n\t\tfmt.Println(\"Count:\", i)\n\t}\n}",
+  "mode": "strict",
+  "difficulty": "beginner",
+  "order": 6,
+  "tags": ["basics", "loops", "for"]
+}

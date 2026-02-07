@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Typing Code Learn - Lesson Schema",
+  "description": "Schema for defining coding lessons in Typing Code Learn",
+  "type": "object",
+  "required": ["id", "title", "language", "concept", "description", "explanation", "code", "mode", "difficulty"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the lesson (e.g., 'go-variables-01')",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "title": {
+      "type": "string",
+      "description": "Human-readable title of the lesson"
+    },
+    "language": {
+      "type": "string",
+      "description": "Programming language of the lesson",
+      "enum": ["go", "javascript", "typescript", "python", "rust"]
+    },
+    "concept": {
+      "type": "string",
+      "description": "The programming concept taught in this lesson"
+    },
+    "description": {
+      "type": "string",
+      "description": "Brief description of what the user will learn"
+    },
+    "explanation": {
+      "type": "array",
+      "description": "Step-by-step explanation shown before typing",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "code": {
+      "type": "string",
+      "description": "The actual code the user will type"
+    },
+    "mode": {
+      "type": "string",
+      "description": "Typing mode: 'strict' requires exact match, 'practice' allows mistakes",
+      "enum": ["strict", "practice"]
+    },
+    "difficulty": {
+      "type": "string",
+      "description": "Difficulty level of the lesson",
+      "enum": ["beginner", "intermediate", "advanced"]
+    },
+    "order": {
+      "type": "integer",
+      "description": "Order of the lesson within its category",
+      "minimum": 1
+    },
+    "hints": {
+      "type": "array",
+      "description": "Optional hints for the user",
+      "items": {
+        "type": "string"
+      }
+    },
+    "tags": {
+      "type": "array",
+      "description": "Tags for categorization",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}

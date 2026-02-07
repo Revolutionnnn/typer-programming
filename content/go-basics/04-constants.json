@@ -1,0 +1,17 @@
+{
+  "id": "go-constants-01",
+  "title": "Constantes en Go",
+  "language": "go",
+  "concept": "constants",
+  "description": "Aprende a declarar constantes que no cambian.",
+  "explanation": [
+    "Las constantes se declaran con 'const'.",
+    "Una vez asignado un valor, no se puede cambiar.",
+    "Se usan para valores fijos como PI o configuraciones."
+  ],
+  "code": "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tconst pi = 3.14159\n\tconst language = \"Go\"\n\tfmt.Println(\"Pi:\", pi)\n\tfmt.Println(\"Language:\", language)\n}",
+  "mode": "strict",
+  "difficulty": "beginner",
+  "order": 4,
+  "tags": ["basics", "constants"]
+}

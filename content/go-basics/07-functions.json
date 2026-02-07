@@ -1,0 +1,17 @@
+{
+  "id": "go-functions-01",
+  "title": "Funciones en Go",
+  "language": "go",
+  "concept": "functions",
+  "description": "Aprende a crear funciones para reutilizar código.",
+  "explanation": [
+    "Las funciones se declaran con 'func'.",
+    "Pueden recibir parámetros y retornar valores.",
+    "El tipo del parámetro va después del nombre."
+  ],
+  "code": "package main\n\nimport \"fmt\"\n\nfunc greet(name string) string {\n\treturn \"Hello, \" + name + \"!\"\n}\n\nfunc main() {\n\tmessage := greet(\"Gopher\")\n\tfmt.Println(message)\n}",
+  "mode": "strict",
+  "difficulty": "beginner",
+  "order": 7,
+  "tags": ["basics", "functions"]
+}

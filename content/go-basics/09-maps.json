@@ -1,0 +1,17 @@
+{
+  "id": "go-maps-01",
+  "title": "Maps en Go",
+  "language": "go",
+  "concept": "maps",
+  "description": "Aprende a usar maps (diccionarios) en Go.",
+  "explanation": [
+    "Un map almacena pares clave-valor.",
+    "Se crea con make(map[KeyType]ValueType).",
+    "Se accede a los valores con map[key]."
+  ],
+  "code": "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tcolors := map[string]string{\n\t\t\"red\":   \"#FF0000\",\n\t\t\"green\": \"#00FF00\",\n\t\t\"blue\":  \"#0000FF\",\n\t}\n\tfor name, hex := range colors {\n\t\tfmt.Println(name, hex)\n\t}\n}",
+  "mode": "strict",
+  "difficulty": "beginner",
+  "order": 9,
+  "tags": ["basics", "maps"]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "py-functions-04",
+  "title": "Funciones en Python",
+  "language": "python",
+  "concept": "functions",
+  "description": "Aprende a definir y usar funciones en Python.",
+  "explanation": [
+    "Las funciones se definen con la palabra clave 'def'.",
+    "Python usa indentación para delimitar bloques de código.",
+    "Puedes tener parámetros con valores por defecto."
+  ],
+  "code": "def greet(name, greeting=\"Hello\"):\n    return f\"{greeting}, {name}!\"\n\ndef add(a, b):\n    return a + b\n\nmessage = greet(\"World\")\nprint(message)\n\nresult = add(5, 3)\nprint(f\"5 + 3 = {result}\")",
+  "mode": "strict",
+  "difficulty": "beginner",
+  "order": 4,
+  "tags": ["basics", "functions"]
+}
