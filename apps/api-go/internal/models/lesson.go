@@ -13,6 +13,7 @@ type Lesson struct {
 	Difficulty  string   `json:"difficulty"` // "beginner", "intermediate", "advanced"
 	Order       int      `json:"order"`
 	Tags        []string `json:"tags"`
+	Level       string   `json:"level"` // "basic", "intermediate", "advanced", "exercises"
 }
 
 // LessonSummary is a lighter version for listing
@@ -25,6 +26,7 @@ type LessonSummary struct {
 	Difficulty  string `json:"difficulty"`
 	Mode        string `json:"mode"`
 	Order       int    `json:"order"`
+	Level       string `json:"level"`
 }
 
 // LanguageInfo describes an available programming language
@@ -46,5 +48,6 @@ func (l *Lesson) ToSummary() LessonSummary {
 		Difficulty:  l.Difficulty,
 		Mode:        l.Mode,
 		Order:       l.Order,
+		Level:       l.Level,
 	}
 }

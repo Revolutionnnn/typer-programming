@@ -1,0 +1,18 @@
+{
+  "id": "go-interfaces-01",
+  "title": "Interfaces en Go",
+  "language": "go",
+  "concept": "interfaces",
+  "description": "Define comportamientos con interfaces implícitas.",
+  "explanation": [
+    "Las interfaces definen comportamientos que los tipos deben implementar.",
+    "A diferencia de otros lenguajes, en Go las interfaces se implementan implícitamente.",
+    "No se usa 'implements', solo se definen los métodos requeridos.",
+    "Una interfaz con método 'Area() float64' puede usarse con cualquier tipo que lo tenga."
+  ],
+  "code": "[[package]] main\n\n[[import]] (\n\t\"fmt\"\n\t\"math\"\n)\n\n[[type]] Shape [[interface]] {\n\tArea() float64\n}\n\n[[type]] Circle [[struct]] {\n\tRadius float64\n}\n\n[[func]] (c Circle) Area() float64 {\n\treturn math.Pi * c.Radius * c.Radius\n}\n\n[[type]] Rectangle [[struct]] {\n\tWidth, Height float64\n}\n\n[[func]] (r Rectangle) Area() float64 {\n\treturn r.Width * r.Height\n}\n\n[[func]] main() {\n\tshapes := []Shape{Circle{5}, Rectangle{4, 6}}\n\tfor _, s := range shapes {\n\t\tfmt.Println(\"Area:\", s.Area())\n\t}\n}",
+  "mode": "strict",
+  "difficulty": "intermediate",
+  "order": 1,
+  "tags": ["interfaces", "polymorphism", "oop"]
+}

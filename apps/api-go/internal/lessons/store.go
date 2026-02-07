@@ -49,6 +49,9 @@ func LoadLessons(contentDir string) (*Store, error) {
 			return fmt.Errorf("failed to parse %s: %w", path, err)
 		}
 
+		// Extract level from path: content/<language>/<level>/file.json
+		lesson.Level = extractLevelFromPath(path, contentDir)
+
 		store.Add(&lesson)
 		return nil
 	})
@@ -67,6 +70,31 @@ func LoadLessons(contentDir string) (*Store, error) {
 	store.mu.Unlock()
 
 	return store, nil
+}
+
+// extractLevelFromPath extracts the level (basic, intermediate, advanced, exercises)
+// from the file path: content/<language>/<level>/file.json
+func extractLevelFromPath(path string, contentDir string) string {
+	// Get relative path from content dir
+	relPath, err := filepath.Rel(contentDir, path)
+	if err != nil {
+		return "basic" // default
+	}
+
+	// Split path: language/level/file.json
+	parts := strings.Split(filepath.ToSlash(relPath), "/")
+	if len(parts) >= 2 {
+		level := parts[1]
+		// Validate level
+		validLevels := []string{"basic", "intermediate", "advanced", "exercises"}
+		for _, valid := range validLevels {
+			if level == valid {
+				return level
+			}
+		}
+	}
+
+	return "basic" // default
 }
 
 // Add adds a lesson to the store

@@ -8,6 +8,14 @@ import { I18nService } from '../../services/i18n.service';
 import { LessonSummary, LanguageInfo } from '../../models/lesson.model';
 import { Progress } from '../../models/progress.model';
 
+type LevelType = 'basic' | 'intermediate' | 'advanced' | 'exercises';
+
+interface LevelInfo {
+  id: LevelType;
+  label: string;
+  icon: string;
+}
+
 @Component({
   selector: 'app-lesson-list',
   standalone: true,
@@ -58,7 +66,25 @@ import { Progress } from '../../models/progress.model';
         <div class="lessons-section">
           <div class="lessons-section__header">
             <h2>{{ selectedLanguageInfo?.icon }} {{ selectedLanguageInfo?.name }}</h2>
-            <span class="lessons-section__count">{{ lessons.length }} {{ i18n.t('lessonList.lessons') }}</span>
+            <span class="lessons-section__count">{{ filteredLessons.length }} {{ i18n.t('lessonList.lessons') }}</span>
+          </div>
+
+          <!-- Level selector -->
+          <div class="level-selector">
+            <div class="level-selector__grid">
+              @for (level of levels; track level.id) {
+                <button
+                  class="level-btn"
+                  [class.level-btn--active]="selectedLevel === level.id"
+                  [class.level-btn--has-content]="hasLessonsInLevel(level.id)"
+                  (click)="selectLevel(level.id)"
+                >
+                  <span class="level-btn__icon">{{ level.icon }}</span>
+                  <span class="level-btn__name">{{ level.label }}</span>
+                  <span class="level-btn__count">{{ countLessonsInLevel(level.id) }}</span>
+                </button>
+              }
+            </div>
           </div>
 
           @if (loadingLessons) {
@@ -68,7 +94,7 @@ import { Progress } from '../../models/progress.model';
           }
 
           <div class="lessons-grid">
-            @for (lesson of lessons; track lesson.id) {
+            @for (lesson of filteredLessons; track lesson.id) {
               <a
                 [routerLink]="['/lesson', lesson.id]"
                 class="lesson-card card"
@@ -109,7 +135,7 @@ import { Progress } from '../../models/progress.model';
             }
           </div>
 
-          @if (!loadingLessons && lessons.length === 0) {
+          @if (!loadingLessons && filteredLessons.length === 0) {
             <div class="empty-state card">
               <p>{{ i18n.t('lessonList.noLessons') }}</p>
             </div>
@@ -225,6 +251,70 @@ import { Progress } from '../../models/progress.model';
         background: var(--bg-tertiary);
         padding: 0.25rem 0.75rem;
         border-radius: 20px;
+      }
+
+      /* ── Level selector ── */
+      .level-selector {
+        margin-bottom: 1.5rem;
+      }
+
+      .level-selector__grid {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .level-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.5rem 0.875rem;
+        background: var(--bg-card);
+        border: 2px solid var(--border-color);
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: var(--text-secondary);
+        font-size: 0.8125rem;
+
+        &:hover {
+          border-color: var(--accent-primary);
+          color: var(--text-primary);
+          background: var(--bg-tertiary);
+        }
+      }
+
+      .level-btn--active {
+        border-color: var(--accent-primary);
+        background: rgba(88, 166, 255, 0.1);
+        color: var(--text-primary);
+        box-shadow: 0 0 0 1px rgba(88, 166, 255, 0.2);
+      }
+
+      .level-btn--has-content {
+        /* Visual indicator that level has content */
+      }
+
+      .level-btn__icon {
+        font-size: 0.875rem;
+      }
+
+      .level-btn__name {
+        font-weight: 500;
+        text-transform: capitalize;
+      }
+
+      .level-btn__count {
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        background: var(--bg-tertiary);
+        padding: 0.1rem 0.4rem;
+        border-radius: 10px;
+      }
+
+      .level-btn--active .level-btn__count {
+        background: rgba(88, 166, 255, 0.2);
+        color: var(--accent-primary);
       }
 
       .lessons-grid {
@@ -375,9 +465,17 @@ export class LessonListComponent implements OnInit {
   lessons: LessonSummary[] = [];
   selectedLanguage = '';
   selectedLanguageInfo: LanguageInfo | null = null;
+  selectedLevel: LevelType = 'basic';
   loadingLanguages = true;
   loadingLessons = false;
   error = '';
+
+  levels: LevelInfo[] = [
+    { id: 'basic', label: 'Basic', icon: '🌱' },
+    { id: 'intermediate', label: 'Intermediate', icon: '📚' },
+    { id: 'advanced', label: 'Advanced', icon: '🔥' },
+    { id: 'exercises', label: 'Exercises', icon: '✏️' },
+  ];
 
   /** Map of lessonId → Progress for completed lessons */
   private progressMap = new Map<string, Progress>();
@@ -439,6 +537,8 @@ export class LessonListComponent implements OnInit {
 
     this.selectedLanguage = languageId;
     this.selectedLanguageInfo = this.languages.find(l => l.id === languageId) || null;
+    // Reset to basic level when changing language
+    this.selectedLevel = 'basic';
     this.loadLessons(languageId);
 
     // Update URL query param without navigation
@@ -448,6 +548,22 @@ export class LessonListComponent implements OnInit {
       queryParamsHandling: 'merge',
       replaceUrl: true,
     });
+  }
+
+  selectLevel(level: LevelType): void {
+    this.selectedLevel = level;
+  }
+
+  get filteredLessons(): LessonSummary[] {
+    return this.lessons.filter(lesson => lesson.level === this.selectedLevel);
+  }
+
+  hasLessonsInLevel(level: LevelType): boolean {
+    return this.lessons.some(lesson => lesson.level === level);
+  }
+
+  countLessonsInLevel(level: LevelType): number {
+    return this.lessons.filter(lesson => lesson.level === level).length;
   }
 
   difficultyLabel(difficulty: string): string {

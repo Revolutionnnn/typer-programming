@@ -98,7 +98,11 @@ Thumbs.db
 *.exe~
 *.dll
 *.so
+*.db
+*.db-shm
+*.db-wal
 *.dylib
 *.test
 *.out
+/apps/api-go/api
 go.work

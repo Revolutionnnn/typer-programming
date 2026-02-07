@@ -21,6 +21,7 @@ export interface LessonSummary {
   difficulty: string;
   mode: string;
   order: number;
+  level?: 'basic' | 'intermediate' | 'advanced' | 'exercises';
 }
 
 export interface LanguageInfo {
