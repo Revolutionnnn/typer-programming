@@ -53,4 +53,6 @@ export interface TypingState {
 export interface CharState {
   char: string;
   status: 'pending' | 'correct' | 'incorrect';
+  /** When true, the char is hidden (fill-in-the-blank) until typed */
+  isHidden?: boolean;
 }

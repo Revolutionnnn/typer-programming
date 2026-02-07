@@ -102,7 +102,8 @@ const STREAK_EMOJIS = ['🔥', '⚡', '🚀', '🏆', '👑'];
                     [class.editor__char--pending]="charState.status === 'pending'"
                     [class.editor__char--cursor]="line.globalIndices[charIdx] === currentIndex"
                     [class.editor__char--next]="charState.status === 'pending' && line.globalIndices[charIdx] === currentIndex"
-                  >{{ displayChar(charState.char) }}</span>
+                    [class.editor__char--hidden]="charState.isHidden && charState.status === 'pending'"
+                  >{{ charState.isHidden && charState.status === 'pending' ? '_' : displayChar(charState.char) }}</span>
                 }
               </span>
             </div>
@@ -404,6 +405,14 @@ const STREAK_EMOJIS = ['🔥', '⚡', '🚀', '🏆', '👑'];
       .editor__char--pending {
         color: var(--text-muted);
         opacity: 0.5;
+      }
+
+      .editor__char--hidden {
+        color: var(--accent-primary);
+        opacity: 0.9;
+        font-weight: bold;
+        background: rgba(88, 166, 255, 0.08);
+        border-radius: 2px;
       }
 
       .editor__char--correct {

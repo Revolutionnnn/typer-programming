@@ -5,11 +5,12 @@
   "concept": "short-variables",
   "description": "Usa la declaración corta := para crear variables.",
   "explanation": [
-    "El operador ':=' declara e inicializa una variable.",
-    "Go infiere el tipo automáticamente.",
-    "Solo se puede usar dentro de funciones."
+    "Go permite declarar variables de forma corta con el operador ':=' (dos puntos + igual).",
+    "Con ':=' no necesitas escribir 'var' ni el tipo: Go lo infiere del valor asignado.",
+    "Solo se puede usar ':=' dentro de funciones, no a nivel de paquete.",
+    "Ejemplo: nombre := \"Gopher\" crea una variable string automáticamente."
   ],
-  "code": "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tname := \"Gopher\"\n\tage := 10\n\tactive := true\n\tfmt.Println(name, age, active)\n}",
+  "code": "[[package]] main\n\n[[import]] \"fmt\"\n\n[[func]] main() {\n\tname [[:=]] \"Gopher\"\n\tage [[:=]] 10\n\tactive [[:=]] true\n\tfmt.Println(name, age, active)\n}",
   "mode": "strict",
   "difficulty": "beginner",
   "order": 3,

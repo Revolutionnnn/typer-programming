@@ -5,11 +5,12 @@
   "concept": "hello-world",
   "description": "Escribe tu primer programa en Go.",
   "explanation": [
-    "Todo programa en Go comienza con 'package main'.",
-    "La función 'main' es el punto de entrada del programa.",
-    "Usamos 'fmt.Println' para imprimir texto en la consola."
+    "Todo archivo Go inicia declarando a qué paquete pertenece con la palabra reservada 'package'.",
+    "Para usar funciones de otros paquetes, se traen con 'import'.",
+    "El punto de entrada del programa es una función llamada 'main', declarada con 'func'.",
+    "'fmt.Println' imprime texto en consola con un salto de línea al final."
   ],
-  "code": "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Println(\"Hello, World!\")\n}",
+  "code": "[[package]] main\n\n[[import]] \"fmt\"\n\n[[func]] main() {\n\tfmt.Println(\"Hello, World!\")\n}",
   "mode": "strict",
   "difficulty": "beginner",
   "order": 1,

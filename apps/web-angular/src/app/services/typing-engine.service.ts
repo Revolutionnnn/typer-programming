@@ -19,13 +19,34 @@ export class TypingEngineService {
 
   /** Initialize the engine with a code snippet */
   init(code: string, mode: 'strict' | 'practice' = 'strict'): void {
-    this.code = code;
     this.mode = mode;
 
-    const chars: CharState[] = code.split('').map((char) => ({
-      char,
-      status: 'pending' as const,
-    }));
+    // Parse [[hidden]] markers and build char array
+    const chars: CharState[] = [];
+    const regex = /\[\[(.*?)\]\]/g;
+    let match: RegExpExecArray | null;
+    let lastIndex = 0;
+
+    while ((match = regex.exec(code)) !== null) {
+      // Normal text before the hidden segment
+      const before = code.substring(lastIndex, match.index);
+      for (const c of before) {
+        chars.push({ char: c, status: 'pending' as const });
+      }
+      // Hidden segment (fill-in-the-blank)
+      for (const c of match[1]) {
+        chars.push({ char: c, status: 'pending' as const, isHidden: true });
+      }
+      lastIndex = regex.lastIndex;
+    }
+    // Remaining normal text
+    const remaining = code.substring(lastIndex);
+    for (const c of remaining) {
+      chars.push({ char: c, status: 'pending' as const });
+    }
+
+    // Store the clean code (without [[ ]] markers)
+    this.code = chars.map((c) => c.char).join('');
 
     this.state = {
       currentIndex: 0,

@@ -5,11 +5,12 @@
   "concept": "arrays-slices",
   "description": "Aprende a manejar colecciones de datos en Go.",
   "explanation": [
-    "Un array tiene tamaño fijo: [3]int{1, 2, 3}.",
-    "Un slice es dinámico y más común: []int{1, 2, 3}.",
-    "Se usa 'append' para agregar elementos a un slice."
+    "Un array tiene tamaño fijo: [3]int{1, 2, 3}. Un slice es dinámico: []int{1, 2, 3}.",
+    "Para agregar elementos a un slice se usa la función 'append(slice, elemento)'.",
+    "Para recorrer un slice se usa 'for' con 'range', que devuelve el índice y el valor.",
+    "El guion bajo '_' descarta un valor (aquí descartamos el índice con 'for _, n := range')."
   ],
-  "code": "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tnumbers := []int{1, 2, 3}\n\tnumbers = append(numbers, 4)\n\tfor _, n := range numbers {\n\t\tfmt.Println(n)\n\t}\n}",
+  "code": "[[package]] main\n\n[[import]] \"fmt\"\n\n[[func]] main() {\n\tnumbers := []int{1, 2, 3}\n\tnumbers = [[append]](numbers, 4)\n\t[[for]] _, n := [[range]] numbers {\n\t\tfmt.Println(n)\n\t}\n}",
   "mode": "strict",
   "difficulty": "beginner",
   "order": 8,

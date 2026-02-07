@@ -37,7 +37,7 @@
     },
     "code": {
       "type": "string",
-      "description": "The actual code the user will type"
+      "description": "The code the user will type. Use [[word]] syntax to mark keywords as hidden (fill-in-the-blank). Example: '[[func]] main()' hides 'func' and shows underscores until the user types it."
     },
     "mode": {
       "type": "string",
