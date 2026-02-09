@@ -1,18 +1,29 @@
 {
   "id": "go-functions-01",
   "title": "Funciones en Go",
+  "title_en": "Functions in Go",
   "language": "go",
   "concept": "functions",
   "description": "Aprende a crear funciones para reutilizar código.",
+  "description_en": "Learn to create functions to reuse code.",
   "explanation": [
     "Las funciones se declaran con la palabra reservada 'func' seguida del nombre.",
     "Los parámetros van entre paréntesis: primero el nombre, luego el tipo (ej: name string).",
     "El tipo de retorno se escribe después de los paréntesis (ej: func suma(a int) int).",
     "Para devolver un valor se usa la palabra reservada 'return'."
   ],
+  "explanation_en": [
+    "Functions are declared with the reserved word 'func' followed by the name.",
+    "Parameters go inside parentheses: first the name, then the type (e.g., name string).",
+    "The return type is written after the parentheses (e.g., func sum(a int) int).",
+    "To return a value, the reserved word 'return' is used."
+  ],
   "code": "[[package]] main\n\n[[import]] \"fmt\"\n\n[[func]] greet(name string) string {\n\t[[return]] \"Hello, \" + name + \"!\"\n}\n\n[[func]] main() {\n\tmessage := greet(\"Gopher\")\n\tfmt.Println(message)\n}",
   "mode": "strict",
   "difficulty": "beginner",
   "order": 7,
-  "tags": ["basics", "functions"]
+  "tags": [
+    "basics",
+    "functions"
+  ]
 }

@@ -1,18 +1,29 @@
 {
   "id": "go-maps-01",
   "title": "Maps en Go",
+  "title_en": "Maps in Go",
   "language": "go",
   "concept": "maps",
   "description": "Aprende a usar maps (diccionarios) en Go.",
+  "description_en": "Learn to use maps (dictionaries) in Go.",
   "explanation": [
     "Un 'map' almacena pares clave-valor, similar a un diccionario.",
     "Se declara con la palabra reservada 'map' seguida de [TipoClave]TipoValor.",
     "Se recorre con 'for clave, valor := range miMap { }'.",
     "Ejemplo: map[string]string crea un map con claves y valores de tipo texto."
   ],
+  "explanation_en": [
+    "A 'map' stores key-value pairs, similar to a dictionary.",
+    "It is declared with the reserved word 'map' followed by [KeyType]ValueType.",
+    "It is iterated with 'for key, value := range myMap { }'.",
+    "Example: map[string]string creates a map with text keys and values."
+  ],
   "code": "[[package]] main\n\n[[import]] \"fmt\"\n\n[[func]] main() {\n\tcolors := [[map]][string]string{\n\t\t\"red\":   \"#FF0000\",\n\t\t\"green\": \"#00FF00\",\n\t\t\"blue\":  \"#0000FF\",\n\t}\n\t[[for]] name, hex := [[range]] colors {\n\t\tfmt.Println(name, hex)\n\t}\n}",
   "mode": "strict",
   "difficulty": "beginner",
   "order": 9,
-  "tags": ["basics", "maps"]
+  "tags": [
+    "basics",
+    "maps"
+  ]
 }
