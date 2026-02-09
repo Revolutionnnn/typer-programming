@@ -1,0 +1,34 @@
+{
+    "id": "py-lists-03",
+    "title": "Listas en Python",
+    "title_en": "Lists in Python",
+    "language": "python",
+    "concept": "lists",
+    "description": "Aprende a trabajar con listas en Python.",
+    "description_en": "Learn to work with lists in Python.",
+    "explanation": [
+        "Las listas en Python son colecciones ordenadas y mutables.",
+        "Se crean con corchetes [] y pueden contener cualquier tipo de dato.",
+        "Puedes usar append(), remove(), y len() para manipularlas."
+    ],
+    "explanation_en": [
+        "Lists in Python are ordered and mutable collections.",
+        "They are created with square brackets [] and can contain any data type.",
+        "You can use append(), remove(), and len() to manipulate them."
+    ],
+    "exclude": [
+        "print",
+        ".append",
+        "for",
+        "in",
+        "len"
+    ],
+    "mode": "strict",
+    "difficulty": "beginner",
+    "order": 3,
+    "tags": [
+        "basics",
+        "lists",
+        "collections"
+    ]
+}

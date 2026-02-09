@@ -1,0 +1,31 @@
+{
+    "id": "py-functions-04",
+    "title": "Funciones en Python",
+    "title_en": "Functions in Python",
+    "language": "python",
+    "concept": "functions",
+    "description": "Aprende a definir y usar funciones en Python.",
+    "description_en": "Learn to define and use functions in Python.",
+    "explanation": [
+        "Las funciones se definen con la palabra clave 'def'.",
+        "Python usa indentación para delimitar bloques de código.",
+        "Puedes tener parámetros con valores por defecto."
+    ],
+    "explanation_en": [
+        "Functions are defined with the 'def' keyword.",
+        "Python uses indentation to delimit code blocks.",
+        "You can have parameters with default values."
+    ],
+    "exclude": [
+        "def",
+        "return",
+        "print"
+    ],
+    "mode": "strict",
+    "difficulty": "beginner",
+    "order": 4,
+    "tags": [
+        "basics",
+        "functions"
+    ]
+}

@@ -1,0 +1,29 @@
+{
+    "id": "py-variables-02",
+    "title": "Variables en Python",
+    "title_en": "Variables in Python",
+    "language": "python",
+    "concept": "variables",
+    "description": "Aprende a declarar y usar variables en Python.",
+    "description_en": "Learn to declare and use variables in Python.",
+    "explanation": [
+        "En Python no necesitas declarar el tipo de variable.",
+        "Python usa tipado dinámico: el tipo se infiere del valor asignado.",
+        "Puedes usar snake_case para nombrar variables (convención de Python)."
+    ],
+    "explanation_en": [
+        "In Python, you don't need to declare the variable type.",
+        "Python uses dynamic typing: the type is inferred from the assigned value.",
+        "You can use snake_case to name variables (Python convention)."
+    ],
+    "exclude": [
+        "print"
+    ],
+    "mode": "strict",
+    "difficulty": "beginner",
+    "order": 2,
+    "tags": [
+        "basics",
+        "variables"
+    ]
+}

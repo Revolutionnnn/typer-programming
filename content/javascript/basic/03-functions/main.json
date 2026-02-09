@@ -1,0 +1,34 @@
+{
+    "id": "js-functions-03",
+    "title": "Funciones en JavaScript",
+    "title_en": "Functions in JavaScript",
+    "language": "javascript",
+    "concept": "functions",
+    "description": "Aprende funciones clásicas y arrow functions.",
+    "description_en": "Learn classic functions and arrow functions.",
+    "explanation": [
+        "Hay dos formas de declarar funciones: 'function' y arrow '=>'.",
+        "Las arrow functions son más concisas y se usan mucho en código moderno.",
+        "Las funciones pueden tener parámetros con valores por defecto."
+    ],
+    "explanation_en": [
+        "There are two ways to declare functions: 'function' and arrow '=>'.",
+        "Arrow functions are more concise and are widely used in modern code.",
+        "Functions can have parameters with default values."
+    ],
+    "exclude": [
+        "function",
+        "const",
+        "return",
+        "=>",
+        "console.log"
+    ],
+    "mode": "strict",
+    "difficulty": "beginner",
+    "order": 3,
+    "tags": [
+        "basics",
+        "functions",
+        "arrow-functions"
+    ]
+}
