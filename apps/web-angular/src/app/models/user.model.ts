@@ -1,3 +1,5 @@
+import { BadgeWithDetails } from './leaderboard.model';
+
 export interface User {
     id: string;
     username: string;

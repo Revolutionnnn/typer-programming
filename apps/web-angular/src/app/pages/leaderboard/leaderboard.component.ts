@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LeaderboardService } from '../../services/leaderboard.service';
-import { LeaderboardEntry } from '../../models/leaderboard.model';
+import { LeaderboardEntry, BadgeWithDetails } from '../../models/leaderboard.model';
 import { RouterLink } from '@angular/router';
 import { I18nService } from '../../services/i18n.service';
 
