@@ -1,0 +1,32 @@
+{
+    "id": "js-reverse-string-exercise-02",
+    "title": "Invertir Cadena",
+    "title_en": "Reverse String",
+    "language": "javascript",
+    "concept": "strings",
+    "description": "Invierte una cadena de texto.",
+    "description_en": "Reverse a string.",
+    "explanation": [
+        "Implementa una función que invierta una cadena.",
+        "Puedes usar métodos de string o bucles.",
+        "Ejemplo: 'hola' -> 'aloh'"
+    ],
+    "explanation_en": [
+        "Implement a function that reverses a string.",
+        "You can use string methods or loops.",
+        "Example: 'hello' -> 'olleh'"
+    ],
+    "exclude": [
+        "function",
+        "return",
+        "console.log"
+    ],
+    "mode": "practice",
+    "difficulty": "basic",
+    "order": 2,
+    "tags": [
+        "exercises",
+        "strings",
+        "algorithms"
+    ]
+}

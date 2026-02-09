@@ -1,0 +1,33 @@
+{
+    "id": "py-sum-list-exercise-03",
+    "title": "Suma de Lista",
+    "title_en": "Sum of List",
+    "language": "python",
+    "concept": "lists",
+    "description": "Calcula la suma de los elementos de una lista.",
+    "description_en": "Calculate the sum of elements in a list.",
+    "explanation": [
+        "Implementa una función que sume todos los elementos de una lista.",
+        "Puedes usar un bucle o la función built-in sum.",
+        "Ejemplo: [1, 2, 3] -> 6"
+    ],
+    "explanation_en": [
+        "Implement a function that sums all elements in a list.",
+        "You can use a loop or the built-in sum function.",
+        "Example: [1, 2, 3] -> 6"
+    ],
+    "exclude": [
+        "def",
+        "for",
+        "return",
+        "print"
+    ],
+    "mode": "practice",
+    "difficulty": "basic",
+    "order": 3,
+    "tags": [
+        "exercises",
+        "lists",
+        "algorithms"
+    ]
+}

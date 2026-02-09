@@ -1,0 +1,35 @@
+{
+    "id": "py-factorial-exercise-01",
+    "title": "Factorial",
+    "title_en": "Factorial",
+    "language": "python",
+    "concept": "recursion",
+    "description": "Calcula el factorial de un número usando recursión.",
+    "description_en": "Calculate the factorial of a number using recursion.",
+    "explanation": [
+        "Implementa la función factorial usando recursión.",
+        "El factorial de n es n * (n-1) * ... * 1.",
+        "Caso base: factorial(0) = 1.",
+        "Recursión: factorial(n) = n * factorial(n-1)."
+    ],
+    "explanation_en": [
+        "Implement the factorial function using recursion.",
+        "The factorial of n is n * (n-1) * ... * 1.",
+        "Base case: factorial(0) = 1.",
+        "Recursion: factorial(n) = n * factorial(n-1)."
+    ],
+    "exclude": [
+        "def",
+        "if",
+        "return",
+        "print"
+    ],
+    "mode": "practice",
+    "difficulty": "intermediate",
+    "order": 1,
+    "tags": [
+        "exercises",
+        "recursion",
+        "algorithms"
+    ]
+}

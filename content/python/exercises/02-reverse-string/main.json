@@ -1,0 +1,32 @@
+{
+    "id": "py-reverse-string-exercise-02",
+    "title": "Invertir Cadena",
+    "title_en": "Reverse String",
+    "language": "python",
+    "concept": "strings",
+    "description": "Invierte una cadena de texto.",
+    "description_en": "Reverse a string.",
+    "explanation": [
+        "Implementa una función que invierta una cadena.",
+        "Puedes usar slicing o bucles.",
+        "Ejemplo: 'hola' -> 'aloh'"
+    ],
+    "explanation_en": [
+        "Implement a function that reverses a string.",
+        "You can use slicing or loops.",
+        "Example: 'hello' -> 'olleh'"
+    ],
+    "exclude": [
+        "def",
+        "return",
+        "print"
+    ],
+    "mode": "practice",
+    "difficulty": "basic",
+    "order": 2,
+    "tags": [
+        "exercises",
+        "strings",
+        "algorithms"
+    ]
+}
