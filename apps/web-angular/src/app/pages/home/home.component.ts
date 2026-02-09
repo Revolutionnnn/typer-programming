@@ -84,6 +84,38 @@ import { LanguageInfo } from '../../models/lesson.model';
           }
         </div>
       </section>
+
+      <section class="opensource">
+        <div class="opensource__content card">
+          <div class="opensource__header">
+            <h2 class="opensource__title">{{ i18n.t('opensource.title') }}</h2>
+            <p class="opensource__subtitle">{{ i18n.t('opensource.subtitle') }}</p>
+          </div>
+          <p class="opensource__desc">
+            {{ i18n.t('opensource.desc') }}
+          </p>
+          <div class="opensource__actions">
+            <a
+              href="https://github.com/Revolutionnnn/typer-programming"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn btn--primary"
+            >
+              <span class="btn__icon">⭐</span>
+              {{ i18n.t('opensource.github') }}
+            </a>
+            <a
+              href="https://github.com/Revolutionnnn/typer-programming/blob/main/CONTRIBUTING.md"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn btn--secondary"
+            >
+              <span class="btn__icon">🤝</span>
+              {{ i18n.t('opensource.contribute') }}
+            </a>
+          </div>
+        </div>
+      </section>
     </div>
   `,
   styles: [
@@ -211,6 +243,96 @@ import { LanguageInfo } from '../../models/lesson.model';
       .lang-card--soon {
         opacity: 0.5;
         pointer-events: none;
+      }
+
+      .opensource {
+        padding: 4rem 0;
+        text-align: center;
+      }
+
+      .opensource__content {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 3rem 2rem;
+        background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+        border: 1px solid var(--border-color);
+        border-radius: 1rem;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .opensource__content::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #58a6ff, #3fb950, #ff7b72);
+      }
+
+      .opensource__header {
+        margin-bottom: 1.5rem;
+      }
+
+      .opensource__title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(135deg, #58a6ff, #3fb950);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .opensource__subtitle {
+        font-size: 1.125rem;
+        color: var(--text-secondary);
+        margin-bottom: 0;
+      }
+
+      .opensource__desc {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+        max-width: 480px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .opensource__actions {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+
+      .btn__icon {
+        margin-right: 0.5rem;
+      }
+
+      .btn--secondary {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+
+        &:hover {
+          background: var(--bg-tertiary);
+          border-color: var(--accent-primary);
+        }
+      }
+
+      @media (max-width: 600px) {
+        .opensource__actions {
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .btn {
+          width: 100%;
+          max-width: 280px;
+        }
       }
     `,
   ],

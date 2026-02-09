@@ -81,6 +81,7 @@ func main() {
 		r.Post("/metrics", h.SaveMetrics)
 		r.Get("/metrics/{userId}", h.GetUserMetrics)
 		r.Get("/leaderboard", h.GetLeaderboard)
+		r.With(authService.RequireAuth).Get("/leaderboard/rank", h.GetUserRank)
 
 		// Health
 		r.Get("/health", h.HealthCheck)

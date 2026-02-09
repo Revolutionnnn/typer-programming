@@ -10,11 +10,12 @@ import { Lesson } from '../../models/lesson.model';
 import { User } from '../../models/user.model';
 import { TypingEditorComponent } from '../../components/typing-editor/typing-editor.component';
 import { ShareComponent } from '../../components/share/share.component';
+import { UserRankComponent } from '../../components/user-rank/user-rank.component';
 
 @Component({
   selector: 'app-lesson',
   standalone: true,
-  imports: [CommonModule, RouterLink, TypingEditorComponent, ShareComponent],
+  imports: [CommonModule, RouterLink, TypingEditorComponent, ShareComponent, UserRankComponent],
   template: `
     <div class="lesson container">
       @if (loading) {
@@ -102,6 +103,8 @@ import { ShareComponent } from '../../components/share/share.component';
                 <span class="result-item__label">{{ i18n.t('lesson.points') }}</span>
               </div>
             </div>
+
+            <app-user-rank [showOnComplete]="true" />
 
             <div class="results__actions">
               <button class="btn" (click)="retry()">{{ i18n.t('lesson.retry') }}</button>

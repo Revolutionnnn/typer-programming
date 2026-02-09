@@ -256,6 +256,45 @@ func (h *Handler) GetLeaderboard(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, leaderboard)
 }
 
+// GetUserRank returns the user's rank in daily and weekly leaderboards
+func (h *Handler) GetUserRank(w http.ResponseWriter, r *http.Request) {
+	userCtx, ok := auth.GetUserFromContext(r.Context())
+	if !ok {
+		respondError(w, http.StatusUnauthorized, "Not authenticated")
+		return
+	}
+
+	now := time.Now().UTC()
+
+	// Daily rank
+	dailyStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+	dailyEnd := now.Add(1 * time.Minute)
+	dailyRank, err := h.db.GetUserRank(userCtx.UserID, dailyStart, dailyEnd)
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "Failed to get daily rank")
+		return
+	}
+
+	// Weekly rank
+	offset := int(now.Weekday())
+	if offset == 0 {
+		offset = 7
+	}
+	weeklyStart := now.AddDate(0, 0, -offset+1)
+	weeklyStart = time.Date(weeklyStart.Year(), weeklyStart.Month(), weeklyStart.Day(), 0, 0, 0, 0, time.UTC)
+	weeklyEnd := now.Add(1 * time.Minute)
+	weeklyRank, err := h.db.GetUserRank(userCtx.UserID, weeklyStart, weeklyEnd)
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "Failed to get weekly rank")
+		return
+	}
+
+	respondJSON(w, http.StatusOK, map[string]interface{}{
+		"dailyRank":  dailyRank,
+		"weeklyRank": weeklyRank,
+	})
+}
+
 // GetUserMetrics returns aggregated metrics for a user
 func (h *Handler) GetUserMetrics(w http.ResponseWriter, r *http.Request) {
 	userID := chi.URLParam(r, "userId")

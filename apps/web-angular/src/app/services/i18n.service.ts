@@ -34,6 +34,13 @@ const translations: Record<Locale, TranslationDict> = {
     'home.languages.connecting': 'Conectando con el servidor',
     'home.lessons.count': 'lecciones',
 
+    // ── Open Source ──
+    'opensource.title': '🌟 Proyecto Open Source',
+    'opensource.subtitle': '¡Contribuye y ayuda a crecer la comunidad!',
+    'opensource.desc': 'Este proyecto es completamente open source. Puedes contribuir agregando nuevos ejercicios, mejorando el código, o simplemente ejecutándolo localmente.',
+    'opensource.contribute': '🤝 Contribuir',
+    'opensource.github': 'Ver en GitHub',
+
     // ── Lesson List ──
     'lessonList.title': '📚 Lecciones',
     'lessonList.subtitle': 'Aprende escribiendo código real, lección por lección.',
@@ -124,6 +131,12 @@ const translations: Record<Locale, TranslationDict> = {
     'share.copyLink': 'Copiar enlace',
     'share.copied': '¡Copiado!',
 
+    // ── User Rank ──
+    'rank.yourRank': 'Tu posición',
+    'rank.daily': 'Hoy',
+    'rank.weekly': 'Esta semana',
+    'rank.unranked': 'Sin ranking',
+
     // ── Leaderboard ──
     'nav.leaderboard': '🏆 Ranking',
     'leaderboard.title': '🏆 Campeones del Teclado',
@@ -166,6 +179,13 @@ const translations: Record<Locale, TranslationDict> = {
     'home.languages.loading': 'Loading...',
     'home.languages.connecting': 'Connecting to server',
     'home.lessons.count': 'lessons',
+
+    // ── Open Source ──
+    'opensource.title': '🌟 Open Source Project',
+    'opensource.subtitle': 'Contribute and help grow the community!',
+    'opensource.desc': 'This project is completely open source. You can contribute by adding new exercises, improving the code, or simply running it locally.',
+    'opensource.contribute': '🤝 Contribute',
+    'opensource.github': 'View on GitHub',
 
     // ── Lesson List ──
     'lessonList.title': '📚 Lessons',
@@ -256,6 +276,12 @@ const translations: Record<Locale, TranslationDict> = {
     'share.message': 'I just completed "{{lesson}}" on Typing Code Learn! 🚀\n\nWPM: {{wpm}}\nAccuracy: {{accuracy}}%\nDaily streak: {{streak}} days\n\nThink you can beat that?',
     'share.copyLink': 'Copy link',
     'share.copied': 'Copied!',
+
+    // ── User Rank ──
+    'rank.yourRank': 'Your rank',
+    'rank.daily': 'Today',
+    'rank.weekly': 'This week',
+    'rank.unranked': 'Unranked',
 
     // ── Leaderboard ──
     'nav.leaderboard': '🏆 Leaderboard',

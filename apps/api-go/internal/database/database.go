@@ -163,6 +163,35 @@ func (db *DB) GetUserPoints(userID string, startDate, endDate time.Time) (int, e
 	return int(totalPoints.Int64), nil
 }
 
+// GetUserRank returns the rank of a user in a specific period
+func (db *DB) GetUserRank(userID string, startDate, endDate time.Time) (int, error) {
+	// Get the user's total points
+	userPoints, err := db.GetUserPoints(userID, startDate, endDate)
+	if err != nil {
+		return 0, err
+	}
+
+	// Count how many users have more points than this user
+	var rank int
+	err = db.QueryRow(
+		`SELECT COUNT(*) + 1 as rank
+		FROM (
+			SELECT user_id, SUM(points) as total_points
+			FROM point_transactions
+			WHERE created_at BETWEEN ? AND ?
+			GROUP BY user_id
+			HAVING SUM(points) > ?
+		) as higher_users`,
+		startDate, endDate, userPoints,
+	).Scan(&rank)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return rank, nil
+}
+
 // --- User Management ---
 
 // CreateGuestUser creates a new guest user with auto-generated username

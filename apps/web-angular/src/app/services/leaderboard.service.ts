@@ -4,6 +4,11 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { LeaderboardEntry } from '../models/leaderboard.model';
 
+export interface UserRank {
+    dailyRank: number;
+    weeklyRank: number;
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -19,5 +24,9 @@ export class LeaderboardService {
                 limit: limit.toString()
             }
         });
+    }
+
+    getUserRank(): Observable<UserRank> {
+        return this.http.get<UserRank>(`${this.apiUrl}/rank`);
     }
 }
