@@ -503,6 +503,45 @@ func (h *Handler) GetMe(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, user)
 }
 
+// GetUserProfile returns a public user profile with stats
+func (h *Handler) GetUserProfile(w http.ResponseWriter, r *http.Request) {
+	userID := chi.URLParam(r, "userId")
+
+	// Get user
+	user, err := h.db.GetUserByID(userID)
+	if err != nil {
+		respondError(w, http.StatusNotFound, "User not found")
+		return
+	}
+
+	// Get metrics
+	metrics, _ := h.db.GetUserMetrics(userID)
+
+	// Get progress
+	progress, _ := h.db.GetUserProgress(userID)
+
+	// Count completed lessons
+	completedLessons := 0
+	for _, p := range progress {
+		if p.Completed {
+			completedLessons++
+		}
+	}
+
+	// Get total points (all time)
+	totalPoints, _ := h.db.GetUserPoints(userID, time.Time{}, time.Now())
+
+	profile := models.UserProfile{
+		User:             *user,
+		Metrics:          metrics,
+		Progress:         progress,
+		CompletedLessons: completedLessons,
+		TotalPoints:      totalPoints,
+	}
+
+	respondJSON(w, http.StatusOK, profile)
+}
+
 // Logout clears the authentication cookie
 func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{

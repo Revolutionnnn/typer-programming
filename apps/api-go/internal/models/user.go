@@ -37,3 +37,12 @@ type AuthResponse struct {
 	User  User   `json:"user"`
 	Token string `json:"token"`
 }
+
+// UserProfile represents a public user profile with stats
+type UserProfile struct {
+	User             User               `json:"user"`
+	Metrics          *UserMetricsSummary `json:"metrics,omitempty"`
+	Progress         []Progress         `json:"progress,omitempty"`
+	CompletedLessons int                `json:"completedLessons"`
+	TotalPoints      int                `json:"totalPoints"`
+}

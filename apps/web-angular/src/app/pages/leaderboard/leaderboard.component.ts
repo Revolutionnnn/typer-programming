@@ -19,136 +19,98 @@ import { I18nService } from '../../services/i18n.service';
         </h1>
       </div>
 
-      <div class="flex justify-center mb-8 space-x-4">
+      <div class="period-tabs">
         <button 
           (click)="setPeriod('daily')" 
           [class.active]="period() === 'daily'"
-          class="period-btn">
-          {{ i18n.t('leaderboard.daily') }}
+          class="tab-btn">
+          <span class="tab-icon">📅</span>
+          <span class="tab-label">{{ i18n.t('leaderboard.daily') }}</span>
         </button>
         <button 
           (click)="setPeriod('weekly')" 
           [class.active]="period() === 'weekly'"
-          class="period-btn">
-          {{ i18n.t('leaderboard.weekly') }}
+          class="tab-btn">
+          <span class="tab-icon">📊</span>
+          <span class="tab-label">{{ i18n.t('leaderboard.weekly') }}</span>
         </button>
         <button 
           (click)="setPeriod('monthly')" 
           [class.active]="period() === 'monthly'"
-          class="period-btn">
-          {{ i18n.t('leaderboard.monthly') }}
+          class="tab-btn">
+          <span class="tab-icon">📈</span>
+          <span class="tab-label">{{ i18n.t('leaderboard.monthly') }}</span>
         </button>
         <button 
           (click)="setPeriod('all_time')" 
           [class.active]="period() === 'all_time'"
-          class="period-btn">
-          {{ i18n.t('leaderboard.allTime') }}
+          class="tab-btn">
+          <span class="tab-icon">🏆</span>
+          <span class="tab-label">{{ i18n.t('leaderboard.allTime') }}</span>
         </button>
       </div>
 
       <!-- Top 3 Podium -->
       @if (entries().length > 0) {
-        <div class="podium-container" [class.single]="entries().length === 1" [class.double]="entries().length === 2">
-          <!-- 2nd Place -->
-          @if (entries().length >= 2) {
-            <div class="podium-card second">
-              <div class="podium-rank">
-                <div class="medal silver">🥈</div>
-                <div class="rank-number">2</div>
-              </div>
-              <div class="podium-avatar">
-                {{ getUserInitials(entries()[1]) }}
-              </div>
-              <div class="podium-username">
-                @if (entries()[1].githubUsername) {
-                  <a [href]="'https://github.com/' + entries()[1].githubUsername" target="_blank" rel="noopener" class="github-link">
-                    <svg class="github-icon" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                    </svg>
-                  </a>
-                }
-                {{ getUserDisplay(entries()[1]) }}
-              </div>
-              @if (entries()[1].badges?.length) {
-                <div class="podium-badges">
-                  @for (badge of entries()[1].badges; track badge.badge.id) {
-                    <span class="badge" [style.background-color]="badge.badge.color">{{ badge.badge.name }}</span>
-                  }
+        <div class="podium-wrapper">
+          <!-- Podium Platform -->
+          <div class="podium-platforms">
+            <!-- 2nd Place Platform -->
+            @if (entries().length >= 2) {
+              <div class="platform second-place">
+                <div class="platform-top">
+                  <div class="player-spot">
+                    <div class="avatar-ring silver">
+                      <div class="spot-avatar">{{ getUserInitials(entries()[1]) }}</div>
+                    </div>
+                    <div class="spot-rank">2</div>
+                  </div>
+                  <div class="player-details">
+                    <a [routerLink]="['/user', entries()[1].userId]" class="spot-name">{{ getUserDisplay(entries()[1]) }}</a>
+                    <div class="spot-points">{{ entries()[1].points | number }} pts</div>
+                  </div>
                 </div>
-              }
-              <div class="podium-points">
-                <span class="points-number">{{ entries()[1].points | number }}</span>
-                <span class="points-label">{{ i18n.t('leaderboard.points') }}</span>
-              </div>
-            </div>
-          }
-
-          <!-- 1st Place -->
-          <div class="podium-card first">
-            <div class="crown">👑</div>
-            <div class="podium-rank">
-              <div class="medal gold">🥇</div>
-              <div class="rank-number">1</div>
-            </div>
-            <div class="podium-avatar champion">
-              {{ getUserInitials(entries()[0]) }}
-            </div>
-            <div class="podium-username">
-              @if (entries()[0].githubUsername) {
-                <a [href]="'https://github.com/' + entries()[0].githubUsername" target="_blank" rel="noopener" class="github-link">
-                  <svg class="github-icon" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                  </svg>
-                </a>
-              }
-              {{ getUserDisplay(entries()[0]) }}
-            </div>
-            @if (entries()[0].badges?.length) {
-              <div class="podium-badges">
-                @for (badge of entries()[0].badges; track badge.badge.id) {
-                  <span class="badge" [style.background-color]="badge.badge.color">{{ badge.badge.name }}</span>
-                }
+                <div class="platform-base"></div>
               </div>
             }
-            <div class="podium-points">
-              <span class="points-number">{{ entries()[0].points | number }}</span>
-              <span class="points-label">points</span>
-            </div>
-          </div>
 
-          <!-- 3rd Place -->
-          @if (entries().length >= 3) {
-            <div class="podium-card third">
-              <div class="podium-rank">
-                <div class="medal bronze">🥉</div>
-                <div class="rank-number">3</div>
-              </div>
-              <div class="podium-avatar">
-                {{ getUserInitials(entries()[2]) }}
-              </div>
-              <div class="podium-username">
-                @if (entries()[2].githubUsername) {
-                  <a [href]="'https://github.com/' + entries()[2].githubUsername" target="_blank" rel="noopener" class="github-link">
-                    <svg class="github-icon" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                    </svg>
-                  </a>
-                }
-                {{ getUserDisplay(entries()[2]) }}
-              </div>
-              @if (entries()[2].badges?.length) {
-                <div class="podium-badges">
-                  @for (badge of entries()[2].badges; track badge.badge.id) {
-                    <span class="badge" [style.background-color]="badge.badge.color">{{ badge.badge.name }}</span>
-                  }
+            <!-- 1st Place Platform -->
+            <div class="platform first-place">
+              <div class="crown-icon">👑</div>
+              <div class="platform-top">
+                <div class="player-spot champion">
+                  <div class="avatar-ring gold">
+                    <div class="spot-avatar">{{ getUserInitials(entries()[0]) }}</div>
+                  </div>
+                  <div class="spot-rank">1</div>
                 </div>
-              }
-              <div class="podium-points">
-                <span class="points-number">{{ entries()[2].points | number }}</span>
-                <span class="points-label">points</span>
+                <div class="player-details">
+                  <a [routerLink]="['/user', entries()[0].userId]" class="spot-name">{{ getUserDisplay(entries()[0]) }}</a>
+                  <div class="spot-points champion-points">{{ entries()[0].points | number }} pts</div>
+                </div>
               </div>
+              <div class="platform-base gold-base"></div>
             </div>
-          }
+
+            <!-- 3rd Place Platform -->
+            @if (entries().length >= 3) {
+              <div class="platform third-place">
+                <div class="platform-top">
+                  <div class="player-spot">
+                    <div class="avatar-ring bronze">
+                      <div class="spot-avatar">{{ getUserInitials(entries()[2]) }}</div>
+                    </div>
+                    <div class="spot-rank">3</div>
+                  </div>
+                  <div class="player-details">
+                    <a [routerLink]="['/user', entries()[2].userId]" class="spot-name">{{ getUserDisplay(entries()[2]) }}</a>
+                    <div class="spot-points">{{ entries()[2].points | number }} pts</div>
+                  </div>
+                </div>
+                <div class="platform-base"></div>
+              </div>
+            }
+          </div>
         </div>
       }
 
@@ -192,7 +154,7 @@ import { I18nService } from '../../services/i18n.service';
                               </svg>
                             </a>
                           }
-                          <span class="player-name" [class.highlight]="i < 3">{{ getUserDisplay(entry) }}</span>
+                          <a [routerLink]="['/user', entry.userId]" class="player-name" [class.highlight]="i < 3">{{ getUserDisplay(entry) }}</a>
                         </div>
                       </div>
                     </div>
@@ -230,11 +192,6 @@ import { I18nService } from '../../services/i18n.service';
         </div>
       }
       
-      <div class="mt-12 text-center">
-        <a routerLink="/" class="cta-button">
-          {{ i18n.t('leaderboard.cta') }}
-        </a>
-      </div>
     </div>
   `,
   styles: [`
@@ -292,231 +249,347 @@ import { I18nService } from '../../services/i18n.service';
       box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
     }
 
-    /* Period Buttons */
-    .period-btn {
-      padding: 0.75rem 2rem;
+    /* Period Tabs - Modern & Aesthetic */
+    .period-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 2.5rem;
+      padding: 0.5rem;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 16px;
+      max-width: fit-content;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .tab-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
       border-radius: 12px;
       font-weight: 600;
       font-size: 0.9rem;
-      background: rgba(255, 255, 255, 0.05);
-      border: 2px solid rgba(255, 255, 255, 0.1);
-      color: rgba(255, 255, 255, 0.6);
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.5);
       cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tab-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      border-radius: 12px;
+    }
+
+    .tab-btn:hover {
+      color: rgba(255, 255, 255, 0.8);
+      transform: translateY(-2px);
+    }
+
+    .tab-btn:hover::before {
+      opacity: 1;
+    }
+
+    .tab-btn.active {
+      background: var(--accent-primary);
+      color: white;
+      box-shadow: 0 4px 20px rgba(88, 166, 255, 0.4);
+      font-weight: 600;
+    }
+
+    .tab-btn.active:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(88, 166, 255, 0.5);
+    }
+
+    .tab-icon {
+      font-size: 1.1rem;
+      filter: grayscale(100%);
+      opacity: 0.7;
       transition: all 0.3s ease;
     }
 
-    .period-btn:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.2);
-      color: rgba(255, 255, 255, 0.9);
+    .tab-btn.active .tab-icon {
+      filter: grayscale(0%);
+      opacity: 1;
     }
 
-    .period-btn.active {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-color: #667eea;
-      color: white;
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    .tab-label {
+      position: relative;
+      z-index: 1;
     }
 
-    /* Podium Container */
-    .podium-container {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.5rem;
-      max-width: 900px;
+    @media (max-width: 640px) {
+      .period-tabs {
+        flex-wrap: wrap;
+        gap: 0.25rem;
+        padding: 0.4rem;
+        border-radius: 14px;
+      }
+
+      .tab-btn {
+        padding: 0.6rem 0.9rem;
+        font-size: 0.8rem;
+        border-radius: 10px;
+      }
+
+      .tab-btn::before {
+        border-radius: 10px;
+      }
+
+      .tab-icon {
+        font-size: 1rem;
+      }
+    }
+
+    /* Podium - Diseño Facherito */
+    .podium-wrapper {
+      max-width: 700px;
       margin: 0 auto 3rem;
+      padding: 0 1rem;
+    }
+
+    .podium-platforms {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr 1fr;
+      gap: 1rem;
       align-items: end;
     }
 
-    .podium-container.single {
-      grid-template-columns: 1fr;
-      max-width: 400px;
-    }
-
-    .podium-container.double {
-      grid-template-columns: repeat(2, 1fr);
-      max-width: 600px;
-    }
-
-    .podium-container.single .podium-card.first {
-      grid-column: 1;
-    }
-
-    .podium-container.double .podium-card.first {
-      grid-column: 2;
-    }
-
-    .podium-container.double .podium-card.second {
-      grid-column: 1;
-    }
-
-
-    .podium-card {
-      background: linear-gradient(135deg, rgba(30, 30, 50, 0.8) 0%, rgba(20, 20, 40, 0.9) 100%);
-      border-radius: 20px;
-      padding: 2rem 1.5rem;
-      text-align: center;
-      position: relative;
-      border: 2px solid;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .podium-card:hover {
-      transform: translateY(-8px);
-    }
-
-    .podium-card.first {
-      border-color: #ffd700;
-      box-shadow: 0 8px 32px rgba(255, 215, 0, 0.3);
-      grid-row: 1;
-      grid-column: 2;
-    }
-
-    .podium-card.first:hover {
-      box-shadow: 0 12px 48px rgba(255, 215, 0, 0.5);
-    }
-
-    .podium-card.second {
-      border-color: #c0c0c0;
-      box-shadow: 0 6px 24px rgba(192, 192, 192, 0.2);
-      grid-row: 1;
-      grid-column: 1;
-      padding-top: 2.5rem;
-    }
-
-    .podium-card.second:hover {
-      box-shadow: 0 10px 36px rgba(192, 192, 192, 0.4);
-    }
-
-    .podium-card.third {
-      border-color: #cd7f32;
-      box-shadow: 0 6px 24px rgba(205, 127, 50, 0.2);
-      grid-row: 1;
-      grid-column: 3;
-      padding-top: 3rem;
-    }
-
-    .podium-card.third:hover {
-      box-shadow: 0 10px 36px rgba(205, 127, 50, 0.4);
-    }
-
-    .crown {
-      position: absolute;
-      top: -20px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 2.5rem;
-      animation: bounce 2s ease-in-out infinite;
-    }
-
-    @keyframes bounce {
-      0%, 100% { transform: translateX(-50%) translateY(0); }
-      50% { transform: translateX(-50%) translateY(-10px); }
-    }
-
-    .podium-rank {
-      position: relative;
-      margin-bottom: 1rem;
-    }
-
-    .medal {
-      font-size: 3rem;
-      display: inline-block;
-      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
-    }
-
-    .rank-number {
-      position: absolute;
-      bottom: -5px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 1.2rem;
-      font-weight: 800;
-      color: white;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-    }
-
-    .podium-avatar {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      margin: 0 auto 1rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.8rem;
-      font-weight: 800;
-      color: white;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    }
-
-    .podium-avatar.champion {
-      width: 100px;
-      height: 100px;
-      font-size: 2.2rem;
-      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-      box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.3);
-    }
-
-    .podium-username {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: white;
-      margin-bottom: 0.5rem;
-    }
-
-    .podium-badges {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 0.25rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .badge {
-      padding: 0.25rem 0.5rem;
-      border-radius: 12px;
-      font-size: 0.7rem;
-      font-weight: 600;
-      color: white;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-      white-space: nowrap;
-    }
-
-    .badge.small {
-      font-size: 0.6rem;
-      padding: 0.2rem 0.4rem;
-    }
-
-    .podium-points {
+    .platform {
       display: flex;
       flex-direction: column;
       align-items: center;
+      position: relative;
     }
 
-    .points-number {
-      font-size: 1.8rem;
+    .platform-top {
+      background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-tertiary) 100%);
+      border-radius: 16px 16px 0 0;
+      padding: 1.5rem 1rem 1rem;
+      width: 100%;
+      text-align: center;
+      border: 1px solid var(--border-color);
+      border-bottom: none;
+      position: relative;
+    }
+
+    .platform-base {
+      width: 100%;
+      height: 20px;
+      background: linear-gradient(180deg, var(--bg-tertiary) 0%, var(--border-color) 100%);
+      border-radius: 0 0 4px 4px;
+      position: relative;
+    }
+
+    /* Heights for each place */
+    .first-place .platform-top {
+      padding-top: 2rem;
+      min-height: 180px;
+    }
+
+    .first-place .platform-base {
+      height: 30px;
+      background: linear-gradient(180deg, #ffd700 0%, #b8860b 100%);
+      box-shadow: 0 4px 20px rgba(255, 215, 0, 0.3);
+    }
+
+    .second-place .platform-top {
+      min-height: 140px;
+    }
+
+    .second-place .platform-base {
+      height: 25px;
+      background: linear-gradient(180deg, #c0c0c0 0%, #808080 100%);
+    }
+
+    .third-place .platform-top {
+      min-height: 120px;
+    }
+
+    .third-place .platform-base {
+      height: 20px;
+      background: linear-gradient(180deg, #cd7f32 0%, #8b4513 100%);
+    }
+
+    .crown-icon {
+      position: absolute;
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 2rem;
+      z-index: 10;
+      animation: float-crown 2s ease-in-out infinite;
+      filter: drop-shadow(0 4px 8px rgba(255, 215, 0, 0.5));
+    }
+
+    @keyframes float-crown {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(-8px); }
+    }
+
+    .player-spot {
+      position: relative;
+      margin-bottom: 0.75rem;
+    }
+
+    .player-spot.champion {
+      transform: scale(1.1);
+    }
+
+    .avatar-ring {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .avatar-ring.gold {
+      background: linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%);
+      padding: 4px;
+      box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+    }
+
+    .avatar-ring.silver {
+      background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 50%, #c0c0c0 100%);
+      padding: 3px;
+    }
+
+    .avatar-ring.bronze {
+      background: linear-gradient(135deg, #cd7f32 0%, #daa520 50%, #cd7f32 100%);
+      padding: 3px;
+    }
+
+    .spot-avatar {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: var(--bg-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
       font-weight: 800;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      color: var(--text-primary);
     }
 
-    .podium-card.first .points-number {
-      font-size: 2.2rem;
-      background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+    .avatar-ring.gold .spot-avatar {
+      font-size: 1.6rem;
     }
 
-    .points-label {
+    .spot-rank {
+      position: absolute;
+      bottom: -5px;
+      right: -5px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--accent-primary);
+      color: white;
+      font-weight: 800;
       font-size: 0.8rem;
-      color: rgba(255, 255, 255, 0.5);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--bg-primary);
+    }
+
+    .player-details {
+      margin-top: 0.5rem;
+    }
+
+    .spot-name {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.25rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-decoration: none;
+      display: block;
+      transition: color 0.2s;
+    }
+
+    .spot-name:hover {
+      color: var(--accent-primary);
+    }
+
+    .spot-points {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-family: var(--font-code);
+    }
+
+    .champion-points {
+      color: #ffd700;
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    /* Glow effects */
+    .first-place .platform-top {
+      box-shadow: 0 -10px 40px rgba(255, 215, 0, 0.15), inset 0 1px 0 rgba(255, 215, 0, 0.2);
+      border-color: rgba(255, 215, 0, 0.3);
+    }
+
+    /* Single / Double variants */
+    .podium-wrapper:has(.platform:only-child) {
+      max-width: 280px;
+    }
+
+    .podium-wrapper:has(.platform:first-child:nth-last-child(2)) {
+      max-width: 450px;
+    }
+
+    .podium-wrapper:has(.platform:first-child:nth-last-child(2)) .platform:first-child {
+      grid-column: 1;
+    }
+
+    .podium-wrapper:has(.platform:first-child:nth-last-child(2)) .platform:last-child {
+      grid-column: 2;
+    }
+
+    @media (max-width: 600px) {
+      .podium-platforms {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .platform {
+        max-width: 280px;
+        margin: 0 auto;
+      }
+
+      .first-place .platform-top,
+      .second-place .platform-top,
+      .third-place .platform-top {
+        min-height: auto;
+        padding: 1rem;
+        border-radius: 16px;
+      }
+
+      .platform-base {
+        display: none;
+      }
+
+      .crown-icon {
+        top: -15px;
+        font-size: 1.5rem;
+      }
     }
 
     /* Rankings Table - New Design */
@@ -574,7 +647,7 @@ import { I18nService } from '../../services/i18n.service';
     }
 
     .rankings-table tbody tr:hover {
-      background: rgba(102, 126, 234, 0.1);
+      background: rgba(88, 166, 255, 0.08);
     }
 
     .rankings-table tbody tr:last-child {
@@ -645,19 +718,21 @@ import { I18nService } from '../../services/i18n.service';
       width: 45px;
       height: 45px;
       border-radius: 12px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: var(--bg-tertiary);
+      border: 2px solid var(--border-color);
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 700;
       font-size: 0.9rem;
-      color: white;
+      color: var(--text-primary);
       flex-shrink: 0;
     }
 
     .player-avatar.champion {
-      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-      box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.3);
+      background: var(--bg-tertiary);
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3);
     }
 
     .player-info {
@@ -676,6 +751,12 @@ import { I18nService } from '../../services/i18n.service';
       font-weight: 600;
       font-size: 1rem;
       color: rgba(255, 255, 255, 0.85);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .player-name:hover {
+      color: var(--accent-primary);
     }
 
     .player-name.highlight {
@@ -720,15 +801,13 @@ import { I18nService } from '../../services/i18n.service';
     .points-display {
       font-size: 1.2rem;
       font-weight: 800;
-      font-family: 'Courier New', monospace;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      font-family: var(--font-code);
+      color: var(--text-primary);
     }
 
     .points-display.highlight {
       font-size: 1.4rem;
+      color: var(--accent-success);
     }
 
     /* GitHub Icon */
@@ -768,37 +847,28 @@ import { I18nService } from '../../services/i18n.service';
       color: rgba(255, 255, 255, 0.5);
     }
 
-    /* CTA Button */
-    .cta-button {
-      display: inline-block;
-      padding: 1rem 3rem;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 1.1rem;
-      color: white;
-      text-decoration: none;
-      box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
-      transition: all 0.3s ease;
-    }
-
-    .cta-button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 32px rgba(102, 126, 234, 0.6);
-    }
-
     /* Responsive */
     @media (max-width: 768px) {
-      .podium-container {
+      .podium-platforms {
         grid-template-columns: 1fr;
         gap: 1rem;
       }
 
-      .podium-card.first,
-      .podium-card.second,
-      .podium-card.third {
-        grid-column: 1;
-        padding-top: 2rem;
+      .platform {
+        max-width: 280px;
+        margin: 0 auto;
+      }
+
+      .first-place .platform-top,
+      .second-place .platform-top,
+      .third-place .platform-top {
+        min-height: auto;
+        padding: 1rem;
+        border-radius: 16px;
+      }
+
+      .platform-base {
+        display: none;
       }
 
       .rankings-table th,

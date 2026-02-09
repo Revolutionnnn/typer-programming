@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { User, RegisterRequest, LoginRequest, AuthResponse } from '../models/user.model';
+import { UserProfile } from '../models/user-profile.model';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
@@ -113,5 +114,12 @@ export class UserService {
    */
   getUserId(): string {
     return this.currentUserSubject.value?.id || '';
+  }
+
+  /**
+   * Get public user profile with stats
+   */
+  getUserProfile(userId: string): Observable<UserProfile> {
+    return this.http.get<UserProfile>(`${environment.apiUrl}/users/${userId}`);
   }
 }

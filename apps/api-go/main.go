@@ -89,6 +89,9 @@ func main() {
 		r.With(authService.RequireAuth).Post("/users/{userId}/badges/{badgeId}", h.AssignBadgeToUser)
 		r.With(authService.RequireAuth).Delete("/users/{userId}/badges/{badgeId}", h.RemoveBadgeFromUser)
 
+		// Users
+		r.Get("/users/{userId}", h.GetUserProfile)
+
 		// Health
 		r.Get("/health", h.HealthCheck)
 	})

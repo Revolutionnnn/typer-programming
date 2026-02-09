@@ -35,6 +35,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'user/:id',
+    loadComponent: () =>
+      import('./pages/user-profile/user-profile.component').then(
+        (m) => m.UserProfileComponent
+      ),
+  },
+  {
     path: '**',
     redirectTo: '',
   },
