@@ -190,6 +190,16 @@ func (s *Store) GetLanguages() []models.LanguageInfo {
 		"kotlin":     {"Kotlin", "🟣"},
 	}
 
+	// Soon languages
+	soonLangs := map[string]struct{ name, icon string }{
+		"cybersecurity": {"Cybersecurity", "🔒"},
+		"aws":           {"AWS", "☁️"},
+		"devops":        {"DevOps", "⚙️"},
+		"docker":        {"Docker", "🐳"},
+		"kubernetes":    {"Kubernetes", "⎈"},
+		"react":         {"React", "⚛️"},
+	}
+
 	var result []models.LanguageInfo
 	for lang, lessons := range s.byLang {
 		info := models.LanguageInfo{
@@ -206,8 +216,23 @@ func (s *Store) GetLanguages() []models.LanguageInfo {
 		result = append(result, info)
 	}
 
+	// Add soon languages
+	for lang, meta := range soonLangs {
+		result = append(result, models.LanguageInfo{
+			ID:          lang,
+			Name:        meta.name,
+			Icon:        meta.icon,
+			LessonCount: 0,
+			Soon:        true,
+		})
+	}
+
 	sort.Slice(result, func(i, j int) bool {
-		return result[i].LessonCount > result[j].LessonCount
+		// Sort by lesson count first (available languages), then by name for soon languages
+		if result[i].LessonCount != result[j].LessonCount {
+			return result[i].LessonCount > result[j].LessonCount
+		}
+		return result[i].Name < result[j].Name
 	})
 
 	return result

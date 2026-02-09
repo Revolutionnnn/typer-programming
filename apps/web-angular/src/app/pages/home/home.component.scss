@@ -179,6 +179,22 @@
       color: var(--accent-primary);
     }
   }
+  
+  &.lang-card--soon {
+    opacity: 0.8;
+    cursor: default;
+    
+    &:hover {
+      transform: none;
+      box-shadow: none;
+      border-color: var(--border-color);
+      
+      .link-arrow {
+        transform: none;
+        color: var(--text-primary);
+      }
+    }
+  }
 }
 
 .lang-card__header {
@@ -229,6 +245,12 @@
   background: rgba(63, 185, 80, 0.15);
   color: var(--accent-success);
   border: 1px solid rgba(63, 185, 80, 0.3);
+}
+
+.badge--soon {
+  background: rgba(255, 193, 7, 0.15);
+  color: #d97706;
+  border: 1px solid rgba(255, 193, 7, 0.3);
 }
 
 .lang-card--soon {

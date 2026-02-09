@@ -41,6 +41,7 @@ type LanguageInfo struct {
 	Name        string `json:"name"`
 	Icon        string `json:"icon"`
 	LessonCount int    `json:"lessonCount"`
+	Soon        bool   `json:"soon,omitempty"`
 }
 
 // ToSummary converts a Lesson to a LessonSummary

@@ -34,4 +34,5 @@ export interface LanguageInfo {
   name: string;
   icon: string;
   lessonCount: number;
+  soon?: boolean;
 }

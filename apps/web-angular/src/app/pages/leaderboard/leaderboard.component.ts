@@ -60,7 +60,7 @@ import { I18nService } from '../../services/i18n.service';
                 {{ getUserInitials(entries()[1]) }}
               </div>
               <div class="podium-username">{{ getUserDisplay(entries()[1]) }}</div>
-              @if (entries()[1].badges && entries()[1].badges.length > 0) {
+              @if (entries()[1].badges?.length) {
                 <div class="podium-badges">
                   @for (badge of entries()[1].badges; track badge.badge.id) {
                     <span class="badge" [style.background-color]="badge.badge.color">{{ badge.badge.name }}</span>
@@ -85,7 +85,7 @@ import { I18nService } from '../../services/i18n.service';
               {{ getUserInitials(entries()[0]) }}
             </div>
             <div class="podium-username">{{ getUserDisplay(entries()[0]) }}</div>
-            @if (entries()[0].badges && entries()[0].badges.length > 0) {
+            @if (entries()[0].badges?.length) {
               <div class="podium-badges">
                 @for (badge of entries()[0].badges; track badge.badge.id) {
                   <span class="badge" [style.background-color]="badge.badge.color">{{ badge.badge.name }}</span>
@@ -109,7 +109,7 @@ import { I18nService } from '../../services/i18n.service';
                 {{ getUserInitials(entries()[2]) }}
               </div>
               <div class="podium-username">{{ getUserDisplay(entries()[2]) }}</div>
-              @if (entries()[2].badges && entries()[2].badges.length > 0) {
+              @if (entries()[2].badges?.length) {
                 <div class="podium-badges">
                   @for (badge of entries()[2].badges; track badge.badge.id) {
                     <span class="badge" [style.background-color]="badge.badge.color">{{ badge.badge.name }}</span>
@@ -144,7 +144,7 @@ import { I18nService } from '../../services/i18n.service';
                 </div>
                 <div class="user-info">
                   <span class="user-name">{{ getUserDisplay(entry) }}</span>
-                  @if (entry.badges && entry.badges.length > 0) {
+                  @if (entry.badges?.length) {
                     <div class="user-badges">
                       @for (badge of entry.badges; track badge.badge.id) {
                         <span class="badge small" [style.background-color]="badge.badge.color">{{ badge.badge.name }}</span>

@@ -71,21 +71,29 @@
     <div class="languages__grid">
       @for (lang of languages; track lang.id) {
         <a
-          [routerLink]="['/lessons']"
-          [queryParams]="{ lang: lang.id }"
+          [routerLink]="lang.soon ? null : ['/lessons']"
+          [queryParams]="lang.soon ? null : { lang: lang.id }"
           class="lang-card card"
+          [class.lang-card--soon]="lang.soon"
           [style]="getLangStyle(lang.id)"
         >
           <div class="lang-card__header">
             <span class="lang-card__icon">{{ lang.icon }}</span>
-            <span class="badge badge--beginner">{{ i18n.t('home.languages.available') }}</span>
+            <span class="badge badge--beginner" [class.badge--soon]="lang.soon">
+              {{ lang.soon ? i18n.t('home.languages.soon') : i18n.t('home.languages.available') }}
+            </span>
           </div>
           <div class="lang-card__content">
             <h3>{{ lang.name }}</h3>
-            <p>{{ lang.lessonCount }} {{ i18n.t('home.lessons.count') }}</p>
+            <p>{{ lang.soon ? i18n.t('home.languages.soon') : (lang.lessonCount + ' ' + i18n.t('home.lessons.count')) }}</p>
           </div>
           <div class="lang-card__footer">
-            <span class="link-arrow">Start Learning <lucide-icon [img]="icons.ArrowRight" [size]="14" style="vertical-align: middle;"></lucide-icon></span>
+            <span class="link-arrow">
+              {{ lang.soon ? i18n.t('home.languages.soon') : 'Start Learning' }}
+              @if (!lang.soon) {
+                <lucide-icon [img]="icons.ArrowRight" [size]="14" style="vertical-align: middle;"></lucide-icon>
+              }
+            </span>
           </div>
         </a>
       }
