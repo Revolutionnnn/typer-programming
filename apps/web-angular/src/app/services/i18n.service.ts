@@ -7,8 +7,8 @@ type TranslationDict = Record<string, string>;
 const translations: Record<Locale, TranslationDict> = {
   es: {
     // ── Header ──
-    'nav.lessons': '📚 Lecciones',
-    'nav.progress': '📈 Progreso',
+    'nav.lessons': 'Lecciones',
+    'nav.progress': 'Progreso',
 
     // ── Home ──
     'home.title': 'Aprende a programar',
@@ -138,7 +138,7 @@ const translations: Record<Locale, TranslationDict> = {
     'rank.unranked': 'Sin ranking',
 
     // ── Leaderboard ──
-    'nav.leaderboard': '🏆 Ranking',
+    'nav.leaderboard': 'Ranking',
     'leaderboard.title': '🏆 Campeones del Teclado',
     'leaderboard.daily': 'Diario',
     'leaderboard.weekly': 'Semanal',
@@ -153,8 +153,8 @@ const translations: Record<Locale, TranslationDict> = {
 
   en: {
     // ── Header ──
-    'nav.lessons': '📚 Lessons',
-    'nav.progress': '📈 Progress',
+    'nav.lessons': 'Lessons',
+    'nav.progress': 'Progress',
 
     // ── Home ──
     'home.title': 'Learn to code',
@@ -284,7 +284,7 @@ const translations: Record<Locale, TranslationDict> = {
     'rank.unranked': 'Unranked',
 
     // ── Leaderboard ──
-    'nav.leaderboard': '🏆 Leaderboard',
+    'nav.leaderboard': 'Leaderboard',
     'leaderboard.title': '🏆 Keyboard Champions',
     'leaderboard.daily': 'Daily',
     'leaderboard.weekly': 'Weekly',

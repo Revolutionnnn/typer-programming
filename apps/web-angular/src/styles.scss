@@ -84,6 +84,13 @@ a {
   padding: 0 1.5rem;
 }
 
+.nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
