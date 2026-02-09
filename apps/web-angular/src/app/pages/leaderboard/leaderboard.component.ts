@@ -60,6 +60,13 @@ import { I18nService } from '../../services/i18n.service';
                 {{ getUserInitials(entries()[1]) }}
               </div>
               <div class="podium-username">{{ getUserDisplay(entries()[1]) }}</div>
+              @if (entries()[1].badges && entries()[1].badges.length > 0) {
+                <div class="podium-badges">
+                  @for (badge of entries()[1].badges; track badge.badge.id) {
+                    <span class="badge" [style.background-color]="badge.badge.color">{{ badge.badge.name }}</span>
+                  }
+                </div>
+              }
               <div class="podium-points">
                 <span class="points-number">{{ entries()[1].points | number }}</span>
                 <span class="points-label">{{ i18n.t('leaderboard.points') }}</span>
@@ -78,6 +85,13 @@ import { I18nService } from '../../services/i18n.service';
               {{ getUserInitials(entries()[0]) }}
             </div>
             <div class="podium-username">{{ getUserDisplay(entries()[0]) }}</div>
+            @if (entries()[0].badges && entries()[0].badges.length > 0) {
+              <div class="podium-badges">
+                @for (badge of entries()[0].badges; track badge.badge.id) {
+                  <span class="badge" [style.background-color]="badge.badge.color">{{ badge.badge.name }}</span>
+                }
+              </div>
+            }
             <div class="podium-points">
               <span class="points-number">{{ entries()[0].points | number }}</span>
               <span class="points-label">points</span>
@@ -95,6 +109,13 @@ import { I18nService } from '../../services/i18n.service';
                 {{ getUserInitials(entries()[2]) }}
               </div>
               <div class="podium-username">{{ getUserDisplay(entries()[2]) }}</div>
+              @if (entries()[2].badges && entries()[2].badges.length > 0) {
+                <div class="podium-badges">
+                  @for (badge of entries()[2].badges; track badge.badge.id) {
+                    <span class="badge" [style.background-color]="badge.badge.color">{{ badge.badge.name }}</span>
+                  }
+                </div>
+              }
               <div class="podium-points">
                 <span class="points-number">{{ entries()[2].points | number }}</span>
                 <span class="points-label">points</span>
@@ -121,7 +142,16 @@ import { I18nService } from '../../services/i18n.service';
                 <div class="user-avatar">
                   {{ getUserInitials(entry) }}
                 </div>
-                <span class="user-name">{{ getUserDisplay(entry) }}</span>
+                <div class="user-info">
+                  <span class="user-name">{{ getUserDisplay(entry) }}</span>
+                  @if (entry.badges && entry.badges.length > 0) {
+                    <div class="user-badges">
+                      @for (badge of entry.badges; track badge.badge.id) {
+                        <span class="badge small" [style.background-color]="badge.badge.color">{{ badge.badge.name }}</span>
+                      }
+                    </div>
+                  }
+                </div>
               </div>
               <div class="col-points">
                 <span class="points-value">{{ entry.points | number }}</span>
@@ -371,7 +401,30 @@ import { I18nService } from '../../services/i18n.service';
       font-size: 1.1rem;
       font-weight: 700;
       color: white;
+      margin-bottom: 0.5rem;
+    }
+
+    .podium-badges {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.25rem;
       margin-bottom: 0.75rem;
+    }
+
+    .badge {
+      padding: 0.25rem 0.5rem;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+      white-space: nowrap;
+    }
+
+    .badge.small {
+      font-size: 0.6rem;
+      padding: 0.2rem 0.4rem;
     }
 
     .podium-points {
@@ -491,6 +544,18 @@ import { I18nService } from '../../services/i18n.service';
       font-weight: 600;
       font-size: 1rem;
       color: rgba(255, 255, 255, 0.9);
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .user-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem;
     }
 
     .col-points {

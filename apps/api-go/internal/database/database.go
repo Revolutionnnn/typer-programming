@@ -29,6 +29,10 @@ func InitDB(dbPath string) (*DB, error) {
 		return nil, fmt.Errorf("failed to create tables: %w", err)
 	}
 
+	if err := db.InitializeBadges(); err != nil {
+		return nil, fmt.Errorf("failed to initialize badges: %w", err)
+	}
+
 	return db, nil
 }
 
@@ -92,6 +96,26 @@ func (db *DB) createTables() error {
 	queries = append(queries, `CREATE INDEX IF NOT EXISTS idx_points_user ON point_transactions(user_id)`)
 	queries = append(queries, `CREATE INDEX IF NOT EXISTS idx_points_created_at ON point_transactions(created_at)`)
 
+	queries = append(queries, `CREATE TABLE IF NOT EXISTS badges (
+		id TEXT PRIMARY KEY,
+		name TEXT UNIQUE NOT NULL,
+		color TEXT NOT NULL,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	)`)
+
+	queries = append(queries, `CREATE TABLE IF NOT EXISTS user_badges (
+		user_id TEXT NOT NULL,
+		badge_id TEXT NOT NULL,
+		assigned_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		PRIMARY KEY (user_id, badge_id),
+		FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+		FOREIGN KEY (badge_id) REFERENCES badges(id) ON DELETE CASCADE
+	)`)
+
+	queries = append(queries, `CREATE INDEX IF NOT EXISTS idx_user_badges_user ON user_badges(user_id)`)
+	queries = append(queries, `CREATE INDEX IF NOT EXISTS idx_user_badges_badge ON user_badges(badge_id)`)
+
 	for _, q := range queries {
 		if _, err := db.Exec(q); err != nil {
 			return fmt.Errorf("failed to execute query: %w", err)
@@ -136,6 +160,14 @@ func (db *DB) GetLeaderboard(startDate, endDate time.Time, limit int) ([]models.
 			return nil, err
 		}
 		entry.Rank = rank
+
+		// Load badges for this user
+		badges, err := db.GetUserBadges(entry.UserID)
+		if err != nil {
+			return nil, err
+		}
+		entry.Badges = badges
+
 		rank++
 		entries = append(entries, entry)
 	}
@@ -236,7 +268,7 @@ func (db *DB) CreateRegisteredUser(username, email, passwordHash, displayName st
 		return nil, err
 	}
 
-	return &models.User{
+	user := &models.User{
 		ID:          id,
 		Username:    username,
 		Email:       &email,
@@ -244,7 +276,15 @@ func (db *DB) CreateRegisteredUser(username, email, passwordHash, displayName st
 		IsGuest:     false,
 		CreatedAt:   now,
 		UpdatedAt:   now,
-	}, nil
+	}
+
+	// Assign automatic badges
+	if err := db.assignAutomaticBadges(user); err != nil {
+		// Log error but don't fail user creation
+		fmt.Printf("Error assigning automatic badges: %v\n", err)
+	}
+
+	return user, nil
 }
 
 // GetUserByID returns a user by ID
@@ -265,6 +305,13 @@ func (db *DB) GetUserByID(id string) (*models.User, error) {
 	if email.Valid {
 		user.Email = &email.String
 	}
+
+	// Load badges
+	badges, err := db.GetUserBadges(id)
+	if err != nil {
+		return nil, err
+	}
+	user.Badges = badges
 
 	return &user, nil
 }
@@ -567,4 +614,224 @@ func (db *DB) UpdateUserStreak(userID string) (int, error) {
 	)
 
 	return currentStreak, err
+}
+
+// --- Badge Management ---
+
+// CreateBadge creates a new badge
+func (db *DB) CreateBadge(name, color string) (*models.Badge, error) {
+	id := uuid.New().String()
+	now := time.Now()
+
+	_, err := db.Exec(
+		`INSERT INTO badges (id, name, color, created_at, updated_at)
+		VALUES (?, ?, ?, ?, ?)`,
+		id, name, color, now, now,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &models.Badge{
+		ID:        id,
+		Name:      name,
+		Color:     color,
+		CreatedAt: now,
+		UpdatedAt: now,
+	}, nil
+}
+
+// GetBadgeByID returns a badge by ID
+func (db *DB) GetBadgeByID(id string) (*models.Badge, error) {
+	var badge models.Badge
+	err := db.QueryRow(
+		`SELECT id, name, color, created_at, updated_at
+		FROM badges WHERE id = ?`,
+		id,
+	).Scan(&badge.ID, &badge.Name, &badge.Color, &badge.CreatedAt, &badge.UpdatedAt)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &badge, nil
+}
+
+// GetBadgeByName returns a badge by name
+func (db *DB) GetBadgeByName(name string) (*models.Badge, error) {
+	var badge models.Badge
+	err := db.QueryRow(
+		`SELECT id, name, color, created_at, updated_at
+		FROM badges WHERE name = ?`,
+		name,
+	).Scan(&badge.ID, &badge.Name, &badge.Color, &badge.CreatedAt, &badge.UpdatedAt)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &badge, nil
+}
+
+// GetAllBadges returns all badges
+func (db *DB) GetAllBadges() ([]models.Badge, error) {
+	rows, err := db.Query(
+		`SELECT id, name, color, created_at, updated_at
+		FROM badges ORDER BY created_at`,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var badges []models.Badge
+	for rows.Next() {
+		var badge models.Badge
+		if err := rows.Scan(&badge.ID, &badge.Name, &badge.Color, &badge.CreatedAt, &badge.UpdatedAt); err != nil {
+			return nil, err
+		}
+		badges = append(badges, badge)
+	}
+
+	return badges, nil
+}
+
+// AssignBadgeToUser assigns a badge to a user
+func (db *DB) AssignBadgeToUser(userID, badgeID string) error {
+	now := time.Now()
+	_, err := db.Exec(
+		`INSERT OR IGNORE INTO user_badges (user_id, badge_id, assigned_at)
+		VALUES (?, ?, ?)`,
+		userID, badgeID, now,
+	)
+	return err
+}
+
+// RemoveBadgeFromUser removes a badge from a user
+func (db *DB) RemoveBadgeFromUser(userID, badgeID string) error {
+	_, err := db.Exec(
+		`DELETE FROM user_badges WHERE user_id = ? AND badge_id = ?`,
+		userID, badgeID,
+	)
+	return err
+}
+
+// GetUserBadges returns all badges for a user
+func (db *DB) GetUserBadges(userID string) ([]models.BadgeWithDetails, error) {
+	rows, err := db.Query(
+		`SELECT b.id, b.name, b.color, b.created_at, b.updated_at, ub.assigned_at
+		FROM badges b
+		INNER JOIN user_badges ub ON b.id = ub.badge_id
+		WHERE ub.user_id = ?
+		ORDER BY ub.assigned_at`,
+		userID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var badges []models.BadgeWithDetails
+	for rows.Next() {
+		var badge models.Badge
+		var assignedAt time.Time
+		if err := rows.Scan(&badge.ID, &badge.Name, &badge.Color, &badge.CreatedAt, &badge.UpdatedAt, &assignedAt); err != nil {
+			return nil, err
+		}
+		badges = append(badges, models.BadgeWithDetails{
+			Badge:      badge,
+			AssignedAt: assignedAt,
+		})
+	}
+
+	return badges, nil
+}
+
+// GetUsersWithBadge returns all users who have a specific badge
+func (db *DB) GetUsersWithBadge(badgeID string) ([]string, error) {
+	rows, err := db.Query(
+		`SELECT user_id FROM user_badges WHERE badge_id = ?`,
+		badgeID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var userIDs []string
+	for rows.Next() {
+		var userID string
+		if err := rows.Scan(&userID); err != nil {
+			return nil, err
+		}
+		userIDs = append(userIDs, userID)
+	}
+
+	return userIDs, nil
+}
+
+// InitializeBadges creates default badges if they don't exist
+func (db *DB) InitializeBadges() error {
+	badges := []struct {
+		name  string
+		color string
+	}{
+		{"Beta Tester", "#FFD700"}, // Gold
+		{"Early Access", "#C0C0C0"}, // Silver
+		{"Donator", "#FF69B4"},     // Hot Pink
+		{"Contributor", "#32CD32"}, // Lime Green
+	}
+
+	for _, b := range badges {
+		_, err := db.GetBadgeByName(b.name)
+		if err == sql.ErrNoRows {
+			// Badge doesn't exist, create it
+			_, err := db.CreateBadge(b.name, b.color)
+			if err != nil {
+				return fmt.Errorf("failed to create badge %s: %w", b.name, err)
+			}
+		} else if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// assignAutomaticBadges assigns badges based on user registration order
+func (db *DB) assignAutomaticBadges(user *models.User) error {
+	// Count registered users (non-guests) created before this user
+	var count int
+	err := db.QueryRow(
+		`SELECT COUNT(*) FROM users WHERE is_guest = 0 AND created_at < ?`,
+		user.CreatedAt,
+	).Scan(&count)
+
+	if err != nil {
+		return err
+	}
+
+	// Assign Beta Tester to first 100 registered users
+	if count < 100 {
+		badge, err := db.GetBadgeByName("Beta Tester")
+		if err != nil {
+			return err
+		}
+		if err := db.AssignBadgeToUser(user.ID, badge.ID); err != nil {
+			return err
+		}
+	}
+
+	// Assign Early Access to first 1000 registered users
+	if count < 1000 {
+		badge, err := db.GetBadgeByName("Early Access")
+		if err != nil {
+			return err
+		}
+		if err := db.AssignBadgeToUser(user.ID, badge.ID); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

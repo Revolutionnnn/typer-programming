@@ -526,3 +526,72 @@ func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 		"lessons": h.lessonStore.Count(),
 	})
 }
+
+// --- Badge handlers ---
+
+// CreateBadge creates a new badge
+func (h *Handler) CreateBadge(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Name  string `json:"name"`
+		Color string `json:"color"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	badge, err := h.db.CreateBadge(req.Name, req.Color)
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "Failed to create badge")
+		return
+	}
+
+	respondJSON(w, http.StatusCreated, badge)
+}
+
+// GetAllBadges returns all badges
+func (h *Handler) GetAllBadges(w http.ResponseWriter, r *http.Request) {
+	badges, err := h.db.GetAllBadges()
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "Failed to get badges")
+		return
+	}
+
+	respondJSON(w, http.StatusOK, badges)
+}
+
+// AssignBadgeToUser assigns a badge to a user
+func (h *Handler) AssignBadgeToUser(w http.ResponseWriter, r *http.Request) {
+	userID := chi.URLParam(r, "userId")
+	badgeID := chi.URLParam(r, "badgeId")
+
+	if userID == "" || badgeID == "" {
+		respondError(w, http.StatusBadRequest, "Missing userId or badgeId")
+		return
+	}
+
+	if err := h.db.AssignBadgeToUser(userID, badgeID); err != nil {
+		respondError(w, http.StatusInternalServerError, "Failed to assign badge")
+		return
+	}
+
+	respondJSON(w, http.StatusOK, map[string]string{"message": "Badge assigned successfully"})
+}
+
+// RemoveBadgeFromUser removes a badge from a user
+func (h *Handler) RemoveBadgeFromUser(w http.ResponseWriter, r *http.Request) {
+	userID := chi.URLParam(r, "userId")
+	badgeID := chi.URLParam(r, "badgeId")
+
+	if userID == "" || badgeID == "" {
+		respondError(w, http.StatusBadRequest, "Missing userId or badgeId")
+		return
+	}
+
+	if err := h.db.RemoveBadgeFromUser(userID, badgeID); err != nil {
+		respondError(w, http.StatusInternalServerError, "Failed to remove badge")
+		return
+	}
+
+	respondJSON(w, http.StatusOK, map[string]string{"message": "Badge removed successfully"})
+}

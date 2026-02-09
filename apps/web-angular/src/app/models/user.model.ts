@@ -6,6 +6,7 @@ export interface User {
     isGuest: boolean;
     currentStreak: number;
     lastStreakAt?: string;
+    badges?: BadgeWithDetails[];
     createdAt: string;
     updatedAt: string;
 }

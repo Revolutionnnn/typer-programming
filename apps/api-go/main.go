@@ -83,6 +83,12 @@ func main() {
 		r.Get("/leaderboard", h.GetLeaderboard)
 		r.With(authService.RequireAuth).Get("/leaderboard/rank", h.GetUserRank)
 
+		// Badges
+		r.With(authService.RequireAuth).Post("/badges", h.CreateBadge)
+		r.Get("/badges", h.GetAllBadges)
+		r.With(authService.RequireAuth).Post("/users/{userId}/badges/{badgeId}", h.AssignBadgeToUser)
+		r.With(authService.RequireAuth).Delete("/users/{userId}/badges/{badgeId}", h.RemoveBadgeFromUser)
+
 		// Health
 		r.Get("/health", h.HealthCheck)
 	})
