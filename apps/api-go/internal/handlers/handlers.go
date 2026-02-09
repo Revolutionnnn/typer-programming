@@ -48,27 +48,44 @@ func respondError(w http.ResponseWriter, status int, message string) {
 
 // ListLessons returns all lessons (summaries)
 func (h *Handler) ListLessons(w http.ResponseWriter, r *http.Request) {
+	lang := r.URL.Query().Get("lang")
 	allLessons := h.lessonStore.All()
 	summaries := make([]models.LessonSummary, len(allLessons))
 	for i, l := range allLessons {
-		summaries[i] = l.ToSummary()
+		s := l.ToSummary()
+		if lang == "en" && s.TitleEn != "" {
+			s.Title = s.TitleEn
+			s.Description = s.DescriptionEn
+		}
+		summaries[i] = s
 	}
 	respondJSON(w, http.StatusOK, summaries)
 }
 
 // GetLesson returns a single lesson by ID
 func (h *Handler) GetLesson(w http.ResponseWriter, r *http.Request) {
+	lang := r.URL.Query().Get("lang")
 	id := chi.URLParam(r, "id")
 	lesson, ok := h.lessonStore.Get(id)
 	if !ok {
 		respondError(w, http.StatusNotFound, "Lesson not found")
 		return
 	}
-	respondJSON(w, http.StatusOK, lesson)
+
+	// Create a shallow copy to return localized content
+	l := *lesson
+	if lang == "en" && l.TitleEn != "" {
+		l.Title = l.TitleEn
+		l.Description = l.DescriptionEn
+		l.Explanation = l.ExplanationEn
+	}
+
+	respondJSON(w, http.StatusOK, l)
 }
 
 // GetLessonsByLanguage returns all lessons for a specific language
 func (h *Handler) GetLessonsByLanguage(w http.ResponseWriter, r *http.Request) {
+	lang := r.URL.Query().Get("lang")
 	language := chi.URLParam(r, "language")
 	lessonList := h.lessonStore.GetByLanguage(language)
 	if lessonList == nil {
@@ -77,7 +94,12 @@ func (h *Handler) GetLessonsByLanguage(w http.ResponseWriter, r *http.Request) {
 
 	summaries := make([]models.LessonSummary, len(lessonList))
 	for i, l := range lessonList {
-		summaries[i] = l.ToSummary()
+		s := l.ToSummary()
+		if lang == "en" && s.TitleEn != "" {
+			s.Title = s.TitleEn
+			s.Description = s.DescriptionEn
+		}
+		summaries[i] = s
 	}
 	respondJSON(w, http.StatusOK, summaries)
 }
