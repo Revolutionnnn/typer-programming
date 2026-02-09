@@ -59,7 +59,16 @@ import { I18nService } from '../../services/i18n.service';
               <div class="podium-avatar">
                 {{ getUserInitials(entries()[1]) }}
               </div>
-              <div class="podium-username">{{ getUserDisplay(entries()[1]) }}</div>
+              <div class="podium-username">
+                @if (entries()[1].githubUsername) {
+                  <a [href]="'https://github.com/' + entries()[1].githubUsername" target="_blank" rel="noopener" class="github-link">
+                    <svg class="github-icon" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                  </a>
+                }
+                {{ getUserDisplay(entries()[1]) }}
+              </div>
               @if (entries()[1].badges?.length) {
                 <div class="podium-badges">
                   @for (badge of entries()[1].badges; track badge.badge.id) {
@@ -84,7 +93,16 @@ import { I18nService } from '../../services/i18n.service';
             <div class="podium-avatar champion">
               {{ getUserInitials(entries()[0]) }}
             </div>
-            <div class="podium-username">{{ getUserDisplay(entries()[0]) }}</div>
+            <div class="podium-username">
+              @if (entries()[0].githubUsername) {
+                <a [href]="'https://github.com/' + entries()[0].githubUsername" target="_blank" rel="noopener" class="github-link">
+                  <svg class="github-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                  </svg>
+                </a>
+              }
+              {{ getUserDisplay(entries()[0]) }}
+            </div>
             @if (entries()[0].badges?.length) {
               <div class="podium-badges">
                 @for (badge of entries()[0].badges; track badge.badge.id) {
@@ -108,7 +126,16 @@ import { I18nService } from '../../services/i18n.service';
               <div class="podium-avatar">
                 {{ getUserInitials(entries()[2]) }}
               </div>
-              <div class="podium-username">{{ getUserDisplay(entries()[2]) }}</div>
+              <div class="podium-username">
+                @if (entries()[2].githubUsername) {
+                  <a [href]="'https://github.com/' + entries()[2].githubUsername" target="_blank" rel="noopener" class="github-link">
+                    <svg class="github-icon" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                  </a>
+                }
+                {{ getUserDisplay(entries()[2]) }}
+              </div>
               @if (entries()[2].badges?.length) {
                 <div class="podium-badges">
                   @for (badge of entries()[2].badges; track badge.badge.id) {
@@ -125,39 +152,74 @@ import { I18nService } from '../../services/i18n.service';
         </div>
       }
 
-      <!-- Rest of rankings -->
-      @if (entries().length > 3) {
-        <div class="rankings-table">
-          <div class="table-header">
-            <div class="col-rank">Rank</div>
-            <div class="col-user">Player</div>
-            <div class="col-points">Points</div>
-          </div>
-          @for (entry of entries().slice(3); track entry.userId) {
-            <div class="ranking-row">
-              <div class="col-rank">
-                <div class="rank-badge">{{ entry.rank }}</div>
-              </div>
-              <div class="col-user">
-                <div class="user-avatar">
-                  {{ getUserInitials(entry) }}
-                </div>
-                <div class="user-info">
-                  <span class="user-name">{{ getUserDisplay(entry) }}</span>
-                  @if (entry.badges?.length) {
-                    <div class="user-badges">
-                      @for (badge of entry.badges; track badge.badge.id) {
-                        <span class="badge small" [style.background-color]="badge.badge.color">{{ badge.badge.name }}</span>
-                      }
+      <!-- Rankings Table - All Participants -->
+      @if (entries().length > 0) {
+        <div class="rankings-table-container">
+          <table class="rankings-table">
+            <thead>
+              <tr>
+                <th class="col-rank">#</th>
+                <th class="col-player">{{ i18n.t('leaderboard.player') || 'Player' }}</th>
+                <th class="col-badges">{{ i18n.t('leaderboard.badges') || 'Badges' }}</th>
+                <th class="col-points">{{ i18n.t('leaderboard.points') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (entry of entries(); track entry.userId; let i = $index) {
+                <tr class="ranking-row" [class.top-three]="i < 3" [class.first-place]="i === 0" [class.second-place]="i === 1" [class.third-place]="i === 2">
+                  <td class="col-rank">
+                    @if (i === 0) {
+                      <span class="rank-medal gold">🥇</span>
+                    } @else if (i === 1) {
+                      <span class="rank-medal silver">🥈</span>
+                    } @else if (i === 2) {
+                      <span class="rank-medal bronze">🥉</span>
+                    } @else {
+                      <span class="rank-number">{{ entry.rank }}</span>
+                    }
+                  </td>
+                  <td class="col-player">
+                    <div class="player-cell">
+                      <div class="player-avatar" [class.champion]="i === 0">
+                        {{ getUserInitials(entry) }}
+                      </div>
+                      <div class="player-info">
+                        <div class="player-name-wrapper">
+                          @if (entry.githubUsername) {
+                            <a [href]="'https://github.com/' + entry.githubUsername" target="_blank" rel="noopener" class="github-link" title="GitHub: @{{ entry.githubUsername }}">
+                              <svg class="github-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                              </svg>
+                            </a>
+                          }
+                          <span class="player-name" [class.highlight]="i < 3">{{ getUserDisplay(entry) }}</span>
+                        </div>
+                      </div>
                     </div>
-                  }
-                </div>
-              </div>
-              <div class="col-points">
-                <span class="points-value">{{ entry.points | number }}</span>
-              </div>
-            </div>
-          }
+                  </td>
+                  <td class="col-badges">
+                    @if (entry.badges?.length) {
+                      <div class="badges-cell">
+                        @for (badge of entry.badges?.slice(0, 3) ?? []; track badge.badge.id) {
+                          <span class="badge-tag" [style.background-color]="badge.badge.color" [title]="badge.badge.name">
+                            {{ badge.badge.name }}
+                          </span>
+                        }
+                        @if ((entry.badges?.length ?? 0) > 3) {
+                          <span class="badge-more">+{{ (entry.badges?.length ?? 0) - 3 }}</span>
+                        }
+                      </div>
+                    } @else {
+                      <span class="no-badges">-</span>
+                    }
+                  </td>
+                  <td class="col-points">
+                    <span class="points-display" [class.highlight]="i < 3">{{ entry.points | number }}</span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
         </div>
       }
 
@@ -457,76 +519,129 @@ import { I18nService } from '../../services/i18n.service';
       letter-spacing: 0.1em;
     }
 
-    /* Rankings Table */
-    .rankings-table {
-      max-width: 900px;
+    /* Rankings Table - New Design */
+    .rankings-table-container {
+      max-width: 1000px;
       margin: 0 auto;
       background: linear-gradient(135deg, rgba(30, 30, 50, 0.6) 0%, rgba(20, 20, 40, 0.8) 100%);
-      border-radius: 16px;
+      border-radius: 20px;
       overflow: hidden;
       border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     }
 
-    .table-header {
-      display: grid;
-      grid-template-columns: 80px 1fr 150px;
-      gap: 1rem;
-      padding: 1.25rem 1.5rem;
-      background: rgba(0, 0, 0, 0.3);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    .rankings-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .rankings-table thead {
+      background: rgba(0, 0, 0, 0.4);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .rankings-table th {
+      padding: 1.25rem 1rem;
       font-weight: 700;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       text-transform: uppercase;
       letter-spacing: 0.1em;
       color: rgba(255, 255, 255, 0.6);
+      text-align: left;
     }
 
-    .ranking-row {
-      display: grid;
-      grid-template-columns: 80px 1fr 150px;
-      gap: 1rem;
-      padding: 1.25rem 1.5rem;
+    .rankings-table th.col-rank {
+      width: 80px;
+      text-align: center;
+    }
+
+    .rankings-table th.col-player {
+      width: auto;
+    }
+
+    .rankings-table th.col-badges {
+      width: 200px;
+    }
+
+    .rankings-table th.col-points {
+      width: 120px;
+      text-align: right;
+    }
+
+    .rankings-table tbody tr {
       border-bottom: 1px solid rgba(255, 255, 255, 0.05);
       transition: all 0.3s ease;
-      cursor: pointer;
     }
 
-    .ranking-row:hover {
+    .rankings-table tbody tr:hover {
       background: rgba(102, 126, 234, 0.1);
-      transform: translateX(4px);
     }
 
-    .ranking-row:last-child {
+    .rankings-table tbody tr:last-child {
       border-bottom: none;
     }
 
-    .col-rank {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .rankings-table tbody tr.top-three {
+      background: rgba(255, 215, 0, 0.05);
     }
 
-    .rank-badge {
-      width: 40px;
-      height: 40px;
+    .rankings-table tbody tr.first-place {
+      background: linear-gradient(90deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 215, 0, 0.05) 100%);
+    }
+
+    .rankings-table tbody tr.second-place {
+      background: linear-gradient(90deg, rgba(192, 192, 192, 0.15) 0%, rgba(192, 192, 192, 0.05) 100%);
+    }
+
+    .rankings-table tbody tr.third-place {
+      background: linear-gradient(90deg, rgba(205, 127, 50, 0.15) 0%, rgba(205, 127, 50, 0.05) 100%);
+    }
+
+    .rankings-table td {
+      padding: 1rem;
+      vertical-align: middle;
+    }
+
+    .col-rank {
+      text-align: center;
+    }
+
+    .rank-medal {
+      font-size: 1.8rem;
+      display: inline-block;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    }
+
+    .rank-medal.gold {
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .rank-number {
+      width: 36px;
+      height: 36px;
       border-radius: 10px;
       background: rgba(255, 255, 255, 0.05);
       border: 2px solid rgba(255, 255, 255, 0.1);
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
       font-weight: 700;
-      font-size: 1.1rem;
-      color: rgba(255, 255, 255, 0.8);
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.7);
     }
 
-    .col-user {
+    .player-cell {
       display: flex;
       align-items: center;
       gap: 1rem;
     }
 
-    .user-avatar {
+    .player-avatar {
       width: 45px;
       height: 45px;
       border-radius: 12px;
@@ -540,38 +655,100 @@ import { I18nService } from '../../services/i18n.service';
       flex-shrink: 0;
     }
 
-    .user-name {
-      font-weight: 600;
-      font-size: 1rem;
-      color: rgba(255, 255, 255, 0.9);
+    .player-avatar.champion {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.3);
     }
 
-    .user-info {
+    .player-info {
       display: flex;
       flex-direction: column;
       gap: 0.25rem;
     }
 
-    .user-badges {
+    .player-name-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .player-name {
+      font-weight: 600;
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    .player-name.highlight {
+      font-size: 1.1rem;
+      color: white;
+    }
+
+    .badges-cell {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.25rem;
+      gap: 0.4rem;
+    }
+
+    .badge-tag {
+      padding: 0.3rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+      white-space: nowrap;
+    }
+
+    .badge-more {
+      padding: 0.3rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.6);
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .no-badges {
+      color: rgba(255, 255, 255, 0.3);
+      font-size: 1rem;
     }
 
     .col-points {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
+      text-align: right;
     }
 
-    .points-value {
-      font-size: 1.3rem;
+    .points-display {
+      font-size: 1.2rem;
       font-weight: 800;
       font-family: 'Courier New', monospace;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+    }
+
+    .points-display.highlight {
+      font-size: 1.4rem;
+    }
+
+    /* GitHub Icon */
+    .github-link {
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .github-icon {
+      width: 18px;
+      height: 18px;
+      fill: rgba(255, 255, 255, 0.6);
+      transition: all 0.3s ease;
+    }
+
+    .github-link:hover .github-icon {
+      fill: #fff;
+      transform: scale(1.1);
     }
 
     /* Empty State */
@@ -624,11 +801,32 @@ import { I18nService } from '../../services/i18n.service';
         padding-top: 2rem;
       }
 
-      .ranking-row,
-      .table-header {
-        grid-template-columns: 60px 1fr 120px;
-        gap: 0.75rem;
-        padding: 1rem;
+      .rankings-table th,
+      .rankings-table td {
+        padding: 0.75rem 0.5rem;
+      }
+
+      .rankings-table th.col-badges,
+      .rankings-table td.col-badges {
+        display: none;
+      }
+
+      .player-avatar {
+        width: 38px;
+        height: 38px;
+        font-size: 0.8rem;
+      }
+
+      .player-name {
+        font-size: 0.9rem;
+      }
+
+      .points-display {
+        font-size: 1rem;
+      }
+
+      .rank-medal {
+        font-size: 1.4rem;
       }
 
       .trophy-icon {

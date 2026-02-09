@@ -44,6 +44,7 @@ func (db *DB) createTables() error {
 			email TEXT UNIQUE,
 			password_hash TEXT,
 			display_name TEXT NOT NULL,
+			github_username TEXT UNIQUE,
 			is_guest BOOLEAN DEFAULT FALSE,
 			current_streak INTEGER DEFAULT 0,
 			last_streak_at DATETIME,
@@ -138,11 +139,11 @@ func (db *DB) SavePointTransaction(pt models.PointTransaction) error {
 // GetLeaderboard returns the leaderboard for a specific period
 func (db *DB) GetLeaderboard(startDate, endDate time.Time, limit int) ([]models.LeaderboardEntry, error) {
 	rows, err := db.Query(
-		`SELECT pt.user_id, u.username, SUM(pt.points) as total_points
+		`SELECT pt.user_id, u.username, u.github_username, SUM(pt.points) as total_points
 		FROM point_transactions pt
 		INNER JOIN users u ON pt.user_id = u.id
 		WHERE pt.created_at BETWEEN ? AND ?
-		GROUP BY pt.user_id, u.username
+		GROUP BY pt.user_id, u.username, u.github_username
 		ORDER BY total_points DESC
 		LIMIT ?`,
 		startDate, endDate, limit,
@@ -156,8 +157,12 @@ func (db *DB) GetLeaderboard(startDate, endDate time.Time, limit int) ([]models.
 	rank := 1
 	for rows.Next() {
 		var entry models.LeaderboardEntry
-		if err := rows.Scan(&entry.UserID, &entry.Username, &entry.Points); err != nil {
+		var githubUsername sql.NullString
+		if err := rows.Scan(&entry.UserID, &entry.Username, &githubUsername, &entry.Points); err != nil {
 			return nil, err
+		}
+		if githubUsername.Valid {
+			entry.GitHubUsername = &githubUsername.String
 		}
 		entry.Rank = rank
 
@@ -255,27 +260,28 @@ func (db *DB) CreateGuestUser() (*models.User, error) {
 }
 
 // CreateRegisteredUser creates a new registered user
-func (db *DB) CreateRegisteredUser(username, email, passwordHash, displayName string) (*models.User, error) {
+func (db *DB) CreateRegisteredUser(username, email, passwordHash, displayName, githubUsername string) (*models.User, error) {
 	id := uuid.New().String()
 	now := time.Now()
 
 	_, err := db.Exec(
-		`INSERT INTO users (id, username, email, password_hash, display_name, is_guest, current_streak, created_at, updated_at)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		id, username, email, passwordHash, displayName, false, 0, now, now,
+		`INSERT INTO users (id, username, email, password_hash, display_name, github_username, is_guest, current_streak, created_at, updated_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		id, username, email, passwordHash, displayName, githubUsername, false, 0, now, now,
 	)
 	if err != nil {
 		return nil, err
 	}
 
 	user := &models.User{
-		ID:          id,
-		Username:    username,
-		Email:       &email,
-		DisplayName: displayName,
-		IsGuest:     false,
-		CreatedAt:   now,
-		UpdatedAt:   now,
+		ID:             id,
+		Username:       username,
+		Email:          &email,
+		DisplayName:    displayName,
+		GitHubUsername: &githubUsername,
+		IsGuest:        false,
+		CreatedAt:      now,
+		UpdatedAt:      now,
 	}
 
 	// Assign automatic badges
@@ -380,26 +386,27 @@ func (db *DB) GetPasswordHash(username string) (string, error) {
 }
 
 // ConvertGuestToRegistered converts a guest user to a registered user
-func (db *DB) ConvertGuestToRegistered(guestID, username, email, passwordHash, displayName string) (*models.User, error) {
+func (db *DB) ConvertGuestToRegistered(guestID, username, email, passwordHash, displayName, githubUsername string) (*models.User, error) {
 	now := time.Now()
 
 	_, err := db.Exec(
 		`UPDATE users
-		SET username = ?, email = ?, password_hash = ?, display_name = ?, is_guest = ?, updated_at = ?
+		SET username = ?, email = ?, password_hash = ?, display_name = ?, github_username = ?, is_guest = ?, updated_at = ?
 		WHERE id = ? AND is_guest = ?`,
-		username, email, passwordHash, displayName, false, now, guestID, true,
+		username, email, passwordHash, displayName, githubUsername, false, now, guestID, true,
 	)
 	if err != nil {
 		return nil, err
 	}
 
 	return &models.User{
-		ID:          guestID,
-		Username:    username,
-		Email:       &email,
-		DisplayName: displayName,
-		IsGuest:     false,
-		UpdatedAt:   now,
+		ID:             guestID,
+		Username:       username,
+		Email:          &email,
+		DisplayName:    displayName,
+		GitHubUsername: &githubUsername,
+		IsGuest:        false,
+		UpdatedAt:      now,
 	}, nil
 }
 

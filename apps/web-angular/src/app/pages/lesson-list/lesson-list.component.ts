@@ -137,7 +137,7 @@ interface LevelInfo {
 
           @if (!loadingLessons && filteredLessons.length === 0) {
             <div class="empty-state card">
-              <p>{{ i18n.t('lessonList.noLessons') }}</p>
+              <p [innerHTML]="i18n.t('lessonList.noLessons')"></p>
             </div>
           }
         </div>

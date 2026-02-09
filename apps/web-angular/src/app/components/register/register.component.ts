@@ -17,6 +17,7 @@ export class RegisterComponent {
 
     username = '';
     email = '';
+    githubUsername = '';
     password = '';
     confirmPassword = '';
     error = '';
@@ -48,7 +49,7 @@ export class RegisterComponent {
         this.error = '';
 
         try {
-            await this.userService.register(this.username, this.email, this.password);
+            await this.userService.register(this.username, this.email, this.password, this.githubUsername);
             // Successfully registered - emit success event
             this.registerSuccess.emit();
         } catch (err: any) {

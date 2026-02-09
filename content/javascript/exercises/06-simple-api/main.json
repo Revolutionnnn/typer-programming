@@ -1,0 +1,33 @@
+{
+    "id": "js-simple-api-exercise-06",
+    "title": "API Simple",
+    "title_en": "Simple API",
+    "language": "javascript",
+    "concept": "functions",
+    "description": "Crea una clase que simule una API con usuarios y posts.",
+    "description_en": "Create a class that simulates an API with users and posts.",
+    "explanation": [
+        "Define una clase con datos de usuarios y posts.",
+        "Implementa métodos para obtener y añadir datos.",
+        "Simula operaciones CRUD básicas."
+    ],
+    "explanation_en": [
+        "Define a class with user and post data.",
+        "Implement methods to get and add data.",
+        "Simulate basic CRUD operations."
+    ],
+    "exclude": [
+        "class",
+        "function",
+        "return",
+        "console.log"
+    ],
+    "mode": "practice",
+    "difficulty": "intermediate",
+    "order": 6,
+    "tags": [
+        "exercises",
+        "functions",
+        "api"
+    ]
+}

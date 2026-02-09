@@ -1,0 +1,32 @@
+{
+    "id": "js-read-file-exercise-05",
+    "title": "Leer Archivo",
+    "title_en": "Read File",
+    "language": "javascript",
+    "concept": "file-io",
+    "description": "Lee un archivo JSON, parsea y procesa los datos.",
+    "description_en": "Read a JSON file, parse and process the data.",
+    "explanation": [
+        "Lee un archivo JSON de forma síncrona.",
+        "Parsea el contenido con JSON.parse.",
+        "Procesa los datos, por ejemplo sumando edades."
+    ],
+    "explanation_en": [
+        "Read a JSON file synchronously.",
+        "Parse the content with JSON.parse.",
+        "Process the data, for example summing ages."
+    ],
+    "exclude": [
+        "const",
+        "require",
+        "console.log"
+    ],
+    "mode": "practice",
+    "difficulty": "intermediate",
+    "order": 5,
+    "tags": [
+        "exercises",
+        "file-io",
+        "node"
+    ]
+}

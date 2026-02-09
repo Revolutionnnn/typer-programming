@@ -4,24 +4,26 @@ import "time"
 
 // User represents a user account (guest or registered)
 type User struct {
-	ID            string             `json:"id"`
-	Username      string             `json:"username"`
-	Email         *string            `json:"email,omitempty"`
-	DisplayName   string             `json:"displayName"`
-	IsGuest       bool               `json:"isGuest"`
-	CurrentStreak int                `json:"currentStreak"`
-	LastStreakAt  *time.Time         `json:"lastStreakAt"`
-	Badges        []BadgeWithDetails `json:"badges,omitempty"`
-	CreatedAt     time.Time          `json:"createdAt"`
-	UpdatedAt     time.Time          `json:"updatedAt"`
+	ID             string             `json:"id"`
+	Username       string             `json:"username"`
+	Email          *string            `json:"email,omitempty"`
+	DisplayName    string             `json:"displayName"`
+	GitHubUsername *string            `json:"githubUsername,omitempty"`
+	IsGuest        bool               `json:"isGuest"`
+	CurrentStreak  int                `json:"currentStreak"`
+	LastStreakAt   *time.Time         `json:"lastStreakAt"`
+	Badges         []BadgeWithDetails `json:"badges,omitempty"`
+	CreatedAt      time.Time          `json:"createdAt"`
+	UpdatedAt      time.Time          `json:"updatedAt"`
 }
 
 // RegisterRequest represents a registration request
 type RegisterRequest struct {
-	Username string  `json:"username"`
-	Email    string  `json:"email"`
-	Password string  `json:"password"`
-	GuestID  *string `json:"guestId,omitempty"` // Optional: for converting guest to registered
+	Username       string  `json:"username"`
+	Email          string  `json:"email"`
+	Password       string  `json:"password"`
+	GitHubUsername string  `json:"githubUsername,omitempty"` // Optional: GitHub username for leaderboard
+	GuestID        *string `json:"guestId,omitempty"`        // Optional: for converting guest to registered
 }
 
 // LoginRequest represents a login request

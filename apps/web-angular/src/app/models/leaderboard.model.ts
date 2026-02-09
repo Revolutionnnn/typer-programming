@@ -14,6 +14,7 @@ export interface BadgeWithDetails {
 export interface LeaderboardEntry {
   userId: string;
   username: string;
+  githubUsername?: string;
   points: number;
   rank: number;
   avatarUrl?: string;

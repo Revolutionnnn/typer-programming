@@ -14,12 +14,13 @@ type PointTransaction struct {
 
 // LeaderboardEntry represents a user's standing in a leaderboard
 type LeaderboardEntry struct {
-	UserID    string             `json:"userId"`
-	Username  string             `json:"username"` // Optional, if we have usernames
-	Points    int                `json:"points"`
-	Rank      int                `json:"rank"`
-	AvatarURL string             `json:"avatarUrl"`
-	Badges    []BadgeWithDetails `json:"badges,omitempty"`
+	UserID         string             `json:"userId"`
+	Username       string             `json:"username"` // Optional, if we have usernames
+	GitHubUsername *string            `json:"githubUsername,omitempty"` // Optional, if user linked GitHub
+	Points         int                `json:"points"`
+	Rank           int                `json:"rank"`
+	AvatarURL      string             `json:"avatarUrl"`
+	Badges         []BadgeWithDetails `json:"badges,omitempty"`
 }
 
 // Leaderboard represents a ranking list for a specific period

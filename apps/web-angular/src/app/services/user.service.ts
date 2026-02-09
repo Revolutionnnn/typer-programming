@@ -48,13 +48,15 @@ export class UserService {
   async register(
     username: string,
     email: string,
-    password: string
+    password: string,
+    githubUsername?: string
   ): Promise<User> {
     const currentUser = this.currentUserSubject.value;
     const request: RegisterRequest = {
       username,
       email,
       password,
+      githubUsername,
       guestId: currentUser?.isGuest ? currentUser.id : undefined,
     };
 

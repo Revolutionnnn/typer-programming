@@ -1,0 +1,31 @@
+{
+    "id": "py-conditionals-06",
+    "title": "Condicionales en Python",
+    "title_en": "Conditionals in Python",
+    "language": "python",
+    "concept": "conditionals",
+    "description": "Aprende a usar if, elif y else en Python.",
+    "description_en": "Learn to use if, elif, and else in Python.",
+    "explanation": [
+        "Los condicionales permiten ejecutar código basado en condiciones.",
+        "Usa 'if' para una condición, 'elif' para adicionales, 'else' para el resto.",
+        "La indentación es crucial en Python."
+    ],
+    "explanation_en": [
+        "Conditionals allow executing code based on conditions.",
+        "Use 'if' for a condition, 'elif' for additional ones, 'else' for the rest.",
+        "Indentation is crucial in Python."
+    ],
+    "exclude": [
+        "if",
+        "elif",
+        "else"
+    ],
+    "mode": "practice",
+    "difficulty": "beginner",
+    "order": 6,
+    "tags": [
+        "basics",
+        "conditionals"
+    ]
+}

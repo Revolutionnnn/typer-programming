@@ -1,0 +1,32 @@
+{
+    "id": "py-generators-02",
+    "title": "Generadores en Python",
+    "title_en": "Generators in Python",
+    "language": "python",
+    "concept": "generators",
+    "description": "Aprende a crear generadores para iteración eficiente.",
+    "description_en": "Learn to create generators for efficient iteration.",
+    "explanation": [
+        "Los generadores producen valores uno a uno, ahorrando memoria.",
+        "Usa 'yield' en lugar de 'return' en funciones.",
+        "Útil para grandes datasets."
+    ],
+    "explanation_en": [
+        "Generators produce values one by one, saving memory.",
+        "Use 'yield' instead of 'return' in functions.",
+        "Useful for large datasets."
+    ],
+    "exclude": [
+        "def",
+        "yield",
+        "for",
+        "in"
+    ],
+    "mode": "practice",
+    "difficulty": "advanced",
+    "order": 2,
+    "tags": [
+        "advanced",
+        "generators"
+    ]
+}

@@ -5,6 +5,7 @@ export interface User {
     username: string;
     email?: string;
     displayName: string;
+    githubUsername?: string;
     isGuest: boolean;
     currentStreak: number;
     lastStreakAt?: string;
@@ -17,6 +18,7 @@ export interface RegisterRequest {
     username: string;
     email: string;
     password: string;
+    githubUsername?: string;
     guestId?: string;
 }
 

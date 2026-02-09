@@ -24,6 +24,13 @@
         </div>
 
         <div class="form-group">
+            <label for="githubUsername">GitHub Username (optional)</label>
+            <input type="text" id="githubUsername" [(ngModel)]="githubUsername" name="githubUsername"
+                placeholder="tu-usuario-de-github" [disabled]="loading" />
+            <small class="help-text">Add your GitHub username to display your profile icon on the leaderboard</small>
+        </div>
+
+        <div class="form-group">
             <label for="password">Password *</label>
             <input type="password" id="password" [(ngModel)]="password" name="password"
                 placeholder="At least 6 characters" [disabled]="loading" required />

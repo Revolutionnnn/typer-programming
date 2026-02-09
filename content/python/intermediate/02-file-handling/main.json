@@ -1,0 +1,33 @@
+{
+    "id": "py-file-handling-02",
+    "title": "Manejo de Archivos en Python",
+    "title_en": "File Handling in Python",
+    "language": "python",
+    "concept": "file-io",
+    "description": "Aprende a leer y escribir archivos en Python.",
+    "description_en": "Learn to read and write files in Python.",
+    "explanation": [
+        "Usa 'open()' para abrir archivos, especifica modo: 'r', 'w', 'a'.",
+        "Recuerda cerrar archivos con 'close()' o usa 'with' para automático.",
+        "Métodos: read(), write(), readline()."
+    ],
+    "explanation_en": [
+        "Use 'open()' to open files, specify mode: 'r', 'w', 'a'.",
+        "Remember to close files with 'close()' or use 'with' for automatic.",
+        "Methods: read(), write(), readline()."
+    ],
+    "exclude": [
+        "open",
+        "with",
+        "read",
+        "write",
+        "close"
+    ],
+    "mode": "practice",
+    "difficulty": "intermediate",
+    "order": 2,
+    "tags": [
+        "intermediate",
+        "file-io"
+    ]
+}

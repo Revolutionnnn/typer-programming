@@ -396,14 +396,14 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 
 	// Check if converting from guest
 	if req.GuestID != nil && *req.GuestID != "" {
-		user, err = h.db.ConvertGuestToRegistered(*req.GuestID, req.Username, req.Email, passwordHash, displayName)
+		user, err = h.db.ConvertGuestToRegistered(*req.GuestID, req.Username, req.Email, passwordHash, displayName, req.GitHubUsername)
 		if err != nil {
 			respondError(w, http.StatusInternalServerError, "Failed to convert guest user")
 			return
 		}
 	} else {
 		// Create new registered user
-		user, err = h.db.CreateRegisteredUser(req.Username, req.Email, passwordHash, displayName)
+		user, err = h.db.CreateRegisteredUser(req.Username, req.Email, passwordHash, displayName, req.GitHubUsername)
 		if err != nil {
 			respondError(w, http.StatusInternalServerError, "Failed to create user")
 			return
