@@ -102,6 +102,7 @@ const translations: Record<Locale, TranslationDict> = {
     'editor.streak.75': '¡Leyenda!',
     'editor.streak.100': '¡GOD MODE!',
     'editor.streak.default': 'En racha',
+    'streak.days': 'días',
 
     // ── Results ──
     'results.title': '📈 Tu Progreso',
@@ -227,6 +228,7 @@ const translations: Record<Locale, TranslationDict> = {
     'editor.streak.75': 'Legend!',
     'editor.streak.100': 'GOD MODE!',
     'editor.streak.default': 'On fire',
+    'streak.days': 'days',
 
     // ── Results ──
     'results.title': '📈 Your Progress',

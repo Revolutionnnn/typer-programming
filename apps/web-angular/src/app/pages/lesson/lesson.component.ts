@@ -328,6 +328,8 @@ export class LessonComponent implements OnInit {
         this.progressService.saveMetrics(metricsReq).subscribe({
           next: (res: any) => {
             this.pointsEarned = res.pointsEarned || 0;
+            // Refresh user data to update streak
+            this.userService.initializeUser();
           },
           error: (err) => console.error('Failed to save metrics:', err),
         });

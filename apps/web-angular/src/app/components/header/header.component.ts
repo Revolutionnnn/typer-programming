@@ -49,12 +49,19 @@ import { RegisterComponent } from '../register/register.component';
         <div class="header__auth">
           @if (currentUser$ | async; as user) {
             <div class="user-info">
-              <span class="username">
-                {{ user.displayName }}
-                @if (user.isGuest) {
-                  <span class="guest-badge">Guest</span>
-                }
-              </span>
+              <div class="user-details">
+                <span class="username">
+                  {{ user.displayName }}
+                  @if (user.isGuest) {
+                    <span class="guest-badge">Guest</span>
+                  }
+                </span>
+                <div class="streak-info">
+                  <span class="streak-icon">🔥</span>
+                  <span class="streak-count">{{ user.currentStreak }}</span>
+                  <span class="streak-label">{{ i18n.t('streak.days') }}</span>
+                </div>
+              </div>
               @if (user.isGuest) {
                 <button class="btn-auth btn-login" (click)="showLoginModal()">
                   Login
@@ -147,20 +154,22 @@ import { RegisterComponent } from '../register/register.component';
         }
       }
 
-      .header__auth {
+      .user-info {
         display: flex;
         align-items: center;
         gap: 1rem;
       }
 
-      .user-info {
+      .user-details {
         display: flex;
-        align-items: center;
-        gap: 0.75rem;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.25rem;
       }
 
       .username {
         font-size: 0.875rem;
+        font-weight: 500;
         color: var(--text-primary);
         display: flex;
         align-items: center;
@@ -168,12 +177,33 @@ import { RegisterComponent } from '../register/register.component';
       }
 
       .guest-badge {
-        background: #ffa726;
+        background: var(--accent-color);
         color: white;
+        font-size: 0.625rem;
+        padding: 0.125rem 0.375rem;
+        border-radius: 0.25rem;
+        font-weight: 600;
+      }
+
+      .streak-info {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
         font-size: 0.75rem;
-        padding: 0.125rem 0.5rem;
-        border-radius: 12px;
-        font-weight: 500;
+        color: var(--text-secondary);
+      }
+
+      .streak-icon {
+        font-size: 0.875rem;
+      }
+
+      .streak-count {
+        font-weight: 600;
+        color: var(--accent-color);
+      }
+
+      .streak-label {
+        font-size: 0.625rem;
       }
 
       .btn-auth {
