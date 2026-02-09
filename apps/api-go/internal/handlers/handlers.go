@@ -199,15 +199,16 @@ func (h *Handler) SaveMetrics(w http.ResponseWriter, r *http.Request) {
 			Reason:    "lesson_complete",
 			CreatedAt: metrics.CreatedAt,
 		}
-
-		// We log the error but don't fail the request if point saving fails
-		// In a production system, we might want to use a transaction or a background job
 		_ = h.db.SavePointTransaction(pt)
 	}
 
+	// Update streak
+	streak, _ := h.db.UpdateUserStreak(metrics.UserID)
+
 	respondJSON(w, http.StatusOK, map[string]interface{}{
-		"metrics":      metrics,
-		"pointsEarned": points,
+		"metrics":       metrics,
+		"pointsEarned":  points,
+		"currentStreak": streak,
 	})
 }
 

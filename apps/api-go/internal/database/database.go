@@ -41,6 +41,8 @@ func (db *DB) createTables() error {
 			password_hash TEXT,
 			display_name TEXT NOT NULL,
 			is_guest BOOLEAN DEFAULT FALSE,
+			current_streak INTEGER DEFAULT 0,
+			last_streak_at DATETIME,
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 		)`,
@@ -77,7 +79,7 @@ func (db *DB) createTables() error {
 	}
 
 	// Append new tables
-	
+
 	queries = append(queries, `CREATE TABLE IF NOT EXISTS point_transactions (
 		id TEXT PRIMARY KEY,
 		user_id TEXT NOT NULL,
@@ -86,7 +88,7 @@ func (db *DB) createTables() error {
 		reason TEXT NOT NULL,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	)`)
-	
+
 	queries = append(queries, `CREATE INDEX IF NOT EXISTS idx_points_user ON point_transactions(user_id)`)
 	queries = append(queries, `CREATE INDEX IF NOT EXISTS idx_points_created_at ON point_transactions(created_at)`)
 
@@ -149,15 +151,15 @@ func (db *DB) GetUserPoints(userID string, startDate, endDate time.Time) (int, e
 		WHERE user_id = ? AND created_at BETWEEN ? AND ?`,
 		userID, startDate, endDate,
 	).Scan(&totalPoints)
-	
+
 	if err != nil {
 		return 0, err
 	}
-	
+
 	if !totalPoints.Valid {
 		return 0, nil
 	}
-	
+
 	return int(totalPoints.Int64), nil
 }
 
@@ -173,9 +175,9 @@ func (db *DB) CreateGuestUser() (*models.User, error) {
 	now := time.Now()
 
 	_, err := db.Exec(
-		`INSERT INTO users (id, username, display_name, is_guest, created_at, updated_at)
-		VALUES (?, ?, ?, ?, ?, ?)`,
-		id, username, displayName, true, now, now,
+		`INSERT INTO users (id, username, display_name, is_guest, current_streak, created_at, updated_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?)`,
+		id, username, displayName, true, 0, now, now,
 	)
 	if err != nil {
 		return nil, err
@@ -197,9 +199,9 @@ func (db *DB) CreateRegisteredUser(username, email, passwordHash, displayName st
 	now := time.Now()
 
 	_, err := db.Exec(
-		`INSERT INTO users (id, username, email, password_hash, display_name, is_guest, created_at, updated_at)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-		id, username, email, passwordHash, displayName, false, now, now,
+		`INSERT INTO users (id, username, email, password_hash, display_name, is_guest, current_streak, created_at, updated_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		id, username, email, passwordHash, displayName, false, 0, now, now,
 	)
 	if err != nil {
 		return nil, err
@@ -222,10 +224,10 @@ func (db *DB) GetUserByID(id string) (*models.User, error) {
 	var email sql.NullString
 
 	err := db.QueryRow(
-		`SELECT id, username, email, display_name, is_guest, created_at, updated_at
+		`SELECT id, username, email, display_name, is_guest, current_streak, last_streak_at, created_at, updated_at
 		FROM users WHERE id = ?`,
 		id,
-	).Scan(&user.ID, &user.Username, &email, &user.DisplayName, &user.IsGuest, &user.CreatedAt, &user.UpdatedAt)
+	).Scan(&user.ID, &user.Username, &email, &user.DisplayName, &user.IsGuest, &user.CurrentStreak, &user.LastStreakAt, &user.CreatedAt, &user.UpdatedAt)
 
 	if err != nil {
 		return nil, err
@@ -244,10 +246,10 @@ func (db *DB) GetUserByUsername(username string) (*models.User, error) {
 	var email sql.NullString
 
 	err := db.QueryRow(
-		`SELECT id, username, email, display_name, is_guest, created_at, updated_at
+		`SELECT id, username, email, display_name, is_guest, current_streak, last_streak_at, created_at, updated_at
 		FROM users WHERE username = ?`,
 		username,
-	).Scan(&user.ID, &user.Username, &email, &user.DisplayName, &user.IsGuest, &user.CreatedAt, &user.UpdatedAt)
+	).Scan(&user.ID, &user.Username, &email, &user.DisplayName, &user.IsGuest, &user.CurrentStreak, &user.LastStreakAt, &user.CreatedAt, &user.UpdatedAt)
 
 	if err != nil {
 		return nil, err
@@ -266,10 +268,10 @@ func (db *DB) GetUserByEmail(email string) (*models.User, error) {
 	var emailVal sql.NullString
 
 	err := db.QueryRow(
-		`SELECT id, username, email, display_name, is_guest, created_at, updated_at
+		`SELECT id, username, email, display_name, is_guest, current_streak, last_streak_at, created_at, updated_at
 		FROM users WHERE email = ?`,
 		email,
-	).Scan(&user.ID, &user.Username, &emailVal, &user.DisplayName, &user.IsGuest, &user.CreatedAt, &user.UpdatedAt)
+	).Scan(&user.ID, &user.Username, &emailVal, &user.DisplayName, &user.IsGuest, &user.CurrentStreak, &user.LastStreakAt, &user.CreatedAt, &user.UpdatedAt)
 
 	if err != nil {
 		return nil, err
@@ -490,4 +492,50 @@ func (db *DB) GetUserMetrics(userID string) (*models.UserMetricsSummary, error) 
 	}
 
 	return &summary, nil
+}
+
+// UpdateUserStreak updates the user's daily streak
+func (db *DB) UpdateUserStreak(userID string) (int, error) {
+	var currentStreak int
+	var lastStreakAt *time.Time
+
+	err := db.QueryRow(
+		"SELECT current_streak, last_streak_at FROM users WHERE id = ?",
+		userID,
+	).Scan(&currentStreak, &lastStreakAt)
+
+	if err != nil {
+		return 0, err
+	}
+
+	now := time.Now().UTC()
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+
+	if lastStreakAt == nil {
+		// First time exercise
+		currentStreak = 1
+	} else {
+		lastDate := time.Date(lastStreakAt.Year(), lastStreakAt.Month(), lastStreakAt.Day(), 0, 0, 0, 0, time.UTC)
+
+		if lastDate.Equal(today) {
+			// Already updated today
+			return currentStreak, nil
+		}
+
+		yesterday := today.AddDate(0, 0, -1)
+		if lastDate.Equal(yesterday) {
+			// Streak continues
+			currentStreak++
+		} else {
+			// Streak broken
+			currentStreak = 1
+		}
+	}
+
+	_, err = db.Exec(
+		"UPDATE users SET current_streak = ?, last_streak_at = ?, updated_at = ? WHERE id = ?",
+		currentStreak, now, now, userID,
+	)
+
+	return currentStreak, err
 }

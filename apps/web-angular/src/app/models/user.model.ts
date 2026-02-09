@@ -4,6 +4,8 @@ export interface User {
     email?: string;
     displayName: string;
     isGuest: boolean;
+    currentStreak: number;
+    lastStreakAt?: string;
     createdAt: string;
     updatedAt: string;
 }
