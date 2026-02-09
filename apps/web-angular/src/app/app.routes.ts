@@ -28,6 +28,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'leaderboard',
+    loadComponent: () =>
+      import('./pages/leaderboard/leaderboard.component').then(
+        (m) => m.LeaderboardPageComponent
+      ),
+  },
+  {
     path: '**',
     redirectTo: '',
   },

@@ -49,8 +49,13 @@ import { Progress } from '../../models/progress.model';
         <!-- Progress List -->
         @if (progressList.length > 0) {
           <h2 class="section-title">{{ i18n.t('results.completedLessons') }}</h2>
+			<div class="mb-6 text-center">
+				<a routerLink="/leaderboard" class="text-primary-400 hover:text-primary-300 underline font-medium">
+					🏆 Check your rank on the Leaderboard
+				</a>
+			</div>
           <div class="progress-list">
-            @for (p of progressList; track p.id) {
+             @for (p of progressList; track p.id) {
               <div class="progress-item card">
                 <div class="progress-item__info">
                   <span class="progress-item__lesson">{{ p.lessonId }}</span>
@@ -59,9 +64,9 @@ import { Progress } from '../../models/progress.model';
                 <div class="progress-item__stats">
                   <span class="stat-pill">{{ p.bestWpm | number:'1.0-1' }} WPM</span>
                   <span class="stat-pill">{{ p.bestAccuracy | number:'1.0-1' }}%</span>
-                  @if (p.completed) {
+                   @if (p.completed) {
                     <span class="stat-pill stat-pill--done">✓</span>
-                  }
+                   }
                 </div>
               </div>
             }

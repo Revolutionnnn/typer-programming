@@ -28,6 +28,13 @@ import { I18nService } from '../../services/i18n.service';
           >
             {{ i18n.t('nav.progress') }}
           </a>
+          <a
+            routerLink="/leaderboard"
+            routerLinkActive="active"
+            class="header__link"
+          >
+            {{ i18n.t('nav.leaderboard') }}
+          </a>
         </nav>
       </div>
     </header>

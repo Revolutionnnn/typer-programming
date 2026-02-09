@@ -3,10 +3,14 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 	"github.com/typing-code-learn/api-go/internal/database"
+	"github.com/typing-code-learn/api-go/internal/gamification"
 	"github.com/typing-code-learn/api-go/internal/lessons"
 	"github.com/typing-code-learn/api-go/internal/models"
 )
@@ -157,7 +161,71 @@ func (h *Handler) SaveMetrics(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondJSON(w, http.StatusOK, metrics)
+	// Calculate and save points
+	pointStrategy := gamification.NewDefaultStrategy()
+	points := pointStrategy.Calculate(*metrics)
+	
+	if points > 0 {
+		pt := models.PointTransaction{
+			ID:        uuid.New().String(),
+			UserID:    metrics.UserID,
+			SourceID:  metrics.LessonID,
+			Points:    points,
+			Reason:    "lesson_complete",
+			CreatedAt: metrics.CreatedAt,
+		}
+		
+		// We log the error but don't fail the request if point saving fails
+		// In a production system, we might want to use a transaction or a background job
+		_ = h.db.SavePointTransaction(pt)
+	}
+
+	respondJSON(w, http.StatusOK, map[string]interface{}{
+		"metrics": metrics,
+		"pointsEarned": points,
+	})
+}
+
+// GetLeaderboard returns the leaderboard
+func (h *Handler) GetLeaderboard(w http.ResponseWriter, r *http.Request) {
+	period := r.URL.Query().Get("period")
+	limitStr := r.URL.Query().Get("limit")
+	limit := 10
+	if limitStr != "" {
+		// simple parse, default to 10 on error
+		fmt.Sscanf(limitStr, "%d", &limit)
+	}
+	
+	now := time.Now()
+	var startDate, endDate time.Time
+	endDate = now
+	
+	switch period {
+	case "weekly":
+		// Start of week (Monday)
+		offset := int(now.Weekday())
+		if offset == 0 {
+			offset = 7
+		}
+		startDate = now.AddDate(0, 0, -offset+1)
+		startDate = time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 0, 0, 0, 0, startDate.Location())
+	case "monthly":
+		startDate = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+	default: // all_time
+		startDate = time.Time{} // Zero time
+	}
+	
+	leaderboard, err := h.db.GetLeaderboard(startDate, endDate, limit)
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "Failed to get leaderboard")
+		return
+	}
+	
+	if leaderboard == nil {
+		leaderboard = []models.LeaderboardEntry{}
+	}
+	
+	respondJSON(w, http.StatusOK, leaderboard)
 }
 
 // GetUserMetrics returns aggregated metrics for a user

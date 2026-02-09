@@ -114,6 +114,18 @@ const translations: Record<Locale, TranslationDict> = {
     'results.attempts': 'intentos',
     'results.empty': 'Aún no has completado ninguna lección.',
     'results.startNow': '🚀 Empezar ahora',
+
+    // ── Leaderboard ──
+    'nav.leaderboard': '🏆 Ranking',
+    'leaderboard.title': '🏆 Campeones del Teclado',
+    'leaderboard.weekly': 'Semanal',
+    'leaderboard.monthly': 'Mensual',
+    'leaderboard.allTime': 'Histórico',
+    'leaderboard.rank': 'Rango',
+    'leaderboard.user': 'Usuario',
+    'leaderboard.points': 'Puntos',
+    'leaderboard.empty': 'No hay registros para este periodo. ¡Sé el primero!',
+    'leaderboard.cta': '¡Empieza a competir!',
   },
 
   en: {
@@ -225,6 +237,18 @@ const translations: Record<Locale, TranslationDict> = {
     'results.attempts': 'attempts',
     'results.empty': 'You haven\'t completed any lessons yet.',
     'results.startNow': '🚀 Start now',
+
+    // ── Leaderboard ──
+    'nav.leaderboard': '🏆 Leaderboard',
+    'leaderboard.title': '🏆 Keyboard Champions',
+    'leaderboard.weekly': 'Weekly',
+    'leaderboard.monthly': 'Monthly',
+    'leaderboard.allTime': 'All Time',
+    'leaderboard.rank': 'Rank',
+    'leaderboard.user': 'User',
+    'leaderboard.points': 'Points',
+    'leaderboard.empty': 'No records for this period. Be the first!',
+    'leaderboard.cta': 'Start Competing!',
   },
 };
 

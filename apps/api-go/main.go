@@ -63,9 +63,10 @@ func main() {
 		r.Get("/progress/{userId}", h.GetUserProgress)
 		r.Get("/progress/{userId}/{lessonId}", h.GetLessonProgress)
 
-		// Metrics
+// Metrics
 		r.Post("/metrics", h.SaveMetrics)
 		r.Get("/metrics/{userId}", h.GetUserMetrics)
+		r.Get("/leaderboard", h.GetLeaderboard)
 
 		// Health
 		r.Get("/health", h.HealthCheck)

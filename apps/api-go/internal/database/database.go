@@ -64,6 +64,20 @@ func (db *DB) createTables() error {
 		`CREATE INDEX IF NOT EXISTS idx_metrics_user ON typing_metrics(user_id)`,
 	}
 
+	// Append new tables
+	
+	queries = append(queries, `CREATE TABLE IF NOT EXISTS point_transactions (
+		id TEXT PRIMARY KEY,
+		user_id TEXT NOT NULL,
+		source_id TEXT,
+		points INTEGER NOT NULL,
+		reason TEXT NOT NULL,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	)`)
+	
+	queries = append(queries, `CREATE INDEX IF NOT EXISTS idx_points_user ON point_transactions(user_id)`)
+	queries = append(queries, `CREATE INDEX IF NOT EXISTS idx_points_created_at ON point_transactions(created_at)`)
+
 	for _, q := range queries {
 		if _, err := db.Exec(q); err != nil {
 			return fmt.Errorf("failed to execute query: %w", err)
@@ -71,6 +85,67 @@ func (db *DB) createTables() error {
 	}
 
 	return nil
+}
+
+// SavePointTransaction saves a point earning event
+func (db *DB) SavePointTransaction(pt models.PointTransaction) error {
+	_, err := db.Exec(
+		`INSERT INTO point_transactions (id, user_id, source_id, points, reason, created_at)
+		VALUES (?, ?, ?, ?, ?, ?)`,
+		pt.ID, pt.UserID, pt.SourceID, pt.Points, pt.Reason, pt.CreatedAt,
+	)
+	return err
+}
+
+// GetLeaderboard returns the leaderboard for a specific period
+func (db *DB) GetLeaderboard(startDate, endDate time.Time, limit int) ([]models.LeaderboardEntry, error) {
+	rows, err := db.Query(
+		`SELECT user_id, SUM(points) as total_points
+		FROM point_transactions
+		WHERE created_at BETWEEN ? AND ?
+		GROUP BY user_id
+		ORDER BY total_points DESC
+		LIMIT ?`,
+		startDate, endDate, limit,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var entries []models.LeaderboardEntry
+	rank := 1
+	for rows.Next() {
+		var entry models.LeaderboardEntry
+		if err := rows.Scan(&entry.UserID, &entry.Points); err != nil {
+			return nil, err
+		}
+		entry.Rank = rank
+		rank++
+		entries = append(entries, entry)
+	}
+
+	return entries, nil
+}
+
+// GetUserPoints returns total points for a user in a period
+func (db *DB) GetUserPoints(userID string, startDate, endDate time.Time) (int, error) {
+	var totalPoints sql.NullInt64
+	err := db.QueryRow(
+		`SELECT SUM(points) FROM point_transactions
+		WHERE user_id = ? AND created_at BETWEEN ? AND ?`,
+		userID, startDate, endDate,
+	).Scan(&totalPoints)
+	
+	if err != nil {
+		return 0, err
+	}
+	
+	if !totalPoints.Valid {
+		return 0, nil
+	}
+	
+	return int(totalPoints.Int64), nil
 }
 
 // SaveProgress saves or updates a user's progress on a lesson
