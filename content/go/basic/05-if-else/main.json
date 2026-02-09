@@ -1,0 +1,36 @@
+{
+    "id": "go-if-else-01",
+    "title": "Condicionales if/else",
+    "title_en": "If/Else Conditionals",
+    "language": "go",
+    "concept": "conditionals",
+    "description": "Aprende a usar if y else para tomar decisiones.",
+    "description_en": "Learn to use if and else to make decisions.",
+    "explanation": [
+        "La palabra reservada 'if' evalúa una condición: si es verdadera, ejecuta el bloque.",
+        "La palabra reservada 'else' define qué hacer cuando la condición del 'if' es falsa.",
+        "En Go, las condiciones NO llevan paréntesis (a diferencia de C o Java).",
+        "Las llaves { } son obligatorias incluso para una sola línea de código."
+    ],
+    "explanation_en": [
+        "The reserved word 'if' evaluates a condition: if it is true, it executes the block.",
+        "The reserved word 'else' defines what to do when the 'if' condition is false.",
+        "In Go, conditions DO NOT have parentheses (unlike C or Java).",
+        "Braces { } are mandatory even for a single line of code."
+    ],
+    "exclude": [
+        "package",
+        "import",
+        "func",
+        "if",
+        "else"
+    ],
+    "mode": "strict",
+    "difficulty": "beginner",
+    "order": 5,
+    "tags": [
+        "basics",
+        "conditionals",
+        "if-else"
+    ]
+}

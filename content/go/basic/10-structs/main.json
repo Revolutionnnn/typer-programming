@@ -1,0 +1,35 @@
+{
+    "id": "go-structs-01",
+    "title": "Structs en Go",
+    "title_en": "Structs in Go",
+    "language": "go",
+    "concept": "structs",
+    "description": "Crea tipos de datos personalizados con structs.",
+    "description_en": "Create custom data types with structs.",
+    "explanation": [
+        "Para definir un tipo personalizado se usa 'type' seguido del nombre y 'struct'.",
+        "Un 'struct' agrupa campos relacionados (como nombre, edad, etc.).",
+        "Cada campo tiene un nombre y un tipo: Nombre string, Edad int.",
+        "Se instancia con NombreStruct{campo: valor}. Es similar a una clase pero sin herencia."
+    ],
+    "explanation_en": [
+        "To define a custom type, use 'type' followed by the name and 'struct'.",
+        "A 'struct' groups related fields (like name, age, etc.).",
+        "Each field has a name and a type: Name string, Age int.",
+        "It is instantiated with StructName{field: value}. It is similar to a class but without inheritance."
+    ],
+    "exclude": [
+        "package",
+        "import",
+        "func",
+        "type",
+        "struct"
+    ],
+    "mode": "strict",
+    "difficulty": "beginner",
+    "order": 10,
+    "tags": [
+        "basics",
+        "structs"
+    ]
+}

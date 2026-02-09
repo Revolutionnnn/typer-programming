@@ -2,21 +2,22 @@ package models
 
 // Lesson represents a typing lesson
 type Lesson struct {
-	ID          string   `json:"id"`
-	Title       string   `json:"title"`
-	TitleEn     string   `json:"title_en,omitempty"`
-	Language    string   `json:"language"`
-	Concept     string   `json:"concept"`
-	Description string   `json:"description"`
-	DescriptionEn string `json:"description_en,omitempty"`
-	Explanation []string `json:"explanation"`
+	ID            string   `json:"id"`
+	Title         string   `json:"title"`
+	TitleEn       string   `json:"title_en,omitempty"`
+	Language      string   `json:"language"`
+	Concept       string   `json:"concept"`
+	Description   string   `json:"description"`
+	DescriptionEn string   `json:"description_en,omitempty"`
+	Explanation   []string `json:"explanation"`
 	ExplanationEn []string `json:"explanation_en,omitempty"`
-	Code        string   `json:"code"`
-	Mode        string   `json:"mode"`       // "strict" or "practice"
-	Difficulty  string   `json:"difficulty"` // "beginner", "intermediate", "advanced"
-	Order       int      `json:"order"`
-	Tags        []string `json:"tags"`
-	Level       string   `json:"level"` // "basic", "intermediate", "advanced", "exercises"
+	Code          string   `json:"code"`
+	Exclude       []string `json:"exclude,omitempty"`
+	Mode          string   `json:"mode"`       // "strict" or "practice"
+	Difficulty    string   `json:"difficulty"` // "beginner", "intermediate", "advanced"
+	Order         int      `json:"order"`
+	Tags          []string `json:"tags"`
+	Level         string   `json:"level"` // "basic", "intermediate", "advanced", "exercises"
 }
 
 // LessonSummary is a lighter version for listing
@@ -28,10 +29,10 @@ type LessonSummary struct {
 	Concept       string `json:"concept"`
 	Description   string `json:"description"`
 	DescriptionEn string `json:"description_en,omitempty"`
-	Difficulty  string `json:"difficulty"`
-	Mode        string `json:"mode"`
-	Order       int    `json:"order"`
-	Level       string `json:"level"`
+	Difficulty    string `json:"difficulty"`
+	Mode          string `json:"mode"`
+	Order         int    `json:"order"`
+	Level         string `json:"level"`
 }
 
 // LanguageInfo describes an available programming language

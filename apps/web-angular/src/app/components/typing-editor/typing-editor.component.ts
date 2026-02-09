@@ -15,6 +15,7 @@ import { CommonModule } from '@angular/common';
 import { TypingEngineService } from '../../services/typing-engine.service';
 import { I18nService } from '../../services/i18n.service';
 import { CharState, TypingState } from '../../models/typing.model';
+import { Lesson } from '../../models/lesson.model';
 
 /** A line with its chars and their global indices for cursor tracking */
 interface LineDef {
@@ -635,8 +636,7 @@ const STREAK_EMOJIS = ['🔥', '⚡', '🚀', '🏆', '👑'];
   ],
 })
 export class TypingEditorComponent implements OnChanges, AfterViewInit {
-  @Input() code = '';
-  @Input() mode: 'strict' | 'practice' = 'strict';
+  @Input() lesson: Lesson | null = null;
   @Output() completed = new EventEmitter<void>();
 
   @ViewChild('editorEl') editorEl!: ElementRef<HTMLDivElement>;
@@ -690,10 +690,10 @@ export class TypingEditorComponent implements OnChanges, AfterViewInit {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['code'] && this.code) {
+    if (changes['lesson'] && this.lesson) {
       this.resetGame();
       this.clearSubscriptions();
-      this.engine.init(this.code, this.mode);
+      this.engine.init(this.lesson);
 
       this.stateSub = this.engine.state$.subscribe((state) => {
         this.state = state;
@@ -742,7 +742,9 @@ export class TypingEditorComponent implements OnChanges, AfterViewInit {
 
   retry(): void {
     this.resetGame();
-    this.engine.init(this.code, this.mode);
+    if (this.lesson) {
+      this.engine.init(this.lesson);
+    }
     this.focusEditor();
   }
 

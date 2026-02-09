@@ -1,0 +1,33 @@
+{
+    "id": "go-hello-world-01",
+    "title": "Hola Mundo en Go",
+    "title_en": "Hello World in Go",
+    "language": "go",
+    "concept": "hello-world",
+    "description": "Escribe tu primer programa en Go.",
+    "description_en": "Write your first Go program.",
+    "explanation": [
+        "Todo archivo Go inicia declarando a qué paquete pertenece con la palabra reservada 'package'.",
+        "Para usar funciones de otros paquetes, se traen con 'import'.",
+        "El punto de entrada del programa es una función llamada 'main', declarada con 'func'.",
+        "'fmt.Println' imprime texto en consola con un salto de línea al final."
+    ],
+    "explanation_en": [
+        "Every Go file starts by declaring which package it belongs to with the reserved word 'package'.",
+        "To use functions from other packages, they are brought in with 'import'.",
+        "The entry point of the program is a function called 'main', declared with 'func'.",
+        "'fmt.Println' prints text to the console with a newline at the end."
+    ],
+    "exclude": [
+        "package",
+        "import",
+        "func"
+    ],
+    "mode": "strict",
+    "difficulty": "beginner",
+    "order": 1,
+    "tags": [
+        "basics",
+        "hello-world"
+    ]
+}

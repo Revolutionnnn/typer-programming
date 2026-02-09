@@ -1,0 +1,39 @@
+{
+    "id": "go-interfaces-01",
+    "title": "Interfaces en Go",
+    "title_en": "Interfaces in Go",
+    "language": "go",
+    "concept": "interfaces",
+    "description": "Define comportamientos con interfaces implícitas.",
+    "description_en": "Define behaviors with implicit interfaces.",
+    "explanation": [
+        "Las interfaces definen comportamientos que los tipos deben implementar.",
+        "A diferencia de otros lenguajes, en Go las interfaces se implementan implícitamente.",
+        "No se usa 'implements', solo se definen los métodos requeridos.",
+        "Una interfaz con método 'Area() float64' puede usarse con cualquier tipo que lo tenga."
+    ],
+    "explanation_en": [
+        "Interfaces define behaviors that types must implement.",
+        "Unlike other languages, in Go interfaces are implemented implicitly.",
+        "No 'implements' keyword is used, only the required methods are defined.",
+        "An interface with an 'Area() float64' method can be used with any type that has it."
+    ],
+    "exclude": [
+        "package",
+        "import",
+        "type",
+        "struct",
+        "interface",
+        "func",
+        "for",
+        "range"
+    ],
+    "mode": "strict",
+    "difficulty": "intermediate",
+    "order": 1,
+    "tags": [
+        "interfaces",
+        "polymorphism",
+        "oop"
+    ]
+}

@@ -1,0 +1,37 @@
+{
+    "id": "go-arrays-slices-01",
+    "title": "Arrays y Slices",
+    "title_en": "Arrays and Slices",
+    "language": "go",
+    "concept": "arrays-slices",
+    "description": "Aprende a manejar colecciones de datos en Go.",
+    "description_en": "Learn to handle data collections in Go.",
+    "explanation": [
+        "Un array tiene tamaño fijo: [3]int{1, 2, 3}. Un slice es dinámico: []int{1, 2, 3}.",
+        "Para agregar elementos a un slice se usa la función 'append(slice, elemento)'.",
+        "Para recorrer un slice se usa 'for' con 'range', que devuelve el índice y el valor.",
+        "El guion bajo '_' descarta un valor (aquí descartamos el índice con 'for _, n := range')."
+    ],
+    "explanation_en": [
+        "An array has a fixed size: [3]int{1, 2, 3}. A slice is dynamic: []int{1, 2, 3}.",
+        "To add elements to a slice, the 'append(slice, element)' function is used.",
+        "To iterate over a slice, 'for' with 'range' is used, which returns the index and the value.",
+        "The underscore '_' discards a value (here we discard the index with 'for _, n := range')."
+    ],
+    "exclude": [
+        "package",
+        "import",
+        "func",
+        "for",
+        "range",
+        "append"
+    ],
+    "mode": "strict",
+    "difficulty": "beginner",
+    "order": 8,
+    "tags": [
+        "basics",
+        "arrays",
+        "slices"
+    ]
+}

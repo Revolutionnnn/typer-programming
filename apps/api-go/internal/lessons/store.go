@@ -27,7 +27,7 @@ func NewStore() *Store {
 	}
 }
 
-// LoadLessons reads all JSON lesson files from the content directory
+// LoadLessons reads all lesson files from the content directory
 func LoadLessons(contentDir string) (*Store, error) {
 	store := NewStore()
 
@@ -35,7 +35,24 @@ func LoadLessons(contentDir string) (*Store, error) {
 		if err != nil {
 			return err
 		}
-		if info.IsDir() || !strings.HasSuffix(info.Name(), ".json") {
+
+		// Skip directories unless they are lesson directories (containing main.json)
+		if info.IsDir() {
+			mainPath := filepath.Join(path, "main.json")
+			if _, err := os.Stat(mainPath); err == nil {
+				// This is a directory-based lesson
+				lesson, err := loadDirectoryLesson(path, contentDir)
+				if err != nil {
+					return err
+				}
+				store.Add(lesson)
+				return filepath.SkipDir // We processed this dir
+			}
+			return nil
+		}
+
+		// Support old-style single JSON files (not in a lesson directory)
+		if !strings.HasSuffix(info.Name(), ".json") || info.Name() == "main.json" {
 			return nil
 		}
 
@@ -56,7 +73,7 @@ func LoadLessons(contentDir string) (*Store, error) {
 		return nil
 	})
 
-	if err != nil {
+	if err != nil && err != filepath.SkipDir {
 		return nil, err
 	}
 
@@ -194,4 +211,59 @@ func (s *Store) GetLanguages() []models.LanguageInfo {
 	})
 
 	return result
+}
+
+// loadDirectoryLesson loads a lesson from a directory containing main.json and a code file
+func loadDirectoryLesson(dirPath string, contentDir string) (*models.Lesson, error) {
+	mainPath := filepath.Join(dirPath, "main.json")
+	data, err := os.ReadFile(mainPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read %s: %w", mainPath, err)
+	}
+
+	var lesson models.Lesson
+	if err := json.Unmarshal(data, &lesson); err != nil {
+		return nil, fmt.Errorf("failed to parse %s: %w", mainPath, err)
+	}
+
+	// If code is not in JSON, look for a code file
+	if lesson.Code == "" {
+		codePath := ""
+		// Look for files named code.ext or index.ext or matching the language name
+		exts := []string{".go", ".js", ".py", ".ts", ".c", ".cpp", ".cs", ".rb", ".php", ".swift", ".kt"}
+		files, _ := os.ReadDir(dirPath)
+		for _, f := range files {
+			if f.IsDir() || f.Name() == "main.json" {
+				continue
+			}
+			name := strings.ToLower(f.Name())
+			if strings.HasPrefix(name, "code.") || strings.HasPrefix(name, "exercise.") || strings.HasPrefix(name, "index.") {
+				codePath = filepath.Join(dirPath, f.Name())
+				break
+			}
+			// Fallback: any file with a code extension
+			for _, ext := range exts {
+				if strings.HasSuffix(name, ext) {
+					codePath = filepath.Join(dirPath, f.Name())
+					break
+				}
+			}
+			if codePath != "" {
+				break
+			}
+		}
+
+		if codePath != "" {
+			codeData, err := os.ReadFile(codePath)
+			if err != nil {
+				return nil, fmt.Errorf("failed to read code file %s: %w", codePath, err)
+			}
+			lesson.Code = string(codeData)
+		}
+	}
+
+	// Extract level from directory path
+	lesson.Level = extractLevelFromPath(dirPath, contentDir)
+
+	return &lesson, nil
 }

@@ -68,8 +68,7 @@ import { TypingEditorComponent } from '../../components/typing-editor/typing-edi
         <!-- Typing Editor -->
         @if (showEditor && !showResults) {
           <app-typing-editor
-            [code]="lesson.code"
-            [mode]="lesson.mode"
+            [lesson]="lesson"
             (completed)="onCompleted()"
           />
         }
