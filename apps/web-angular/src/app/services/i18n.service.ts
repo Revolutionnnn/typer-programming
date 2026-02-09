@@ -16,6 +16,7 @@ const translations: Record<Locale, TranslationDict> = {
     'home.subtitle':
       'Mejora tu velocidad, precisión y comprensión de la programación con typing guiado. Escribe código real, carácter por carácter, y aprende mientras practicas.',
     'home.cta': '🚀 Empezar ahora',
+    'home.opensource.badge': '🌟 Proyecto Open Source',
     'home.feature.typing.title': 'Typing guiado',
     'home.feature.typing.desc':
       'Escribe código carácter por carácter con feedback visual en tiempo real. Verde = correcto, rojo = incorrecto.',
@@ -150,6 +151,23 @@ const translations: Record<Locale, TranslationDict> = {
     'leaderboard.points': 'Puntos',
     'leaderboard.empty': 'No hay registros para este periodo. ¡Sé el primero!',
     'leaderboard.cta': '¡Empieza a competir!',
+
+    // ── User Profile ──
+    'user.totalPoints': 'Puntos Totales',
+    'user.completedLessons': 'Lecciones Completadas',
+    'user.currentStreak': 'Racha de Días',
+    'user.avgWpm': 'WPM Promedio',
+    'user.accuracy': 'Precisión',
+    'user.bestWpm': 'Mejor WPM',
+    'user.badges': 'Insignias',
+    'user.recentProgress': 'Progreso Reciente',
+    'user.memberSince': 'Miembro desde',
+    'user.guest': 'Invitado',
+
+    // ── Common ──
+    'common.back': 'Volver',
+    'common.loading': 'Cargando...',
+    'common.goBack': 'Volver atrás',
   },
 
   en: {
@@ -297,6 +315,23 @@ const translations: Record<Locale, TranslationDict> = {
     'leaderboard.points': 'Points',
     'leaderboard.empty': 'No records for this period. Be the first!',
     'leaderboard.cta': 'Start Competing!',
+
+    // ── User Profile ──
+    'user.totalPoints': 'Total Points',
+    'user.completedLessons': 'Completed Lessons',
+    'user.currentStreak': 'Day Streak',
+    'user.avgWpm': 'Avg WPM',
+    'user.accuracy': 'Accuracy',
+    'user.bestWpm': 'Best WPM',
+    'user.badges': 'Badges',
+    'user.recentProgress': 'Recent Progress',
+    'user.memberSince': 'Member since',
+    'user.guest': 'Guest',
+
+    // ── Common ──
+    'common.back': 'Back',
+    'common.loading': 'Loading...',
+    'common.goBack': 'Go Back',
   },
 };
 
