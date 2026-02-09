@@ -1,8 +1,6 @@
 package gamification
 
 import (
-	"time"
-
 	"github.com/typing-code-learn/api-go/internal/models"
 )
 

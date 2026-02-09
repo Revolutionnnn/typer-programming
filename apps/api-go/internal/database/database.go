@@ -34,6 +34,18 @@ func InitDB(dbPath string) (*DB, error) {
 
 func (db *DB) createTables() error {
 	queries := []string{
+		`CREATE TABLE IF NOT EXISTS users (
+			id TEXT PRIMARY KEY,
+			username TEXT UNIQUE NOT NULL,
+			email TEXT UNIQUE,
+			password_hash TEXT,
+			display_name TEXT NOT NULL,
+			is_guest BOOLEAN DEFAULT FALSE,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		)`,
+		`CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)`,
+		`CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`,
 		`CREATE TABLE IF NOT EXISTS progress (
 			id TEXT PRIMARY KEY,
 			user_id TEXT NOT NULL,
@@ -100,10 +112,11 @@ func (db *DB) SavePointTransaction(pt models.PointTransaction) error {
 // GetLeaderboard returns the leaderboard for a specific period
 func (db *DB) GetLeaderboard(startDate, endDate time.Time, limit int) ([]models.LeaderboardEntry, error) {
 	rows, err := db.Query(
-		`SELECT user_id, SUM(points) as total_points
-		FROM point_transactions
-		WHERE created_at BETWEEN ? AND ?
-		GROUP BY user_id
+		`SELECT pt.user_id, u.username, SUM(pt.points) as total_points
+		FROM point_transactions pt
+		INNER JOIN users u ON pt.user_id = u.id
+		WHERE pt.created_at BETWEEN ? AND ?
+		GROUP BY pt.user_id, u.username
 		ORDER BY total_points DESC
 		LIMIT ?`,
 		startDate, endDate, limit,
@@ -117,7 +130,7 @@ func (db *DB) GetLeaderboard(startDate, endDate time.Time, limit int) ([]models.
 	rank := 1
 	for rows.Next() {
 		var entry models.LeaderboardEntry
-		if err := rows.Scan(&entry.UserID, &entry.Points); err != nil {
+		if err := rows.Scan(&entry.UserID, &entry.Username, &entry.Points); err != nil {
 			return nil, err
 		}
 		entry.Rank = rank
@@ -146,6 +159,170 @@ func (db *DB) GetUserPoints(userID string, startDate, endDate time.Time) (int, e
 	}
 	
 	return int(totalPoints.Int64), nil
+}
+
+// --- User Management ---
+
+// CreateGuestUser creates a new guest user with auto-generated username
+func (db *DB) CreateGuestUser() (*models.User, error) {
+	id := uuid.New().String()
+	// Generate guest username: guest_ + random 7-digit number
+	guestNum := time.Now().UnixNano() % 10000000
+	username := fmt.Sprintf("guest_%07d", guestNum)
+	displayName := username
+	now := time.Now()
+
+	_, err := db.Exec(
+		`INSERT INTO users (id, username, display_name, is_guest, created_at, updated_at)
+		VALUES (?, ?, ?, ?, ?, ?)`,
+		id, username, displayName, true, now, now,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &models.User{
+		ID:          id,
+		Username:    username,
+		DisplayName: displayName,
+		IsGuest:     true,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+	}, nil
+}
+
+// CreateRegisteredUser creates a new registered user
+func (db *DB) CreateRegisteredUser(username, email, passwordHash, displayName string) (*models.User, error) {
+	id := uuid.New().String()
+	now := time.Now()
+
+	_, err := db.Exec(
+		`INSERT INTO users (id, username, email, password_hash, display_name, is_guest, created_at, updated_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+		id, username, email, passwordHash, displayName, false, now, now,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &models.User{
+		ID:          id,
+		Username:    username,
+		Email:       &email,
+		DisplayName: displayName,
+		IsGuest:     false,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+	}, nil
+}
+
+// GetUserByID returns a user by ID
+func (db *DB) GetUserByID(id string) (*models.User, error) {
+	var user models.User
+	var email sql.NullString
+
+	err := db.QueryRow(
+		`SELECT id, username, email, display_name, is_guest, created_at, updated_at
+		FROM users WHERE id = ?`,
+		id,
+	).Scan(&user.ID, &user.Username, &email, &user.DisplayName, &user.IsGuest, &user.CreatedAt, &user.UpdatedAt)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if email.Valid {
+		user.Email = &email.String
+	}
+
+	return &user, nil
+}
+
+// GetUserByUsername returns a user by username
+func (db *DB) GetUserByUsername(username string) (*models.User, error) {
+	var user models.User
+	var email sql.NullString
+
+	err := db.QueryRow(
+		`SELECT id, username, email, display_name, is_guest, created_at, updated_at
+		FROM users WHERE username = ?`,
+		username,
+	).Scan(&user.ID, &user.Username, &email, &user.DisplayName, &user.IsGuest, &user.CreatedAt, &user.UpdatedAt)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if email.Valid {
+		user.Email = &email.String
+	}
+
+	return &user, nil
+}
+
+// GetUserByEmail returns a user by email
+func (db *DB) GetUserByEmail(email string) (*models.User, error) {
+	var user models.User
+	var emailVal sql.NullString
+
+	err := db.QueryRow(
+		`SELECT id, username, email, display_name, is_guest, created_at, updated_at
+		FROM users WHERE email = ?`,
+		email,
+	).Scan(&user.ID, &user.Username, &emailVal, &user.DisplayName, &user.IsGuest, &user.CreatedAt, &user.UpdatedAt)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if emailVal.Valid {
+		user.Email = &emailVal.String
+	}
+
+	return &user, nil
+}
+
+// GetPasswordHash returns the password hash for a user
+func (db *DB) GetPasswordHash(username string) (string, error) {
+	var hash sql.NullString
+	err := db.QueryRow(
+		`SELECT password_hash FROM users WHERE username = ?`,
+		username,
+	).Scan(&hash)
+
+	if err != nil {
+		return "", err
+	}
+
+	if !hash.Valid {
+		return "", sql.ErrNoRows
+	}
+
+	return hash.String, nil
+}
+
+// ConvertGuestToRegistered converts a guest user to a registered user
+func (db *DB) ConvertGuestToRegistered(guestID, username, email, passwordHash, displayName string) (*models.User, error) {
+	now := time.Now()
+
+	_, err := db.Exec(
+		`UPDATE users
+		SET username = ?, email = ?, password_hash = ?, display_name = ?, is_guest = ?, updated_at = ?
+		WHERE id = ? AND is_guest = ?`,
+		username, email, passwordHash, displayName, false, now, guestID, true,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &models.User{
+		ID:          guestID,
+		Username:    username,
+		Email:       &email,
+		DisplayName: displayName,
+		IsGuest:     false,
+		UpdatedAt:   now,
+	}, nil
 }
 
 // SaveProgress saves or updates a user's progress on a lesson

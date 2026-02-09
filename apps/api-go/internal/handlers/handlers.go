@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
+	"github.com/typing-code-learn/api-go/internal/auth"
 	"github.com/typing-code-learn/api-go/internal/database"
 	"github.com/typing-code-learn/api-go/internal/gamification"
 	"github.com/typing-code-learn/api-go/internal/lessons"
@@ -19,13 +20,15 @@ import (
 type Handler struct {
 	db          *database.DB
 	lessonStore *lessons.Store
+	authService *auth.Service
 }
 
 // New creates a new Handler
-func New(db *database.DB, lessonStore *lessons.Store) *Handler {
+func New(db *database.DB, lessonStore *lessons.Store, authService *auth.Service) *Handler {
 	return &Handler{
 		db:          db,
 		lessonStore: lessonStore,
+		authService: authService,
 	}
 }
 
@@ -248,6 +251,205 @@ func (h *Handler) GetLanguages(w http.ResponseWriter, r *http.Request) {
 		langs = make([]models.LanguageInfo, 0)
 	}
 	respondJSON(w, http.StatusOK, langs)
+}
+
+// --- Authentication handlers ---
+
+// CreateGuestUser creates a new guest user
+func (h *Handler) CreateGuestUser(w http.ResponseWriter, r *http.Request) {
+	user, err := h.db.CreateGuestUser()
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "Failed to create guest user")
+		return
+	}
+
+	token, err := h.authService.GenerateToken(*user)
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "Failed to generate token")
+		return
+	}
+
+	// Set HTTP-only cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     "token",
+		Value:    token,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   false, // Set to true in production with HTTPS
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   30 * 24 * 60 * 60, // 30 days
+	})
+
+	respondJSON(w, http.StatusOK, models.AuthResponse{
+		User:  *user,
+		Token: token,
+	})
+}
+
+// Register handles user registration (new user or guest conversion)
+func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
+	var req models.RegisterRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	// Validate input
+	if req.Username == "" || req.Password == "" {
+		respondError(w, http.StatusBadRequest, "Username and password are required")
+		return
+	}
+
+	// Check if username already exists
+	existingUser, err := h.db.GetUserByUsername(req.Username)
+	if err == nil && existingUser != nil {
+		respondError(w, http.StatusConflict, "Username already exists")
+		return
+	}
+
+	// Check if email already exists (if provided)
+	if req.Email != "" {
+		existingUser, err = h.db.GetUserByEmail(req.Email)
+		if err == nil && existingUser != nil {
+			respondError(w, http.StatusConflict, "Email already exists")
+			return
+		}
+	}
+
+	// Hash password
+	passwordHash, err := h.authService.HashPassword(req.Password)
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "Failed to process password")
+		return
+	}
+
+	displayName := req.Username
+	if req.Email != "" {
+		displayName = req.Email
+	}
+
+	var user *models.User
+
+	// Check if converting from guest
+	if req.GuestID != nil && *req.GuestID != "" {
+		user, err = h.db.ConvertGuestToRegistered(*req.GuestID, req.Username, req.Email, passwordHash, displayName)
+		if err != nil {
+			respondError(w, http.StatusInternalServerError, "Failed to convert guest user")
+			return
+		}
+	} else {
+		// Create new registered user
+		user, err = h.db.CreateRegisteredUser(req.Username, req.Email, passwordHash, displayName)
+		if err != nil {
+			respondError(w, http.StatusInternalServerError, "Failed to create user")
+			return
+		}
+	}
+
+	// Generate token
+	token, err := h.authService.GenerateToken(*user)
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "Failed to generate token")
+		return
+	}
+
+	// Set HTTP-only cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     "token",
+		Value:    token,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   false, // Set to true in production with HTTPS
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   30 * 24 * 60 * 60, // 30 days
+	})
+
+	respondJSON(w, http.StatusCreated, models.AuthResponse{
+		User:  *user,
+		Token: token,
+	})
+}
+
+// Login authenticates a user
+func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
+	var req models.LoginRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	// Get user
+	user, err := h.db.GetUserByUsername(req.Username)
+	if err != nil {
+		respondError(w, http.StatusUnauthorized, "Invalid credentials")
+		return
+	}
+
+	// Get password hash
+	passwordHash, err := h.db.GetPasswordHash(req.Username)
+	if err != nil {
+		respondError(w, http.StatusUnauthorized, "Invalid credentials")
+		return
+	}
+
+	// Check password
+	if err := h.authService.CheckPassword(req.Password, passwordHash); err != nil {
+		respondError(w, http.StatusUnauthorized, "Invalid credentials")
+		return
+	}
+
+	// Generate token
+	token, err := h.authService.GenerateToken(*user)
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "Failed to generate token")
+		return
+	}
+
+	// Set HTTP-only cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     "token",
+		Value:    token,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   false, // Set to true in production with HTTPS
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   30 * 24 * 60 * 60, // 30 days
+	})
+
+	respondJSON(w, http.StatusOK, models.AuthResponse{
+		User:  *user,
+		Token: token,
+	})
+}
+
+// GetMe returns the current authenticated user
+func (h *Handler) GetMe(w http.ResponseWriter, r *http.Request) {
+	userCtx, ok := auth.GetUserFromContext(r.Context())
+	if !ok {
+		respondError(w, http.StatusUnauthorized, "Not authenticated")
+		return
+	}
+
+	user, err := h.db.GetUserByID(userCtx.UserID)
+	if err != nil {
+		respondError(w, http.StatusNotFound, "User not found")
+		return
+	}
+
+	respondJSON(w, http.StatusOK, user)
+}
+
+// Logout clears the authentication cookie
+func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "token",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		MaxAge:   -1, // Delete cookie
+	})
+
+	respondJSON(w, http.StatusOK, map[string]string{"message": "Logged out successfully"})
 }
 
 // --- Health check ---

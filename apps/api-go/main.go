@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/typing-code-learn/api-go/internal/auth"
 	"github.com/typing-code-learn/api-go/internal/database"
 	"github.com/typing-code-learn/api-go/internal/handlers"
 	"github.com/typing-code-learn/api-go/internal/lessons"
@@ -29,8 +30,11 @@ func main() {
 	}
 	log.Printf("Loaded %d lessons", lessonStore.Count())
 
+	// Create auth service
+	authService := auth.NewService()
+
 	// Create handlers
-	h := handlers.New(db, lessonStore)
+	h := handlers.New(db, lessonStore, authService)
 
 	// Setup router
 	r := chi.NewRouter()
@@ -48,8 +52,18 @@ func main() {
 		MaxAge:           300,
 	}))
 
+	// Apply optional auth middleware to all routes
+	r.Use(authService.AuthMiddleware)
+
 	// Routes
 	r.Route("/api/v1", func(r chi.Router) {
+		// Authentication
+		r.Post("/auth/guest", h.CreateGuestUser)
+		r.Post("/auth/register", h.Register)
+		r.Post("/auth/login", h.Login)
+		r.Post("/auth/logout", h.Logout)
+		r.With(authService.RequireAuth).Get("/auth/me", h.GetMe)
+
 		// Languages
 		r.Get("/languages", h.GetLanguages)
 
@@ -63,7 +77,7 @@ func main() {
 		r.Get("/progress/{userId}", h.GetUserProgress)
 		r.Get("/progress/{userId}/{lessonId}", h.GetLessonProgress)
 
-// Metrics
+		// Metrics
 		r.Post("/metrics", h.SaveMetrics)
 		r.Get("/metrics/{userId}", h.GetUserMetrics)
 		r.Get("/leaderboard", h.GetLeaderboard)

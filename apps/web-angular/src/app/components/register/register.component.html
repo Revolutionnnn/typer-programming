@@ -1,0 +1,53 @@
+<div class="register-modal">
+    <div class="register-header">
+        <h2>{{ isConvertingGuest ? 'Save Your Progress' : 'Create Account' }}</h2>
+        <button class="close-btn" (click)="onClose()" type="button">&times;</button>
+    </div>
+
+    @if (isConvertingGuest) {
+    <div class="info-message">
+        <p>Register to save your progress and access it from any device!</p>
+    </div>
+    }
+
+    <form (ngSubmit)="onSubmit()">
+        <div class="form-group">
+            <label for="username">Username *</label>
+            <input type="text" id="username" [(ngModel)]="username" name="username" placeholder="Choose a username"
+                [disabled]="loading" required />
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email (optional)</label>
+            <input type="email" id="email" [(ngModel)]="email" name="email" placeholder="your@email.com"
+                [disabled]="loading" />
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password *</label>
+            <input type="password" id="password" [(ngModel)]="password" name="password"
+                placeholder="At least 6 characters" [disabled]="loading" required />
+        </div>
+
+        <div class="form-group">
+            <label for="confirmPassword">Confirm Password *</label>
+            <input type="password" id="confirmPassword" [(ngModel)]="confirmPassword" name="confirmPassword"
+                placeholder="Re-enter your password" [disabled]="loading" required />
+        </div>
+
+        @if (error) {
+        <div class="error-message">{{ error }}</div>
+        }
+
+        <button type="submit" class="btn-primary" [disabled]="loading">
+            {{ loading ? 'Creating account...' : 'Register' }}
+        </button>
+
+        <div class="switch-mode">
+            Already have an account?
+            <button type="button" class="link-btn" (click)="onSwitchToLogin()">
+                Login
+            </button>
+        </div>
+    </form>
+</div>
