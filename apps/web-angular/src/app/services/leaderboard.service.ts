@@ -12,7 +12,7 @@ export class LeaderboardService {
 
     constructor(private http: HttpClient) { }
 
-    getLeaderboard(period: 'weekly' | 'monthly' | 'all_time' = 'weekly', limit: number = 10): Observable<LeaderboardEntry[]> {
+    getLeaderboard(period: 'daily' | 'weekly' | 'monthly' | 'all_time' = 'weekly', limit: number = 10): Observable<LeaderboardEntry[]> {
         return this.http.get<LeaderboardEntry[]>(this.apiUrl, {
             params: {
                 period,

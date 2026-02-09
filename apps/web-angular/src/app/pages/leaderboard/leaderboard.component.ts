@@ -21,6 +21,12 @@ import { I18nService } from '../../services/i18n.service';
 
       <div class="flex justify-center mb-8 space-x-4">
         <button 
+          (click)="setPeriod('daily')" 
+          [class.active]="period() === 'daily'"
+          class="period-btn">
+          {{ i18n.t('leaderboard.daily') }}
+        </button>
+        <button 
           (click)="setPeriod('weekly')" 
           [class.active]="period() === 'weekly'"
           class="period-btn">
@@ -575,19 +581,19 @@ export class LeaderboardPageComponent implements OnInit {
   i18n = inject(I18nService);
 
   entries = signal<LeaderboardEntry[]>([]);
-  period = signal<'weekly' | 'monthly' | 'all_time'>('weekly');
+  period = signal<'daily' | 'weekly' | 'monthly' | 'all_time'>('daily');
 
   ngOnInit() {
     this.loadLeaderboard();
   }
 
-  setPeriod(newPeriod: 'weekly' | 'monthly' | 'all_time') {
+  setPeriod(newPeriod: 'daily' | 'weekly' | 'monthly' | 'all_time') {
     this.period.set(newPeriod);
     this.loadLeaderboard();
   }
 
   loadLeaderboard() {
-    const p = this.period() as 'weekly' | 'monthly' | 'all_time';
+    const p = this.period() as 'daily' | 'weekly' | 'monthly' | 'all_time';
     this.leaderboardService.getLeaderboard(p).subscribe({
       next: (data: any) => this.entries.set(data),
       error: (err: any) => console.error('Failed to load leaderboard', err)

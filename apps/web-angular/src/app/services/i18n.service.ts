@@ -118,6 +118,7 @@ const translations: Record<Locale, TranslationDict> = {
     // ── Leaderboard ──
     'nav.leaderboard': '🏆 Ranking',
     'leaderboard.title': '🏆 Campeones del Teclado',
+    'leaderboard.daily': 'Diario',
     'leaderboard.weekly': 'Semanal',
     'leaderboard.monthly': 'Mensual',
     'leaderboard.allTime': 'Histórico',
@@ -241,6 +242,7 @@ const translations: Record<Locale, TranslationDict> = {
     // ── Leaderboard ──
     'nav.leaderboard': '🏆 Leaderboard',
     'leaderboard.title': '🏆 Keyboard Champions',
+    'leaderboard.daily': 'Daily',
     'leaderboard.weekly': 'Weekly',
     'leaderboard.monthly': 'Monthly',
     'leaderboard.allTime': 'All Time',
