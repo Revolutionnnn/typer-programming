@@ -62,7 +62,7 @@ import { I18nService } from '../../services/i18n.service';
               <div class="podium-username">{{ getUserDisplay(entries()[1]) }}</div>
               <div class="podium-points">
                 <span class="points-number">{{ entries()[1].points | number }}</span>
-                <span class="points-label">points</span>
+                <span class="points-label">{{ i18n.t('leaderboard.points') }}</span>
               </div>
             </div>
           }

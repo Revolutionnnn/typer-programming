@@ -45,7 +45,7 @@ func NewDefaultStrategy() *DefaultPointStrategy {
 	return &DefaultPointStrategy{
 		BasePointsPerChar: 1.0,
 		WPMValidation:     10.0,
-		AccuracyThreshold: 80.0,
+		AccuracyThreshold: 70.0,
 	}
 }
 
@@ -53,11 +53,11 @@ func NewDefaultStrategy() *DefaultPointStrategy {
 type RankTier string
 
 const (
-	TierNovice   RankTier = "Novice"
+	TierNovice     RankTier = "Novice"
 	TierApprentice RankTier = "Apprentice"
-	TierCoder    RankTier = "Coder"
-	TierHacker   RankTier = "Hacker"
-	TierGuru     RankTier = "Guru"
+	TierCoder      RankTier = "Coder"
+	TierHacker     RankTier = "Hacker"
+	TierGuru       RankTier = "Guru"
 )
 
 // GetTier returns the tier based on total points

@@ -221,13 +221,13 @@ func (h *Handler) GetLeaderboard(w http.ResponseWriter, r *http.Request) {
 		fmt.Sscanf(limitStr, "%d", &limit)
 	}
 
-	now := time.Now()
+	now := time.Now().UTC()
 	var startDate, endDate time.Time
-	endDate = now
+	endDate = now.Add(1 * time.Minute)
 
 	switch period {
 	case "daily":
-		startDate = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+		startDate = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
 	case "weekly":
 		// Start of week (Monday)
 		offset := int(now.Weekday())
@@ -235,9 +235,9 @@ func (h *Handler) GetLeaderboard(w http.ResponseWriter, r *http.Request) {
 			offset = 7
 		}
 		startDate = now.AddDate(0, 0, -offset+1)
-		startDate = time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 0, 0, 0, 0, startDate.Location())
+		startDate = time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 0, 0, 0, 0, time.UTC)
 	case "monthly":
-		startDate = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+		startDate = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
 	default: // all_time
 		startDate = time.Time{} // Zero time
 	}

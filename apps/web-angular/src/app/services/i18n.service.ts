@@ -68,6 +68,7 @@ const translations: Record<Locale, TranslationDict> = {
     'lesson.accuracy': 'Precisión',
     'lesson.time': 'Tiempo',
     'lesson.errors': 'Errores',
+    'lesson.points': 'Puntos',
 
     // ── Typing Editor ──
     'editor.stat.wpm': 'WPM',
@@ -192,6 +193,7 @@ const translations: Record<Locale, TranslationDict> = {
     'lesson.accuracy': 'Accuracy',
     'lesson.time': 'Time',
     'lesson.errors': 'Errors',
+    'lesson.points': 'Points',
 
     // ── Typing Editor ──
     'editor.stat.wpm': 'WPM',

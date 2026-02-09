@@ -95,6 +95,10 @@ import { TypingEditorComponent } from '../../components/typing-editor/typing-edi
                 <span class="result-item__value">{{ metrics.incorrectChars }}</span>
                 <span class="result-item__label">{{ i18n.t('lesson.errors') }}</span>
               </div>
+              <div class="result-item">
+                <span class="result-item__value">{{ pointsEarned }}</span>
+                <span class="result-item__label">{{ i18n.t('lesson.points') }}</span>
+              </div>
             </div>
 
             <div class="results__actions">
@@ -265,6 +269,7 @@ export class LessonComponent implements OnInit {
     correctChars: 0,
     incorrectChars: 0,
   };
+  pointsEarned = 0;
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -321,6 +326,9 @@ export class LessonComponent implements OnInit {
           this.lesson.id
         );
         this.progressService.saveMetrics(metricsReq).subscribe({
+          next: (res: any) => {
+            this.pointsEarned = res.pointsEarned || 0;
+          },
           error: (err) => console.error('Failed to save metrics:', err),
         });
       }
