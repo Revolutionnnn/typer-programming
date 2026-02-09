@@ -7,12 +7,14 @@ import { TypingEngineService } from '../../services/typing-engine.service';
 import { UserService } from '../../services/user.service';
 import { I18nService } from '../../services/i18n.service';
 import { Lesson } from '../../models/lesson.model';
+import { User } from '../../models/user.model';
 import { TypingEditorComponent } from '../../components/typing-editor/typing-editor.component';
+import { ShareComponent } from '../../components/share/share.component';
 
 @Component({
   selector: 'app-lesson',
   standalone: true,
-  imports: [CommonModule, RouterLink, TypingEditorComponent],
+  imports: [CommonModule, RouterLink, TypingEditorComponent, ShareComponent],
   template: `
     <div class="lesson container">
       @if (loading) {
@@ -103,6 +105,12 @@ import { TypingEditorComponent } from '../../components/typing-editor/typing-edi
 
             <div class="results__actions">
               <button class="btn" (click)="retry()">{{ i18n.t('lesson.retry') }}</button>
+              <app-share
+                [lessonTitle]="lesson.title"
+                [wpm]="metrics.wpm"
+                [accuracy]="metrics.accuracy"
+                [streak]="currentUser?.currentStreak || 0"
+              />
               <a routerLink="/lessons" class="btn btn--primary">
                 {{ i18n.t('lesson.next') }}
               </a>
@@ -260,6 +268,7 @@ export class LessonComponent implements OnInit {
   error = '';
   showEditor = false;
   showResults = false;
+  currentUser: User | null = this.userService.getCurrentUser();
 
   metrics = {
     wpm: 0,

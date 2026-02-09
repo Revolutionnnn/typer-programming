@@ -117,6 +117,13 @@ const translations: Record<Locale, TranslationDict> = {
     'results.empty': 'Aún no has completado ninguna lección.',
     'results.startNow': '🚀 Empezar ahora',
 
+    // ── Share ──
+    'share.share': 'Compartir',
+    'share.shareProgress': 'Comparte tu progreso',
+    'share.message': '¡Acabo de completar "{{lesson}}" en Typing Code Learn! 🚀\n\nWPM: {{wpm}}\nPrecisión: {{accuracy}}%\nRacha diaria: {{streak}} días\n\n¿Te animas a probar?',
+    'share.copyLink': 'Copiar enlace',
+    'share.copied': '¡Copiado!',
+
     // ── Leaderboard ──
     'nav.leaderboard': '🏆 Ranking',
     'leaderboard.title': '🏆 Campeones del Teclado',
@@ -242,6 +249,13 @@ const translations: Record<Locale, TranslationDict> = {
     'results.attempts': 'attempts',
     'results.empty': 'You haven\'t completed any lessons yet.',
     'results.startNow': '🚀 Start now',
+
+    // ── Share ──
+    'share.share': 'Share',
+    'share.shareProgress': 'Share your progress',
+    'share.message': 'I just completed "{{lesson}}" on Typing Code Learn! 🚀\n\nWPM: {{wpm}}\nAccuracy: {{accuracy}}%\nDaily streak: {{streak}} days\n\nThink you can beat that?',
+    'share.copyLink': 'Copy link',
+    'share.copied': 'Copied!',
 
     // ── Leaderboard ──
     'nav.leaderboard': '🏆 Leaderboard',
