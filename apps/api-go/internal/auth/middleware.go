@@ -17,19 +17,14 @@ type UserContext struct {
 	IsGuest  bool
 }
 
-// AuthMiddleware is optional authentication middleware
-// It validates the token if present and adds user info to context
 func (s *Service) AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Add some basic security headers
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("X-Frame-Options", "DENY")
 		w.Header().Set("X-XSS-Protection", "1; mode=block")
 
-		token := s.extractToken(r)
-		if token != "" {
-			claims, err := s.ValidateToken(token)
-			if err == nil {
+		if token := s.extractToken(r); token != "" {
+			if claims, err := s.ValidateToken(token); err == nil {
 				r = s.injectUserContext(r, claims)
 			}
 		}
@@ -37,7 +32,6 @@ func (s *Service) AuthMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// RequireAuth is middleware that requires authentication
 func (s *Service) RequireAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token := s.extractToken(r)
@@ -57,45 +51,34 @@ func (s *Service) RequireAuth(next http.Handler) http.Handler {
 	})
 }
 
-// injectUserContext adds the user info from claims to the request context
 func (s *Service) injectUserContext(r *http.Request, claims *Claims) *http.Request {
 	userCtx := UserContext{
 		UserID:   claims.UserID,
 		Username: claims.Username,
 		IsGuest:  claims.IsGuest,
 	}
-	ctx := context.WithValue(r.Context(), UserContextKey, userCtx)
-	return r.WithContext(ctx)
+	return r.WithContext(context.WithValue(r.Context(), UserContextKey, userCtx))
 }
 
-// respondWithError sends a JSON error response
 func respondWithError(w http.ResponseWriter, code int, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	_, _ = w.Write([]byte(`{"error":"` + message + `"}`))
 }
 
-// extractToken extracts JWT token from cookie or Authorization header
-	// Try cookie first
-	cookie, err := r.Cookie("token")
-	if err == nil && cookie.Value != "" {
+func (s *Service) extractToken(r *http.Request) string {
+	if cookie, err := r.Cookie("token"); err == nil && cookie.Value != "" {
 		return cookie.Value
 	}
 
-	// Try Authorization header
 	authHeader := r.Header.Get("Authorization")
-	if authHeader != "" {
-		// Expected format: "Bearer <token>"
-		parts := strings.Split(authHeader, " ")
-		if len(parts) == 2 && parts[0] == "Bearer" {
-			return parts[1]
-		}
+	if strings.HasPrefix(authHeader, "Bearer ") {
+		return strings.TrimPrefix(authHeader, "Bearer ")
 	}
 
 	return ""
 }
 
-// GetUserFromContext extracts user info from request context
 func GetUserFromContext(ctx context.Context) (*UserContext, bool) {
 	user, ok := ctx.Value(UserContextKey).(UserContext)
 	return &user, ok

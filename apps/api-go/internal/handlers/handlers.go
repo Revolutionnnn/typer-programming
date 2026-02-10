@@ -44,25 +44,30 @@ func respondError(w http.ResponseWriter, status int, message string) {
 	respondJSON(w, status, map[string]string{"error": message})
 }
 
-// --- Lesson handlers ---
+func (h *Handler) setAuthCookie(w http.ResponseWriter, token string) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "token",
+		Value:    token,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   false, // Set to true in production with HTTPS
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   int(auth.TokenDuration.Seconds()),
+	})
+}
 
-// ListLessons returns all lessons (summaries)
 func (h *Handler) ListLessons(w http.ResponseWriter, r *http.Request) {
 	lang := r.URL.Query().Get("lang")
 	allLessons := h.lessonStore.All()
 	summaries := make([]models.LessonSummary, len(allLessons))
 	for i, l := range allLessons {
 		s := l.ToSummary()
-		if lang == "en" && s.TitleEn != "" {
-			s.Title = s.TitleEn
-			s.Description = s.DescriptionEn
-		}
+		h.localizeSummary(&s, lang)
 		summaries[i] = s
 	}
 	respondJSON(w, http.StatusOK, summaries)
 }
 
-// GetLesson returns a single lesson by ID
 func (h *Handler) GetLesson(w http.ResponseWriter, r *http.Request) {
 	lang := r.URL.Query().Get("lang")
 	id := chi.URLParam(r, "id")
@@ -72,18 +77,11 @@ func (h *Handler) GetLesson(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Create a shallow copy to return localized content
 	l := *lesson
-	if lang == "en" && l.TitleEn != "" {
-		l.Title = l.TitleEn
-		l.Description = l.DescriptionEn
-		l.Explanation = l.ExplanationEn
-	}
-
+	h.localizeLesson(&l, lang)
 	respondJSON(w, http.StatusOK, l)
 }
 
-// GetLessonsByLanguage returns all lessons for a specific language
 func (h *Handler) GetLessonsByLanguage(w http.ResponseWriter, r *http.Request) {
 	lang := r.URL.Query().Get("lang")
 	language := chi.URLParam(r, "language")
@@ -95,18 +93,27 @@ func (h *Handler) GetLessonsByLanguage(w http.ResponseWriter, r *http.Request) {
 	summaries := make([]models.LessonSummary, len(lessonList))
 	for i, l := range lessonList {
 		s := l.ToSummary()
-		if lang == "en" && s.TitleEn != "" {
-			s.Title = s.TitleEn
-			s.Description = s.DescriptionEn
-		}
+		h.localizeSummary(&s, lang)
 		summaries[i] = s
 	}
 	respondJSON(w, http.StatusOK, summaries)
 }
 
-// --- Progress handlers ---
+func (h *Handler) localizeSummary(s *models.LessonSummary, lang string) {
+	if lang == "en" && s.TitleEn != "" {
+		s.Title = s.TitleEn
+		s.Description = s.DescriptionEn
+	}
+}
 
-// SaveProgress saves or updates user progress
+func (h *Handler) localizeLesson(l *models.Lesson, lang string) {
+	if lang == "en" && l.TitleEn != "" {
+		l.Title = l.TitleEn
+		l.Description = l.DescriptionEn
+		l.Explanation = l.ExplanationEn
+	}
+}
+
 func (h *Handler) SaveProgress(w http.ResponseWriter, r *http.Request) {
 	var req models.ProgressRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -165,9 +172,6 @@ func (h *Handler) GetLessonProgress(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, progress)
 }
 
-// --- Metrics handlers ---
-
-// SaveMetrics saves typing metrics for a session
 func (h *Handler) SaveMetrics(w http.ResponseWriter, r *http.Request) {
 	var req models.MetricsRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -186,7 +190,6 @@ func (h *Handler) SaveMetrics(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Calculate and save points
 	pointStrategy := gamification.NewDefaultStrategy()
 	points := pointStrategy.Calculate(*metrics)
 
@@ -202,8 +205,10 @@ func (h *Handler) SaveMetrics(w http.ResponseWriter, r *http.Request) {
 		_ = h.db.SavePointTransaction(pt)
 	}
 
-	// Update streak
-	streak, _ := h.db.UpdateUserStreak(metrics.UserID)
+	streak, err := h.db.UpdateUserStreak(metrics.UserID)
+	if err != nil {
+		fmt.Printf("Error updating streak for user %s: %v\n", metrics.UserID, err)
+	}
 
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"metrics":       metrics,
@@ -306,9 +311,6 @@ func (h *Handler) GetUserMetrics(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, summary)
 }
 
-// --- Language handlers ---
-
-// GetLanguages returns all available programming languages
 func (h *Handler) GetLanguages(w http.ResponseWriter, r *http.Request) {
 	langs := h.lessonStore.GetLanguages()
 	if langs == nil {
@@ -317,9 +319,6 @@ func (h *Handler) GetLanguages(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, langs)
 }
 
-// --- Authentication handlers ---
-
-// CreateGuestUser creates a new guest user
 func (h *Handler) CreateGuestUser(w http.ResponseWriter, r *http.Request) {
 	user, err := h.db.CreateGuestUser()
 	if err != nil {
@@ -333,16 +332,7 @@ func (h *Handler) CreateGuestUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Set HTTP-only cookie
-	http.SetCookie(w, &http.Cookie{
-		Name:     "token",
-		Value:    token,
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   false, // Set to true in production with HTTPS
-		SameSite: http.SameSiteLaxMode,
-		MaxAge:   30 * 24 * 60 * 60, // 30 days
-	})
+	h.setAuthCookie(w, token)
 
 	respondJSON(w, http.StatusOK, models.AuthResponse{
 		User:  *user,
@@ -358,7 +348,6 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Validate input
 	if req.Username == "" || req.Password == "" {
 		respondError(w, http.StatusBadRequest, "Username and password are required")
 		return
@@ -369,14 +358,12 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Check if username already exists
 	existingUser, err := h.db.GetUserByUsername(req.Username)
 	if err == nil && existingUser != nil {
 		respondError(w, http.StatusConflict, "Username already exists")
 		return
 	}
 
-	// Check if email already exists (if provided)
 	if req.Email != "" {
 		existingUser, err = h.db.GetUserByEmail(req.Email)
 		if err == nil && existingUser != nil {
@@ -385,7 +372,6 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Hash password
 	passwordHash, err := h.authService.HashPassword(req.Password)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to process password")
@@ -393,13 +379,9 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	displayName := req.Username
-	if req.Email != "" {
-		displayName = req.Email
-	}
 
 	var user *models.User
 
-	// Check if converting from guest
 	if req.GuestID != nil && *req.GuestID != "" {
 		user, err = h.db.ConvertGuestToRegistered(*req.GuestID, req.Username, req.Email, passwordHash, displayName, req.GitHubUsername)
 		if err != nil {
@@ -407,7 +389,6 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		// Create new registered user
 		user, err = h.db.CreateRegisteredUser(req.Username, req.Email, passwordHash, displayName, req.GitHubUsername)
 		if err != nil {
 			respondError(w, http.StatusInternalServerError, "Failed to create user")
@@ -415,23 +396,13 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Generate token
 	token, err := h.authService.GenerateToken(*user)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to generate token")
 		return
 	}
 
-	// Set HTTP-only cookie
-	http.SetCookie(w, &http.Cookie{
-		Name:     "token",
-		Value:    token,
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   false, // Set to true in production with HTTPS
-		SameSite: http.SameSiteLaxMode,
-		MaxAge:   int(auth.TokenDuration.Seconds()),
-	})
+	h.setAuthCookie(w, token)
 
 	respondJSON(w, http.StatusCreated, models.AuthResponse{
 		User:  *user,
@@ -447,43 +418,30 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get user
 	user, err := h.db.GetUserByUsername(req.Username)
 	if err != nil {
 		respondError(w, http.StatusUnauthorized, "Invalid credentials")
 		return
 	}
 
-	// Get password hash
 	passwordHash, err := h.db.GetPasswordHash(req.Username)
 	if err != nil {
 		respondError(w, http.StatusUnauthorized, "Invalid credentials")
 		return
 	}
 
-	// Check password
 	if err := h.authService.CheckPassword(req.Password, passwordHash); err != nil {
 		respondError(w, http.StatusUnauthorized, "Invalid credentials")
 		return
 	}
 
-	// Generate token
 	token, err := h.authService.GenerateToken(*user)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to generate token")
 		return
 	}
 
-	// Set HTTP-only cookie
-	http.SetCookie(w, &http.Cookie{
-		Name:     "token",
-		Value:    token,
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   false, // Set to true in production with HTTPS
-		SameSite: http.SameSiteLaxMode,
-		MaxAge:   int(auth.TokenDuration.Seconds()),
-	})
+	h.setAuthCookie(w, token)
 
 	respondJSON(w, http.StatusOK, models.AuthResponse{
 		User:  *user,
@@ -520,10 +478,17 @@ func (h *Handler) GetUserProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get metrics
-	metrics, _ := h.db.GetUserMetrics(userID)
+	metrics, err := h.db.GetUserMetrics(userID)
+	if err != nil {
+		fmt.Printf("Error getting user metrics: %v\n", err)
+	}
 
 	// Get progress
-	progress, _ := h.db.GetUserProgress(userID)
+	progress, err := h.db.GetUserProgress(userID)
+	if err != nil {
+		fmt.Printf("Error getting user progress: %v\n", err)
+		progress = []models.Progress{}
+	}
 
 	// Count completed lessons
 	completedLessons := 0
@@ -534,7 +499,10 @@ func (h *Handler) GetUserProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get total points (all time)
-	totalPoints, _ := h.db.GetUserPoints(userID, time.Time{}, time.Now())
+	totalPoints, err := h.db.GetUserPoints(userID, time.Time{}, time.Now())
+	if err != nil {
+		fmt.Printf("Error getting user points: %v\n", err)
+	}
 
 	profile := models.UserProfile{
 		User:             *user,
@@ -560,9 +528,6 @@ func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, map[string]string{"message": "Logged out successfully"})
 }
 
-// --- Health check ---
-
-// HealthCheck returns the health status
 func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"status":  "ok",
@@ -571,9 +536,6 @@ func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// --- Badge handlers ---
-
-// CreateBadge creates a new badge
 func (h *Handler) CreateBadge(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		Name  string `json:"name"`

@@ -39,90 +39,55 @@ func InitDB(dbPath string) (*DB, error) {
 func (db *DB) createTables() error {
 	queries := []string{
 		`CREATE TABLE IF NOT EXISTS users (
-			id TEXT PRIMARY KEY,
-			username TEXT UNIQUE NOT NULL,
-			email TEXT UNIQUE,
-			password_hash TEXT,
-			display_name TEXT NOT NULL,
-			github_username TEXT UNIQUE,
-			is_guest BOOLEAN DEFAULT FALSE,
-			current_streak INTEGER DEFAULT 0,
-			last_streak_at DATETIME,
-			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			id TEXT PRIMARY KEY, username TEXT UNIQUE NOT NULL, email TEXT UNIQUE,
+			password_hash TEXT, display_name TEXT NOT NULL, github_username TEXT UNIQUE,
+			is_guest BOOLEAN DEFAULT FALSE, current_streak INTEGER DEFAULT 0,
+			last_streak_at DATETIME, created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 		)`,
 		`CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)`,
 		`CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`,
 		`CREATE TABLE IF NOT EXISTS progress (
-			id TEXT PRIMARY KEY,
-			user_id TEXT NOT NULL,
-			lesson_id TEXT NOT NULL,
-			completed BOOLEAN DEFAULT FALSE,
-			best_wpm REAL DEFAULT 0,
-			best_accuracy REAL DEFAULT 0,
-			attempts INTEGER DEFAULT 0,
-			last_attempt DATETIME,
-			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-			UNIQUE(user_id, lesson_id)
+			id TEXT PRIMARY KEY, user_id TEXT NOT NULL, lesson_id TEXT NOT NULL,
+			completed BOOLEAN DEFAULT FALSE, best_wpm REAL DEFAULT 0,
+			best_accuracy REAL DEFAULT 0, attempts INTEGER DEFAULT 0,
+			last_attempt DATETIME, created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP, UNIQUE(user_id, lesson_id)
 		)`,
 		`CREATE TABLE IF NOT EXISTS typing_metrics (
-			id TEXT PRIMARY KEY,
-			user_id TEXT NOT NULL,
-			lesson_id TEXT NOT NULL,
-			wpm REAL NOT NULL,
-			accuracy REAL NOT NULL,
-			total_time REAL NOT NULL,
-			total_chars INTEGER NOT NULL,
-			correct_chars INTEGER NOT NULL,
-			incorrect_chars INTEGER NOT NULL,
-			common_errors TEXT DEFAULT '[]',
+			id TEXT PRIMARY KEY, user_id TEXT NOT NULL, lesson_id TEXT NOT NULL,
+			wpm REAL NOT NULL, accuracy REAL NOT NULL, total_time REAL NOT NULL,
+			total_chars INTEGER NOT NULL, correct_chars INTEGER NOT NULL,
+			incorrect_chars INTEGER NOT NULL, common_errors TEXT DEFAULT '[]',
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 		)`,
 		`CREATE INDEX IF NOT EXISTS idx_progress_user ON progress(user_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_metrics_user ON typing_metrics(user_id)`,
+		`CREATE TABLE IF NOT EXISTS point_transactions (
+			id TEXT PRIMARY KEY, user_id TEXT NOT NULL, source_id TEXT,
+			points INTEGER NOT NULL, reason TEXT NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		)`,
+		`CREATE INDEX IF NOT EXISTS idx_points_user ON point_transactions(user_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_points_created_at ON point_transactions(created_at)`,
+		`CREATE TABLE IF NOT EXISTS badges (
+			id TEXT PRIMARY KEY, name TEXT UNIQUE NOT NULL, color TEXT NOT NULL,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		)`,
+		`CREATE TABLE IF NOT EXISTS user_badges (
+			user_id TEXT NOT NULL, badge_id TEXT NOT NULL, assigned_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY (user_id, badge_id),
+			FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+			FOREIGN KEY (badge_id) REFERENCES badges(id) ON DELETE CASCADE
+		)`,
+		`CREATE INDEX IF NOT EXISTS idx_user_badges_user ON user_badges(user_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_user_badges_badge ON user_badges(badge_id)`,
 	}
-
-	// Append new tables
-
-	queries = append(queries, `CREATE TABLE IF NOT EXISTS point_transactions (
-		id TEXT PRIMARY KEY,
-		user_id TEXT NOT NULL,
-		source_id TEXT,
-		points INTEGER NOT NULL,
-		reason TEXT NOT NULL,
-		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-	)`)
-
-	queries = append(queries, `CREATE INDEX IF NOT EXISTS idx_points_user ON point_transactions(user_id)`)
-	queries = append(queries, `CREATE INDEX IF NOT EXISTS idx_points_created_at ON point_transactions(created_at)`)
-
-	queries = append(queries, `CREATE TABLE IF NOT EXISTS badges (
-		id TEXT PRIMARY KEY,
-		name TEXT UNIQUE NOT NULL,
-		color TEXT NOT NULL,
-		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-	)`)
-
-	queries = append(queries, `CREATE TABLE IF NOT EXISTS user_badges (
-		user_id TEXT NOT NULL,
-		badge_id TEXT NOT NULL,
-		assigned_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		PRIMARY KEY (user_id, badge_id),
-		FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-		FOREIGN KEY (badge_id) REFERENCES badges(id) ON DELETE CASCADE
-	)`)
-
-	queries = append(queries, `CREATE INDEX IF NOT EXISTS idx_user_badges_user ON user_badges(user_id)`)
-	queries = append(queries, `CREATE INDEX IF NOT EXISTS idx_user_badges_badge ON user_badges(badge_id)`)
 
 	for _, q := range queries {
 		if _, err := db.Exec(q); err != nil {
 			return fmt.Errorf("failed to execute query: %w", err)
 		}
 	}
-
 	return nil
 }
 
@@ -166,7 +131,6 @@ func (db *DB) GetLeaderboard(startDate, endDate time.Time, limit int) ([]models.
 		}
 		entry.Rank = rank
 
-		// Load badges for this user
 		badges, err := db.GetUserBadges(entry.UserID)
 		if err != nil {
 			return nil, err
@@ -202,13 +166,11 @@ func (db *DB) GetUserPoints(userID string, startDate, endDate time.Time) (int, e
 
 // GetUserRank returns the rank of a user in a specific period
 func (db *DB) GetUserRank(userID string, startDate, endDate time.Time) (int, error) {
-	// Get the user's total points
 	userPoints, err := db.GetUserPoints(userID, startDate, endDate)
 	if err != nil {
 		return 0, err
 	}
 
-	// Count how many users have more points than this user
 	var rank int
 	err = db.QueryRow(
 		`SELECT COUNT(*) + 1 as rank
@@ -229,12 +191,8 @@ func (db *DB) GetUserRank(userID string, startDate, endDate time.Time) (int, err
 	return rank, nil
 }
 
-// --- User Management ---
-
-// CreateGuestUser creates a new guest user with auto-generated username
 func (db *DB) CreateGuestUser() (*models.User, error) {
 	id := uuid.New().String()
-	// Generate guest username: guest_ + random 7-digit number
 	guestNum := time.Now().UnixNano() % 10000000
 	username := fmt.Sprintf("guest_%07d", guestNum)
 	displayName := username
@@ -417,9 +375,9 @@ func (db *DB) SaveProgress(req models.ProgressRequest) (*models.Progress, error)
 	// Check if progress exists
 	var existing models.Progress
 	err := db.QueryRow(
-		"SELECT id, best_wpm, best_accuracy, attempts FROM progress WHERE user_id = ? AND lesson_id = ?",
+		"SELECT id, completed, best_wpm, best_accuracy, attempts FROM progress WHERE user_id = ? AND lesson_id = ?",
 		req.UserID, req.LessonID,
-	).Scan(&existing.ID, &existing.BestWPM, &existing.BestAccuracy, &existing.Attempts)
+	).Scan(&existing.ID, &existing.Completed, &existing.BestWPM, &existing.BestAccuracy, &existing.Attempts)
 
 	if err == sql.ErrNoRows {
 		// Insert new progress
@@ -458,7 +416,7 @@ func (db *DB) SaveProgress(req models.ProgressRequest) (*models.Progress, error)
 	if req.Accuracy > bestAccuracy {
 		bestAccuracy = req.Accuracy
 	}
-	completed := req.Completed || existing.BestAccuracy > 0
+	completed := req.Completed || existing.Completed
 
 	_, err = db.Exec(
 		`UPDATE progress SET completed = ?, best_wpm = ?, best_accuracy = ?, attempts = attempts + 1, last_attempt = ?, updated_at = ?
@@ -783,10 +741,10 @@ func (db *DB) InitializeBadges() error {
 		name  string
 		color string
 	}{
-		{"Beta Tester", "#FFD700"}, // Gold
+		{"Beta Tester", "#FFD700"},  // Gold
 		{"Early Access", "#C0C0C0"}, // Silver
-		{"Donator", "#FF69B4"},     // Hot Pink
-		{"Contributor", "#32CD32"}, // Lime Green
+		{"Donator", "#FF69B4"},      // Hot Pink
+		{"Contributor", "#32CD32"},  // Lime Green
 	}
 
 	for _, b := range badges {
