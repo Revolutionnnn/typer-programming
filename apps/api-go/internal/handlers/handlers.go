@@ -364,6 +364,11 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := auth.ValidatePassword(req.Password); err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
 	// Check if username already exists
 	existingUser, err := h.db.GetUserByUsername(req.Username)
 	if err == nil && existingUser != nil {
@@ -425,7 +430,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		Secure:   false, // Set to true in production with HTTPS
 		SameSite: http.SameSiteLaxMode,
-		MaxAge:   30 * 24 * 60 * 60, // 30 days
+		MaxAge:   int(auth.TokenDuration.Seconds()),
 	})
 
 	respondJSON(w, http.StatusCreated, models.AuthResponse{
@@ -477,7 +482,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		Secure:   false, // Set to true in production with HTTPS
 		SameSite: http.SameSiteLaxMode,
-		MaxAge:   30 * 24 * 60 * 60, // 30 days
+		MaxAge:   int(auth.TokenDuration.Seconds()),
 	})
 
 	respondJSON(w, http.StatusOK, models.AuthResponse{

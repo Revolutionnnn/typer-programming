@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/joho/godotenv"
 	"github.com/typing-code-learn/api-go/internal/auth"
 	"github.com/typing-code-learn/api-go/internal/database"
 	"github.com/typing-code-learn/api-go/internal/handlers"
@@ -15,6 +16,11 @@ import (
 )
 
 func main() {
+	// Load environment variables from .env file
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found, using system environment variables")
+	}
+
 	// Initialize database
 	db, err := database.InitDB("typing_code_learn.db")
 	if err != nil {
@@ -31,7 +37,11 @@ func main() {
 	log.Printf("Loaded %d lessons", lessonStore.Count())
 
 	// Create auth service
-	authService := auth.NewService()
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		log.Println("⚠️ WARNING: JWT_SECRET is not set. Using default development key.")
+	}
+	authService := auth.NewService(jwtSecret)
 
 	// Create handlers
 	h := handlers.New(db, lessonStore, authService)

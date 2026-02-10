@@ -21,18 +21,16 @@ type UserContext struct {
 // It validates the token if present and adds user info to context
 func (s *Service) AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Add some basic security headers
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.Header().Set("X-Frame-Options", "DENY")
+		w.Header().Set("X-XSS-Protection", "1; mode=block")
+
 		token := s.extractToken(r)
 		if token != "" {
 			claims, err := s.ValidateToken(token)
 			if err == nil {
-				// Add user info to context
-				userCtx := UserContext{
-					UserID:   claims.UserID,
-					Username: claims.Username,
-					IsGuest:  claims.IsGuest,
-				}
-				ctx := context.WithValue(r.Context(), UserContextKey, userCtx)
-				r = r.WithContext(ctx)
+				r = s.injectUserContext(r, claims)
 			}
 		}
 		next.ServeHTTP(w, r)
@@ -44,31 +42,40 @@ func (s *Service) RequireAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token := s.extractToken(r)
 		if token == "" {
-			http.Error(w, `{"error":"authentication required"}`, http.StatusUnauthorized)
+			respondWithError(w, http.StatusUnauthorized, "authentication required")
 			return
 		}
 
 		claims, err := s.ValidateToken(token)
 		if err != nil {
-			http.Error(w, `{"error":"invalid or expired token"}`, http.StatusUnauthorized)
+			respondWithError(w, http.StatusUnauthorized, "invalid or expired token")
 			return
 		}
 
-		// Add user info to context
-		userCtx := UserContext{
-			UserID:   claims.UserID,
-			Username: claims.Username,
-			IsGuest:  claims.IsGuest,
-		}
-		ctx := context.WithValue(r.Context(), UserContextKey, userCtx)
-		r = r.WithContext(ctx)
-
+		r = s.injectUserContext(r, claims)
 		next.ServeHTTP(w, r)
 	})
 }
 
+// injectUserContext adds the user info from claims to the request context
+func (s *Service) injectUserContext(r *http.Request, claims *Claims) *http.Request {
+	userCtx := UserContext{
+		UserID:   claims.UserID,
+		Username: claims.Username,
+		IsGuest:  claims.IsGuest,
+	}
+	ctx := context.WithValue(r.Context(), UserContextKey, userCtx)
+	return r.WithContext(ctx)
+}
+
+// respondWithError sends a JSON error response
+func respondWithError(w http.ResponseWriter, code int, message string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	_, _ = w.Write([]byte(`{"error":"` + message + `"}`))
+}
+
 // extractToken extracts JWT token from cookie or Authorization header
-func (s *Service) extractToken(r *http.Request) string {
 	// Try cookie first
 	cookie, err := r.Cookie("token")
 	if err == nil && cookie.Value != "" {

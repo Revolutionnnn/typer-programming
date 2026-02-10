@@ -40,7 +40,7 @@ const translations: Record<Locale, TranslationDict> = {
     'opensource.title': '🌟 Proyecto Open Source',
     'opensource.subtitle': '¡Contribuye y ayuda a crecer la comunidad!',
     'opensource.desc': 'Este proyecto es completamente open source. Puedes contribuir agregando nuevos ejercicios, mejorando el código, o simplemente ejecutándolo localmente.',
-    'opensource.contribute': '🤝 Contribuir',
+    'opensource.contribute': 'Contribuir',
     'opensource.github': 'Ver en GitHub',
 
     // ── Lesson List ──
@@ -204,7 +204,7 @@ const translations: Record<Locale, TranslationDict> = {
     'opensource.title': '🌟 Open Source Project',
     'opensource.subtitle': 'Contribute and help grow the community!',
     'opensource.desc': 'This project is completely open source. You can contribute by adding new exercises, improving the code, or simply running it locally.',
-    'opensource.contribute': '🤝 Contribute',
+    'opensource.contribute': 'Contribute',
     'opensource.github': 'View on GitHub',
 
     // ── Lesson List ──
