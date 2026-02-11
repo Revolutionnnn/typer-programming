@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -22,7 +23,8 @@ func main() {
 	}
 
 	// Initialize database
-	db, err := database.InitDB("typing_code_learn.db")
+	dbURL := getEnv("DATABASE_URL", "postgres://typer:typer@localhost:5432/typer?sslmode=disable")
+	db, err := database.InitDB(dbURL)
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
@@ -53,8 +55,10 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.RequestID)
+	// CORS – configurable via ALLOWED_ORIGINS env var (comma‑separated)
+	allowedOrigins := getAllowedOrigins()
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:4200", "http://localhost:3000"},
+		AllowedOrigins:   allowedOrigins,
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
 		ExposedHeaders:   []string{"Link"},
@@ -116,4 +120,16 @@ func getEnv(key, fallback string) string {
 		return value
 	}
 	return fallback
+}
+
+func getAllowedOrigins() []string {
+	raw := os.Getenv("ALLOWED_ORIGINS")
+	if raw == "" {
+		return []string{"http://localhost:4200", "http://localhost:3000"}
+	}
+	origins := strings.Split(raw, ",")
+	for i := range origins {
+		origins[i] = strings.TrimSpace(origins[i])
+	}
+	return origins
 }

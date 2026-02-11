@@ -1,8 +1,6 @@
 # ── Build stage ──
 FROM golang:1.22-alpine AS builder
 
-RUN apk add --no-cache gcc musl-dev
-
 WORKDIR /app
 
 COPY apps/api-go/go.mod apps/api-go/go.sum* ./
@@ -10,20 +8,29 @@ RUN go mod download
 
 COPY apps/api-go/ .
 
-RUN CGO_ENABLED=1 go build -o /api-server .
+RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /api-server .
 
 # ── Run stage ──
 FROM alpine:3.20
 
-RUN apk add --no-cache ca-certificates
+RUN apk add --no-cache ca-certificates curl \
+    && addgroup -S appgroup && adduser -S appuser -G appgroup
 
 WORKDIR /app
 
 COPY --from=builder /api-server .
 COPY content/ ./content/
 
+RUN chown -R appuser:appgroup /app
+
 ENV PORT=8080
 ENV CONTENT_DIR=/app/content
+ENV GIN_MODE=release
+
+USER appuser
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD curl -f http://localhost:${PORT}/api/v1/health || exit 1
 
 EXPOSE 8080
 

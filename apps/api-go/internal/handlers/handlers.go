@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -45,13 +48,18 @@ func respondError(w http.ResponseWriter, status int, message string) {
 }
 
 func (h *Handler) setAuthCookie(w http.ResponseWriter, token string) {
+	secure := os.Getenv("COOKIE_SECURE") != "false" // default true
+	sameSite := http.SameSiteLaxMode
+	if secure {
+		sameSite = http.SameSiteNoneMode
+	}
 	http.SetCookie(w, &http.Cookie{
 		Name:     "token",
 		Value:    token,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   false, // Set to true in production with HTTPS
-		SameSite: http.SameSiteLaxMode,
+		Secure:   secure,
+		SameSite: sameSite,
 		MaxAge:   int(auth.TokenDuration.Seconds()),
 	})
 }
@@ -342,14 +350,24 @@ func (h *Handler) CreateGuestUser(w http.ResponseWriter, r *http.Request) {
 
 // Register handles user registration (new user or guest conversion)
 func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, 1<<20) // 1 MB limit
+
 	var req models.RegisterRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
+	req.Username = strings.TrimSpace(req.Username)
+	req.Email = strings.TrimSpace(req.Email)
+
 	if req.Username == "" || req.Password == "" {
 		respondError(w, http.StatusBadRequest, "Username and password are required")
+		return
+	}
+
+	if err := validateUsername(req.Username); err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -412,11 +430,15 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 
 // Login authenticates a user
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, 1<<20) // 1 MB limit
+
 	var req models.LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
+
+	req.Username = strings.TrimSpace(req.Username)
 
 	user, err := h.db.GetUserByUsername(req.Username)
 	if err != nil {
@@ -534,6 +556,16 @@ func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 		"service": "typing-code-learn-api",
 		"lessons": h.lessonStore.Count(),
 	})
+}
+
+// validateUsername checks that a username is safe and well-formed
+var validUsernameRe = regexp.MustCompile(`^[a-zA-Z0-9_-]{3,30}$`)
+
+func validateUsername(username string) error {
+	if !validUsernameRe.MatchString(username) {
+		return fmt.Errorf("username must be 3-30 characters and contain only letters, numbers, _ or -")
+	}
+	return nil
 }
 
 func (h *Handler) CreateBadge(w http.ResponseWriter, r *http.Request) {

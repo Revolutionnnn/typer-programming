@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"strings"
 )
@@ -63,7 +64,8 @@ func (s *Service) injectUserContext(r *http.Request, claims *Claims) *http.Reque
 func respondWithError(w http.ResponseWriter, code int, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	_, _ = w.Write([]byte(`{"error":"` + message + `"}`))
+	response, _ := json.Marshal(map[string]string{"error": message})
+	_, _ = w.Write(response)
 }
 
 func (s *Service) extractToken(r *http.Request) string {

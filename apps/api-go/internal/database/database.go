@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/lib/pq"
 	"github.com/typing-code-learn/api-go/internal/models"
 )
 
@@ -16,11 +16,20 @@ type DB struct {
 	*sql.DB
 }
 
-// InitDB creates and initializes the SQLite database
-func InitDB(dbPath string) (*DB, error) {
-	sqlDB, err := sql.Open("sqlite3", dbPath+"?_journal=WAL&_fk=1")
+// InitDB creates and initializes the PostgreSQL database
+func InitDB(databaseURL string) (*DB, error) {
+	sqlDB, err := sql.Open("postgres", databaseURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %w", err)
+	}
+
+	// Connection pool settings
+	sqlDB.SetMaxOpenConns(25)
+	sqlDB.SetMaxIdleConns(5)
+	sqlDB.SetConnMaxLifetime(5 * time.Minute)
+
+	if err := sqlDB.Ping(); err != nil {
+		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 
 	db := &DB{sqlDB}
@@ -42,8 +51,8 @@ func (db *DB) createTables() error {
 			id TEXT PRIMARY KEY, username TEXT UNIQUE NOT NULL, email TEXT UNIQUE,
 			password_hash TEXT, display_name TEXT NOT NULL, github_username TEXT UNIQUE,
 			is_guest BOOLEAN DEFAULT FALSE, current_streak INTEGER DEFAULT 0,
-			last_streak_at DATETIME, created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+			last_streak_at TIMESTAMPTZ, created_at TIMESTAMPTZ DEFAULT NOW(),
+			updated_at TIMESTAMPTZ DEFAULT NOW()
 		)`,
 		`CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)`,
 		`CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`,
@@ -51,30 +60,30 @@ func (db *DB) createTables() error {
 			id TEXT PRIMARY KEY, user_id TEXT NOT NULL, lesson_id TEXT NOT NULL,
 			completed BOOLEAN DEFAULT FALSE, best_wpm REAL DEFAULT 0,
 			best_accuracy REAL DEFAULT 0, attempts INTEGER DEFAULT 0,
-			last_attempt DATETIME, created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP, UNIQUE(user_id, lesson_id)
+			last_attempt TIMESTAMPTZ, created_at TIMESTAMPTZ DEFAULT NOW(),
+			updated_at TIMESTAMPTZ DEFAULT NOW(), UNIQUE(user_id, lesson_id)
 		)`,
 		`CREATE TABLE IF NOT EXISTS typing_metrics (
 			id TEXT PRIMARY KEY, user_id TEXT NOT NULL, lesson_id TEXT NOT NULL,
 			wpm REAL NOT NULL, accuracy REAL NOT NULL, total_time REAL NOT NULL,
 			total_chars INTEGER NOT NULL, correct_chars INTEGER NOT NULL,
 			incorrect_chars INTEGER NOT NULL, common_errors TEXT DEFAULT '[]',
-			created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+			created_at TIMESTAMPTZ DEFAULT NOW()
 		)`,
 		`CREATE INDEX IF NOT EXISTS idx_progress_user ON progress(user_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_metrics_user ON typing_metrics(user_id)`,
 		`CREATE TABLE IF NOT EXISTS point_transactions (
 			id TEXT PRIMARY KEY, user_id TEXT NOT NULL, source_id TEXT,
-			points INTEGER NOT NULL, reason TEXT NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+			points INTEGER NOT NULL, reason TEXT NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW()
 		)`,
 		`CREATE INDEX IF NOT EXISTS idx_points_user ON point_transactions(user_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_points_created_at ON point_transactions(created_at)`,
 		`CREATE TABLE IF NOT EXISTS badges (
 			id TEXT PRIMARY KEY, name TEXT UNIQUE NOT NULL, color TEXT NOT NULL,
-			created_at DATETIME DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+			created_at TIMESTAMPTZ DEFAULT NOW(), updated_at TIMESTAMPTZ DEFAULT NOW()
 		)`,
 		`CREATE TABLE IF NOT EXISTS user_badges (
-			user_id TEXT NOT NULL, badge_id TEXT NOT NULL, assigned_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			user_id TEXT NOT NULL, badge_id TEXT NOT NULL, assigned_at TIMESTAMPTZ DEFAULT NOW(),
 			PRIMARY KEY (user_id, badge_id),
 			FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
 			FOREIGN KEY (badge_id) REFERENCES badges(id) ON DELETE CASCADE
@@ -95,7 +104,7 @@ func (db *DB) createTables() error {
 func (db *DB) SavePointTransaction(pt models.PointTransaction) error {
 	_, err := db.Exec(
 		`INSERT INTO point_transactions (id, user_id, source_id, points, reason, created_at)
-		VALUES (?, ?, ?, ?, ?, ?)`,
+		VALUES ($1, $2, $3, $4, $5, $6)`,
 		pt.ID, pt.UserID, pt.SourceID, pt.Points, pt.Reason, pt.CreatedAt,
 	)
 	return err
@@ -107,10 +116,10 @@ func (db *DB) GetLeaderboard(startDate, endDate time.Time, limit int) ([]models.
 		`SELECT pt.user_id, u.username, u.github_username, SUM(pt.points) as total_points
 		FROM point_transactions pt
 		INNER JOIN users u ON pt.user_id = u.id
-		WHERE pt.created_at BETWEEN ? AND ?
+		WHERE pt.created_at BETWEEN $1 AND $2
 		GROUP BY pt.user_id, u.username, u.github_username
 		ORDER BY total_points DESC
-		LIMIT ?`,
+		LIMIT $3`,
 		startDate, endDate, limit,
 	)
 	if err != nil {
@@ -149,7 +158,7 @@ func (db *DB) GetUserPoints(userID string, startDate, endDate time.Time) (int, e
 	var totalPoints sql.NullInt64
 	err := db.QueryRow(
 		`SELECT SUM(points) FROM point_transactions
-		WHERE user_id = ? AND created_at BETWEEN ? AND ?`,
+		WHERE user_id = $1 AND created_at BETWEEN $2 AND $3`,
 		userID, startDate, endDate,
 	).Scan(&totalPoints)
 
@@ -177,9 +186,9 @@ func (db *DB) GetUserRank(userID string, startDate, endDate time.Time) (int, err
 		FROM (
 			SELECT user_id, SUM(points) as total_points
 			FROM point_transactions
-			WHERE created_at BETWEEN ? AND ?
+			WHERE created_at BETWEEN $1 AND $2
 			GROUP BY user_id
-			HAVING SUM(points) > ?
+			HAVING SUM(points) > $3
 		) as higher_users`,
 		startDate, endDate, userPoints,
 	).Scan(&rank)
@@ -200,7 +209,7 @@ func (db *DB) CreateGuestUser() (*models.User, error) {
 
 	_, err := db.Exec(
 		`INSERT INTO users (id, username, display_name, is_guest, current_streak, created_at, updated_at)
-		VALUES (?, ?, ?, ?, ?, ?, ?)`,
+		VALUES ($1, $2, $3, $4, $5, $6, $7)`,
 		id, username, displayName, true, 0, now, now,
 	)
 	if err != nil {
@@ -224,7 +233,7 @@ func (db *DB) CreateRegisteredUser(username, email, passwordHash, displayName, g
 
 	_, err := db.Exec(
 		`INSERT INTO users (id, username, email, password_hash, display_name, github_username, is_guest, current_streak, created_at, updated_at)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
 		id, username, email, passwordHash, displayName, githubUsername, false, 0, now, now,
 	)
 	if err != nil {
@@ -258,7 +267,7 @@ func (db *DB) GetUserByID(id string) (*models.User, error) {
 
 	err := db.QueryRow(
 		`SELECT id, username, email, display_name, is_guest, current_streak, last_streak_at, created_at, updated_at
-		FROM users WHERE id = ?`,
+		FROM users WHERE id = $1`,
 		id,
 	).Scan(&user.ID, &user.Username, &email, &user.DisplayName, &user.IsGuest, &user.CurrentStreak, &user.LastStreakAt, &user.CreatedAt, &user.UpdatedAt)
 
@@ -287,7 +296,7 @@ func (db *DB) GetUserByUsername(username string) (*models.User, error) {
 
 	err := db.QueryRow(
 		`SELECT id, username, email, display_name, is_guest, current_streak, last_streak_at, created_at, updated_at
-		FROM users WHERE username = ?`,
+		FROM users WHERE username = $1`,
 		username,
 	).Scan(&user.ID, &user.Username, &email, &user.DisplayName, &user.IsGuest, &user.CurrentStreak, &user.LastStreakAt, &user.CreatedAt, &user.UpdatedAt)
 
@@ -309,7 +318,7 @@ func (db *DB) GetUserByEmail(email string) (*models.User, error) {
 
 	err := db.QueryRow(
 		`SELECT id, username, email, display_name, is_guest, current_streak, last_streak_at, created_at, updated_at
-		FROM users WHERE email = ?`,
+		FROM users WHERE email = $1`,
 		email,
 	).Scan(&user.ID, &user.Username, &emailVal, &user.DisplayName, &user.IsGuest, &user.CurrentStreak, &user.LastStreakAt, &user.CreatedAt, &user.UpdatedAt)
 
@@ -328,7 +337,7 @@ func (db *DB) GetUserByEmail(email string) (*models.User, error) {
 func (db *DB) GetPasswordHash(username string) (string, error) {
 	var hash sql.NullString
 	err := db.QueryRow(
-		`SELECT password_hash FROM users WHERE username = ?`,
+		`SELECT password_hash FROM users WHERE username = $1`,
 		username,
 	).Scan(&hash)
 
@@ -349,8 +358,8 @@ func (db *DB) ConvertGuestToRegistered(guestID, username, email, passwordHash, d
 
 	_, err := db.Exec(
 		`UPDATE users
-		SET username = ?, email = ?, password_hash = ?, display_name = ?, github_username = ?, is_guest = ?, updated_at = ?
-		WHERE id = ? AND is_guest = ?`,
+		SET username = $1, email = $2, password_hash = $3, display_name = $4, github_username = $5, is_guest = $6, updated_at = $7
+		WHERE id = $8 AND is_guest = $9`,
 		username, email, passwordHash, displayName, githubUsername, false, now, guestID, true,
 	)
 	if err != nil {
@@ -375,7 +384,7 @@ func (db *DB) SaveProgress(req models.ProgressRequest) (*models.Progress, error)
 	// Check if progress exists
 	var existing models.Progress
 	err := db.QueryRow(
-		"SELECT id, completed, best_wpm, best_accuracy, attempts FROM progress WHERE user_id = ? AND lesson_id = ?",
+		"SELECT id, completed, best_wpm, best_accuracy, attempts FROM progress WHERE user_id = $1 AND lesson_id = $2",
 		req.UserID, req.LessonID,
 	).Scan(&existing.ID, &existing.Completed, &existing.BestWPM, &existing.BestAccuracy, &existing.Attempts)
 
@@ -384,7 +393,7 @@ func (db *DB) SaveProgress(req models.ProgressRequest) (*models.Progress, error)
 		id := uuid.New().String()
 		_, err := db.Exec(
 			`INSERT INTO progress (id, user_id, lesson_id, completed, best_wpm, best_accuracy, attempts, last_attempt, created_at, updated_at)
-			VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?)`,
+			VALUES ($1, $2, $3, $4, $5, $6, 1, $7, $8, $9)`,
 			id, req.UserID, req.LessonID, req.Completed, req.WPM, req.Accuracy, now, now, now,
 		)
 		if err != nil {
@@ -419,8 +428,8 @@ func (db *DB) SaveProgress(req models.ProgressRequest) (*models.Progress, error)
 	completed := req.Completed || existing.Completed
 
 	_, err = db.Exec(
-		`UPDATE progress SET completed = ?, best_wpm = ?, best_accuracy = ?, attempts = attempts + 1, last_attempt = ?, updated_at = ?
-		WHERE id = ?`,
+		`UPDATE progress SET completed = $1, best_wpm = $2, best_accuracy = $3, attempts = attempts + 1, last_attempt = $4, updated_at = $5
+		WHERE id = $6`,
 		completed, bestWPM, bestAccuracy, now, now, existing.ID,
 	)
 	if err != nil {
@@ -444,7 +453,7 @@ func (db *DB) SaveProgress(req models.ProgressRequest) (*models.Progress, error)
 func (db *DB) GetUserProgress(userID string) ([]models.Progress, error) {
 	rows, err := db.Query(
 		`SELECT id, user_id, lesson_id, completed, best_wpm, best_accuracy, attempts, last_attempt, created_at, updated_at
-		FROM progress WHERE user_id = ? ORDER BY updated_at DESC`,
+		FROM progress WHERE user_id = $1 ORDER BY updated_at DESC`,
 		userID,
 	)
 	if err != nil {
@@ -469,7 +478,7 @@ func (db *DB) GetLessonProgress(userID, lessonID string) (*models.Progress, erro
 	var p models.Progress
 	err := db.QueryRow(
 		`SELECT id, user_id, lesson_id, completed, best_wpm, best_accuracy, attempts, last_attempt, created_at, updated_at
-		FROM progress WHERE user_id = ? AND lesson_id = ?`,
+		FROM progress WHERE user_id = $1 AND lesson_id = $2`,
 		userID, lessonID,
 	).Scan(&p.ID, &p.UserID, &p.LessonID, &p.Completed, &p.BestWPM, &p.BestAccuracy, &p.Attempts, &p.LastAttempt, &p.CreatedAt, &p.UpdatedAt)
 	if err != nil {
@@ -490,7 +499,7 @@ func (db *DB) SaveMetrics(req models.MetricsRequest) (*models.TypingMetrics, err
 
 	_, err = db.Exec(
 		`INSERT INTO typing_metrics (id, user_id, lesson_id, wpm, accuracy, total_time, total_chars, correct_chars, incorrect_chars, common_errors, created_at)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
 		id, req.UserID, req.LessonID, req.WPM, req.Accuracy, req.TotalTime,
 		req.TotalChars, req.CorrectChars, req.IncorrectChars, string(errorsJSON), now,
 	)
@@ -525,7 +534,7 @@ func (db *DB) GetUserMetrics(userID string) (*models.UserMetricsSummary, error) 
 			COUNT(*),
 			COALESCE(SUM(total_time), 0),
 			COALESCE(MAX(wpm), 0)
-		FROM typing_metrics WHERE user_id = ?`,
+		FROM typing_metrics WHERE user_id = $1`,
 		userID,
 	).Scan(&summary.AverageWPM, &summary.AverageAccuracy, &summary.TotalSessions, &summary.TotalTime, &summary.BestWPM)
 	if err != nil {
@@ -541,7 +550,7 @@ func (db *DB) UpdateUserStreak(userID string) (int, error) {
 	var lastStreakAt *time.Time
 
 	err := db.QueryRow(
-		"SELECT current_streak, last_streak_at FROM users WHERE id = ?",
+		"SELECT current_streak, last_streak_at FROM users WHERE id = $1",
 		userID,
 	).Scan(&currentStreak, &lastStreakAt)
 
@@ -574,7 +583,7 @@ func (db *DB) UpdateUserStreak(userID string) (int, error) {
 	}
 
 	_, err = db.Exec(
-		"UPDATE users SET current_streak = ?, last_streak_at = ?, updated_at = ? WHERE id = ?",
+		"UPDATE users SET current_streak = $1, last_streak_at = $2, updated_at = $3 WHERE id = $4",
 		currentStreak, now, now, userID,
 	)
 
@@ -590,7 +599,7 @@ func (db *DB) CreateBadge(name, color string) (*models.Badge, error) {
 
 	_, err := db.Exec(
 		`INSERT INTO badges (id, name, color, created_at, updated_at)
-		VALUES (?, ?, ?, ?, ?)`,
+		VALUES ($1, $2, $3, $4, $5)`,
 		id, name, color, now, now,
 	)
 	if err != nil {
@@ -611,7 +620,7 @@ func (db *DB) GetBadgeByID(id string) (*models.Badge, error) {
 	var badge models.Badge
 	err := db.QueryRow(
 		`SELECT id, name, color, created_at, updated_at
-		FROM badges WHERE id = ?`,
+		FROM badges WHERE id = $1`,
 		id,
 	).Scan(&badge.ID, &badge.Name, &badge.Color, &badge.CreatedAt, &badge.UpdatedAt)
 
@@ -627,7 +636,7 @@ func (db *DB) GetBadgeByName(name string) (*models.Badge, error) {
 	var badge models.Badge
 	err := db.QueryRow(
 		`SELECT id, name, color, created_at, updated_at
-		FROM badges WHERE name = ?`,
+		FROM badges WHERE name = $1`,
 		name,
 	).Scan(&badge.ID, &badge.Name, &badge.Color, &badge.CreatedAt, &badge.UpdatedAt)
 
@@ -665,8 +674,9 @@ func (db *DB) GetAllBadges() ([]models.Badge, error) {
 func (db *DB) AssignBadgeToUser(userID, badgeID string) error {
 	now := time.Now()
 	_, err := db.Exec(
-		`INSERT OR IGNORE INTO user_badges (user_id, badge_id, assigned_at)
-		VALUES (?, ?, ?)`,
+		`INSERT INTO user_badges (user_id, badge_id, assigned_at)
+		VALUES ($1, $2, $3)
+		ON CONFLICT DO NOTHING`,
 		userID, badgeID, now,
 	)
 	return err
@@ -675,7 +685,7 @@ func (db *DB) AssignBadgeToUser(userID, badgeID string) error {
 // RemoveBadgeFromUser removes a badge from a user
 func (db *DB) RemoveBadgeFromUser(userID, badgeID string) error {
 	_, err := db.Exec(
-		`DELETE FROM user_badges WHERE user_id = ? AND badge_id = ?`,
+		`DELETE FROM user_badges WHERE user_id = $1 AND badge_id = $2`,
 		userID, badgeID,
 	)
 	return err
@@ -687,7 +697,7 @@ func (db *DB) GetUserBadges(userID string) ([]models.BadgeWithDetails, error) {
 		`SELECT b.id, b.name, b.color, b.created_at, b.updated_at, ub.assigned_at
 		FROM badges b
 		INNER JOIN user_badges ub ON b.id = ub.badge_id
-		WHERE ub.user_id = ?
+		WHERE ub.user_id = $1
 		ORDER BY ub.assigned_at`,
 		userID,
 	)
@@ -715,7 +725,7 @@ func (db *DB) GetUserBadges(userID string) ([]models.BadgeWithDetails, error) {
 // GetUsersWithBadge returns all users who have a specific badge
 func (db *DB) GetUsersWithBadge(badgeID string) ([]string, error) {
 	rows, err := db.Query(
-		`SELECT user_id FROM user_badges WHERE badge_id = ?`,
+		`SELECT user_id FROM user_badges WHERE badge_id = $1`,
 		badgeID,
 	)
 	if err != nil {
@@ -768,7 +778,7 @@ func (db *DB) assignAutomaticBadges(user *models.User) error {
 	// Count registered users (non-guests) created before this user
 	var count int
 	err := db.QueryRow(
-		`SELECT COUNT(*) FROM users WHERE is_guest = 0 AND created_at < ?`,
+		`SELECT COUNT(*) FROM users WHERE is_guest = false AND created_at < $1`,
 		user.CreatedAt,
 	).Scan(&count)
 

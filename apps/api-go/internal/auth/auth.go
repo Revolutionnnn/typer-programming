@@ -2,7 +2,9 @@ package auth
 
 import (
 	"errors"
+	"strings"
 	"time"
+	"unicode"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/typing-code-learn/api-go/internal/models"
@@ -106,6 +108,26 @@ func ValidatePassword(password string) error {
 	if len(password) < 8 {
 		return errors.New("password must be at least 8 characters long")
 	}
-	// Add more complex checks here if needed (uppercase, numbers, etc.)
+	if len(password) > 72 {
+		// bcrypt truncates at 72 bytes
+		return errors.New("password must be at most 72 characters long")
+	}
+	if strings.TrimSpace(password) != password {
+		return errors.New("password must not start or end with whitespace")
+	}
+	var hasUpper, hasLower, hasDigit bool
+	for _, c := range password {
+		switch {
+		case unicode.IsUpper(c):
+			hasUpper = true
+		case unicode.IsLower(c):
+			hasLower = true
+		case unicode.IsDigit(c):
+			hasDigit = true
+		}
+	}
+	if !hasUpper || !hasLower || !hasDigit {
+		return errors.New("password must contain at least one uppercase letter, one lowercase letter, and one digit")
+	}
 	return nil
 }
