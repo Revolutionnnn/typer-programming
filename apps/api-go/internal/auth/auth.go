@@ -14,6 +14,8 @@ import (
 const (
 	// TokenDuration is the lifetime of a JWT token
 	TokenDuration = 24 * time.Hour
+	// MinSecretLength is a minimal recommended size for HMAC secrets.
+	MinSecretLength = 32
 )
 
 var (
@@ -36,6 +38,10 @@ func NewService(secret string) *Service {
 	return &Service{
 		secretKey: []byte(secret),
 	}
+}
+
+func IsStrongEnoughSecret(secret string) bool {
+	return len(secret) >= MinSecretLength
 }
 
 // Claims represents JWT claims

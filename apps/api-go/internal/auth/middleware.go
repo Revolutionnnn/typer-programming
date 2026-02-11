@@ -83,5 +83,8 @@ func (s *Service) extractToken(r *http.Request) string {
 
 func GetUserFromContext(ctx context.Context) (*UserContext, bool) {
 	user, ok := ctx.Value(UserContextKey).(UserContext)
-	return &user, ok
+	if !ok {
+		return nil, false
+	}
+	return &user, true
 }

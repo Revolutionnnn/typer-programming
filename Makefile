@@ -14,6 +14,11 @@ CYAN  := \033[36m
 GREEN := \033[32m
 RESET := \033[0m
 
+# ── Container engine / compose ──
+# Auto-detect: prefer podman, fallback to docker, then docker-compose.
+ENGINE := $(shell if command -v podman >/dev/null 2>&1; then echo podman; elif command -v docker >/dev/null 2>&1; then echo docker; else echo ""; fi)
+COMPOSE := $(shell if command -v podman >/dev/null 2>&1; then echo "podman compose"; elif command -v docker >/dev/null 2>&1; then echo "docker compose"; elif command -v docker-compose >/dev/null 2>&1; then echo "docker-compose"; else echo ""; fi)
+
 help: ## Mostrar esta ayuda
 	@echo ""
 	@echo "$(CYAN)═══ Typing Code Learn ═══$(RESET)"
@@ -28,16 +33,20 @@ help: ## Mostrar esta ayuda
 
 dev: ## Levantar en modo desarrollo (hot‑reload)
 	@echo "$(CYAN)▶ Levantando entorno de DESARROLLO...$(RESET)"
-	podman compose --env-file .env.dev up --build
+	@if [ -z "$(COMPOSE)" ]; then echo "No se encontró podman/docker/docker-compose en PATH"; exit 127; fi
+	$(COMPOSE) --env-file .env.dev up --build
 
 dev-build: ## Reconstruir imágenes de desarrollo
-	podman compose --env-file .env.dev build --no-cache
+	@if [ -z "$(COMPOSE)" ]; then echo "No se encontró podman/docker/docker-compose en PATH"; exit 127; fi
+	$(COMPOSE) --env-file .env.dev build --no-cache
 
 dev-down: ## Parar entorno de desarrollo
-	podman compose --env-file .env.dev down
+	@if [ -z "$(COMPOSE)" ]; then echo "No se encontró podman/docker/docker-compose en PATH"; exit 127; fi
+	$(COMPOSE) --env-file .env.dev down
 
 dev-detach: ## Levantar dev en background
-	podman compose --env-file .env.dev up --build -d
+	@if [ -z "$(COMPOSE)" ]; then echo "No se encontró podman/docker/docker-compose en PATH"; exit 127; fi
+	$(COMPOSE) --env-file .env.dev up --build -d
 
 # ─────────────────────────────────────────────
 #  Production
@@ -50,49 +59,61 @@ prod: ## Levantar en modo producción
 		cp .env.prod.example .env.prod; \
 		echo "$(GREEN)   Edita .env.prod con tus valores reales antes de exponer a internet.$(RESET)"; \
 	fi
-	podman compose -f docker-compose.prod.yml --env-file .env.prod up --build -d
+	@if [ -z "$(COMPOSE)" ]; then echo "No se encontró podman/docker/docker-compose en PATH"; exit 127; fi
+	$(COMPOSE) -f docker-compose.prod.yml --env-file .env.prod up --build -d
 
 prod-build: ## Reconstruir imágenes de producción
-	podman compose -f docker-compose.prod.yml --env-file .env.prod build --no-cache
+	@if [ -z "$(COMPOSE)" ]; then echo "No se encontró podman/docker/docker-compose en PATH"; exit 127; fi
+	$(COMPOSE) -f docker-compose.prod.yml --env-file .env.prod build --no-cache
 
 prod-down: ## Parar entorno de producción
-	podman compose -f docker-compose.prod.yml --env-file .env.prod down
+	@if [ -z "$(COMPOSE)" ]; then echo "No se encontró podman/docker/docker-compose en PATH"; exit 127; fi
+	$(COMPOSE) -f docker-compose.prod.yml --env-file .env.prod down
 
 # ─────────────────────────────────────────────
 #  Utilidades
 # ─────────────────────────────────────────────
 
 down: ## Parar TODOS los contenedores (dev + prod)
-	podman compose --env-file .env.dev down 2>/dev/null || true
-	podman compose -f docker-compose.prod.yml --env-file .env.prod down 2>/dev/null || true
+	@if [ -z "$(COMPOSE)" ]; then echo "No se encontró podman/docker/docker-compose en PATH"; exit 127; fi
+	$(COMPOSE) --env-file .env.dev down 2>/dev/null || true
+	$(COMPOSE) -f docker-compose.prod.yml --env-file .env.prod down 2>/dev/null || true
 
 logs: ## Ver logs en tiempo real (dev)
-	podman compose --env-file .env.dev logs -f
+	@if [ -z "$(COMPOSE)" ]; then echo "No se encontró podman/docker/docker-compose en PATH"; exit 127; fi
+	$(COMPOSE) --env-file .env.dev logs -f
 
 logs-prod: ## Ver logs en tiempo real (prod)
-	podman compose -f docker-compose.prod.yml --env-file .env.prod logs -f
+	@if [ -z "$(COMPOSE)" ]; then echo "No se encontró podman/docker/docker-compose en PATH"; exit 127; fi
+	$(COMPOSE) -f docker-compose.prod.yml --env-file .env.prod logs -f
 
 logs-api: ## Ver logs solo de la API
-	podman compose --env-file .env.dev logs -f api
+	@if [ -z "$(COMPOSE)" ]; then echo "No se encontró podman/docker/docker-compose en PATH"; exit 127; fi
+	$(COMPOSE) --env-file .env.dev logs -f api
 
 logs-web: ## Ver logs solo del frontend
-	podman compose --env-file .env.dev logs -f web
+	@if [ -z "$(COMPOSE)" ]; then echo "No se encontró podman/docker/docker-compose en PATH"; exit 127; fi
+	$(COMPOSE) --env-file .env.dev logs -f web
 
 status: ## Ver estado de los contenedores
 	@echo "$(CYAN)── Desarrollo ──$(RESET)"
-	@podman compose --env-file .env.dev ps 2>/dev/null || echo "  (no hay contenedores de dev)"
+	@if [ -z "$(COMPOSE)" ]; then echo "No se encontró podman/docker/docker-compose en PATH"; exit 127; fi
+	@$(COMPOSE) --env-file .env.dev ps 2>/dev/null || echo "  (no hay contenedores de dev)"
 	@echo ""
 	@echo "$(CYAN)── Producción ──$(RESET)"
-	@podman compose -f docker-compose.prod.yml --env-file .env.prod ps 2>/dev/null || echo "  (no hay contenedores de prod)"
+	@$(COMPOSE) -f docker-compose.prod.yml --env-file .env.prod ps 2>/dev/null || echo "  (no hay contenedores de prod)"
 
 restart-api: ## Reiniciar solo la API (dev)
-	podman compose --env-file .env.dev restart api
+	@if [ -z "$(COMPOSE)" ]; then echo "No se encontró podman/docker/docker-compose en PATH"; exit 127; fi
+	$(COMPOSE) --env-file .env.dev restart api
 
 restart-web: ## Reiniciar solo el frontend (dev)
-	podman compose --env-file .env.dev restart web
+	@if [ -z "$(COMPOSE)" ]; then echo "No se encontró podman/docker/docker-compose en PATH"; exit 127; fi
+	$(COMPOSE) --env-file .env.dev restart web
 
 clean: ## Limpiar imágenes, volúmenes y cache de podman
 	@echo "$(CYAN)▶ Limpiando todo...$(RESET)"
-	podman compose --env-file .env.dev down -v --rmi local 2>/dev/null || true
-	podman compose -f docker-compose.prod.yml --env-file .env.prod down -v --rmi local 2>/dev/null || true
-	podman system prune -f
+	@if [ -z "$(COMPOSE)" ]; then echo "No se encontró podman/docker/docker-compose en PATH"; exit 127; fi
+	$(COMPOSE) --env-file .env.dev down -v --rmi local 2>/dev/null || true
+	$(COMPOSE) -f docker-compose.prod.yml --env-file .env.prod down -v --rmi local 2>/dev/null || true
+	@if [ -n "$(ENGINE)" ]; then $(ENGINE) system prune -f; fi

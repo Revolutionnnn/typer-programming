@@ -64,6 +64,24 @@ func (h *Handler) setAuthCookie(w http.ResponseWriter, token string) {
 	})
 }
 
+func (h *Handler) clearAuthCookie(w http.ResponseWriter) {
+	secure := os.Getenv("COOKIE_SECURE") != "false" // default true
+	sameSite := http.SameSiteLaxMode
+	if secure {
+		sameSite = http.SameSiteNoneMode
+	}
+	http.SetCookie(w, &http.Cookie{
+		Name:     "token",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   secure,
+		SameSite: sameSite,
+		MaxAge:   -1,
+		Expires:  time.Unix(0, 0),
+	})
+}
+
 func (h *Handler) ListLessons(w http.ResponseWriter, r *http.Request) {
 	lang := r.URL.Query().Get("lang")
 	allLessons := h.lessonStore.All()
@@ -123,11 +141,22 @@ func (h *Handler) localizeLesson(l *models.Lesson, lang string) {
 }
 
 func (h *Handler) SaveProgress(w http.ResponseWriter, r *http.Request) {
+	userCtx, ok := auth.GetUserFromContext(r.Context())
+	if !ok {
+		respondError(w, http.StatusUnauthorized, "Not authenticated")
+		return
+	}
+
 	var req models.ProgressRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
+	if req.UserID != "" && req.UserID != userCtx.UserID {
+		respondError(w, http.StatusForbidden, "Cannot write progress for another user")
+		return
+	}
+	req.UserID = userCtx.UserID
 
 	if req.UserID == "" || req.LessonID == "" {
 		respondError(w, http.StatusBadRequest, "userId and lessonId are required")
@@ -145,7 +174,16 @@ func (h *Handler) SaveProgress(w http.ResponseWriter, r *http.Request) {
 
 // GetUserProgress returns all progress for a user
 func (h *Handler) GetUserProgress(w http.ResponseWriter, r *http.Request) {
+	userCtx, ok := auth.GetUserFromContext(r.Context())
+	if !ok {
+		respondError(w, http.StatusUnauthorized, "Not authenticated")
+		return
+	}
 	userID := chi.URLParam(r, "userId")
+	if userID != userCtx.UserID {
+		respondError(w, http.StatusForbidden, "Cannot read progress for another user")
+		return
+	}
 	progress, err := h.db.GetUserProgress(userID)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to get progress")
@@ -159,7 +197,16 @@ func (h *Handler) GetUserProgress(w http.ResponseWriter, r *http.Request) {
 
 // GetLessonProgress returns progress for a specific lesson
 func (h *Handler) GetLessonProgress(w http.ResponseWriter, r *http.Request) {
+	userCtx, ok := auth.GetUserFromContext(r.Context())
+	if !ok {
+		respondError(w, http.StatusUnauthorized, "Not authenticated")
+		return
+	}
 	userID := chi.URLParam(r, "userId")
+	if userID != userCtx.UserID {
+		respondError(w, http.StatusForbidden, "Cannot read progress for another user")
+		return
+	}
 	lessonID := chi.URLParam(r, "lessonId")
 
 	progress, err := h.db.GetLessonProgress(userID, lessonID)
@@ -181,11 +228,22 @@ func (h *Handler) GetLessonProgress(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) SaveMetrics(w http.ResponseWriter, r *http.Request) {
+	userCtx, ok := auth.GetUserFromContext(r.Context())
+	if !ok {
+		respondError(w, http.StatusUnauthorized, "Not authenticated")
+		return
+	}
+
 	var req models.MetricsRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
+	if req.UserID != "" && req.UserID != userCtx.UserID {
+		respondError(w, http.StatusForbidden, "Cannot write metrics for another user")
+		return
+	}
+	req.UserID = userCtx.UserID
 
 	if req.UserID == "" || req.LessonID == "" {
 		respondError(w, http.StatusBadRequest, "userId and lessonId are required")
@@ -310,7 +368,16 @@ func (h *Handler) GetUserRank(w http.ResponseWriter, r *http.Request) {
 
 // GetUserMetrics returns aggregated metrics for a user
 func (h *Handler) GetUserMetrics(w http.ResponseWriter, r *http.Request) {
+	userCtx, ok := auth.GetUserFromContext(r.Context())
+	if !ok {
+		respondError(w, http.StatusUnauthorized, "Not authenticated")
+		return
+	}
 	userID := chi.URLParam(r, "userId")
+	if userID != userCtx.UserID {
+		respondError(w, http.StatusForbidden, "Cannot read metrics for another user")
+		return
+	}
 	summary, err := h.db.GetUserMetrics(userID)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to get metrics")
@@ -526,8 +593,10 @@ func (h *Handler) GetUserProfile(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("Error getting user points: %v\n", err)
 	}
 
+	publicUser := *user
+	publicUser.Email = nil
 	profile := models.UserProfile{
-		User:             *user,
+		User:             publicUser,
 		Metrics:          metrics,
 		Progress:         progress,
 		CompletedLessons: completedLessons,
@@ -539,13 +608,7 @@ func (h *Handler) GetUserProfile(w http.ResponseWriter, r *http.Request) {
 
 // Logout clears the authentication cookie
 func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
-	http.SetCookie(w, &http.Cookie{
-		Name:     "token",
-		Value:    "",
-		Path:     "/",
-		HttpOnly: true,
-		MaxAge:   -1, // Delete cookie
-	})
+	h.clearAuthCookie(w)
 
 	respondJSON(w, http.StatusOK, map[string]string{"message": "Logged out successfully"})
 }

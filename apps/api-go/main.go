@@ -1,10 +1,14 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -39,8 +43,16 @@ func main() {
 	log.Printf("Loaded %d lessons", lessonStore.Count())
 
 	// Create auth service
+	appEnv := strings.ToLower(strings.TrimSpace(getEnv("APP_ENV", getEnv("ENV", getEnv("GO_ENV", "development")))))
 	jwtSecret := os.Getenv("JWT_SECRET")
-	if jwtSecret == "" {
+	if appEnv == "production" || appEnv == "prod" {
+		if jwtSecret == "" {
+			log.Fatal("JWT_SECRET is required in production")
+		}
+		if !auth.IsStrongEnoughSecret(jwtSecret) {
+			log.Fatalf("JWT_SECRET must be at least %d characters", auth.MinSecretLength)
+		}
+	} else if jwtSecret == "" {
 		log.Println("⚠️ WARNING: JWT_SECRET is not set. Using default development key.")
 	}
 	authService := auth.NewService(jwtSecret)
@@ -87,13 +99,13 @@ func main() {
 		r.Get("/lessons/language/{language}", h.GetLessonsByLanguage)
 
 		// Progress
-		r.Post("/progress", h.SaveProgress)
-		r.Get("/progress/{userId}", h.GetUserProgress)
-		r.Get("/progress/{userId}/{lessonId}", h.GetLessonProgress)
+		r.With(authService.RequireAuth).Post("/progress", h.SaveProgress)
+		r.With(authService.RequireAuth).Get("/progress/{userId}", h.GetUserProgress)
+		r.With(authService.RequireAuth).Get("/progress/{userId}/{lessonId}", h.GetLessonProgress)
 
 		// Metrics
-		r.Post("/metrics", h.SaveMetrics)
-		r.Get("/metrics/{userId}", h.GetUserMetrics)
+		r.With(authService.RequireAuth).Post("/metrics", h.SaveMetrics)
+		r.With(authService.RequireAuth).Get("/metrics/{userId}", h.GetUserMetrics)
 		r.Get("/leaderboard", h.GetLeaderboard)
 		r.With(authService.RequireAuth).Get("/leaderboard/rank", h.GetUserRank)
 
@@ -111,8 +123,37 @@ func main() {
 	})
 
 	port := getEnv("PORT", "8080")
+	srv := &http.Server{
+		Addr:              ":" + port,
+		Handler:           r,
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       15 * time.Second,
+		WriteTimeout:      15 * time.Second,
+		IdleTimeout:       60 * time.Second,
+	}
+
 	log.Printf("🚀 Typing Code Learn API running on http://localhost:%s", port)
-	log.Fatal(http.ListenAndServe(":"+port, r))
+	serverErr := make(chan error, 1)
+	go func() {
+		serverErr <- srv.ListenAndServe()
+	}()
+
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
+
+	select {
+	case <-stop:
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		_ = srv.Shutdown(ctx)
+		log.Println("Server stopped")
+		return
+	case err := <-serverErr:
+		if err == nil || err == http.ErrServerClosed {
+			return
+		}
+		log.Fatal(err)
+	}
 }
 
 func getEnv(key, fallback string) string {
