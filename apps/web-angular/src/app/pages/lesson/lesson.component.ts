@@ -7,12 +7,15 @@ import { TypingEngineService } from '../../services/typing-engine.service';
 import { UserService } from '../../services/user.service';
 import { I18nService } from '../../services/i18n.service';
 import { Lesson } from '../../models/lesson.model';
+import { User } from '../../models/user.model';
 import { TypingEditorComponent } from '../../components/typing-editor/typing-editor.component';
+import { ShareComponent } from '../../components/share/share.component';
+import { UserRankComponent } from '../../components/user-rank/user-rank.component';
 
 @Component({
   selector: 'app-lesson',
   standalone: true,
-  imports: [CommonModule, RouterLink, TypingEditorComponent],
+  imports: [CommonModule, RouterLink, TypingEditorComponent, ShareComponent, UserRankComponent],
   template: `
     <div class="lesson container">
       @if (loading) {
@@ -68,8 +71,7 @@ import { TypingEditorComponent } from '../../components/typing-editor/typing-edi
         <!-- Typing Editor -->
         @if (showEditor && !showResults) {
           <app-typing-editor
-            [code]="lesson.code"
-            [mode]="lesson.mode"
+            [lesson]="lesson"
             (completed)="onCompleted()"
           />
         }
@@ -96,10 +98,22 @@ import { TypingEditorComponent } from '../../components/typing-editor/typing-edi
                 <span class="result-item__value">{{ metrics.incorrectChars }}</span>
                 <span class="result-item__label">{{ i18n.t('lesson.errors') }}</span>
               </div>
+              <div class="result-item">
+                <span class="result-item__value">{{ pointsEarned }}</span>
+                <span class="result-item__label">{{ i18n.t('lesson.points') }}</span>
+              </div>
             </div>
+
+            <app-user-rank [showOnComplete]="true" />
 
             <div class="results__actions">
               <button class="btn" (click)="retry()">{{ i18n.t('lesson.retry') }}</button>
+              <app-share
+                [lessonTitle]="lesson.title"
+                [wpm]="metrics.wpm"
+                [accuracy]="metrics.accuracy"
+                [streak]="currentUser?.currentStreak || 0"
+              />
               <a routerLink="/lessons" class="btn btn--primary">
                 {{ i18n.t('lesson.next') }}
               </a>
@@ -257,6 +271,7 @@ export class LessonComponent implements OnInit {
   error = '';
   showEditor = false;
   showResults = false;
+  currentUser: User | null = this.userService.getCurrentUser();
 
   metrics = {
     wpm: 0,
@@ -266,6 +281,7 @@ export class LessonComponent implements OnInit {
     correctChars: 0,
     incorrectChars: 0,
   };
+  pointsEarned = 0;
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -322,6 +338,11 @@ export class LessonComponent implements OnInit {
           this.lesson.id
         );
         this.progressService.saveMetrics(metricsReq).subscribe({
+          next: (res: any) => {
+            this.pointsEarned = res.pointsEarned || 0;
+            // Refresh user data to update streak
+            this.userService.initializeUser();
+          },
           error: (err) => console.error('Failed to save metrics:', err),
         });
       }

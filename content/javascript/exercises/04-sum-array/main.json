@@ -1,0 +1,33 @@
+{
+    "id": "js-sum-array-exercise-04",
+    "title": "Sumar Array",
+    "title_en": "Sum Array",
+    "language": "javascript",
+    "concept": "arrays",
+    "description": "Trabaja con arrays: suma pares, suma total, encuentra máximo.",
+    "description_en": "Work with arrays: sum evens, total sum, find max.",
+    "explanation": [
+        "Implementa funciones para procesar arrays.",
+        "Suma solo números pares, suma total con reduce, encuentra máximo.",
+        "Usa bucles y métodos de array."
+    ],
+    "explanation_en": [
+        "Implement functions to process arrays.",
+        "Sum only even numbers, total sum with reduce, find max.",
+        "Use loops and array methods."
+    ],
+    "exclude": [
+        "function",
+        "for",
+        "return",
+        "console.log"
+    ],
+    "mode": "practice",
+    "difficulty": "basic",
+    "order": 4,
+    "tags": [
+        "exercises",
+        "arrays",
+        "algorithms"
+    ]
+}

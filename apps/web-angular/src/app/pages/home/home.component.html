@@ -1,0 +1,162 @@
+<div class="home container">
+  <section class="hero">
+    <div class="hero__badge">
+      <span class="badge-new">New</span> {{ i18n.t('home.languages.title') }}
+    </div>
+    <h1 class="hero__title">
+      {{ i18n.t('home.title') }}
+      <span class="hero__highlight">{{ i18n.t('home.title.highlight') }}</span>
+    </h1>
+    <a 
+      href="https://github.com/Revolutionnnn/typer-programming"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="hero__badge badge-link" 
+      style="margin-top: 1rem; text-decoration: none;"
+    >
+      <span class="badge-opensource">{{ i18n.t('home.opensource.badge') }}</span>
+    </a>
+    <p class="hero__subtitle">
+      {{ i18n.t('home.subtitle') }}
+    </p>
+    <div class="hero__actions">
+      <a routerLink="/lessons" class="btn btn--primary btn--lg btn--glow">
+        {{ i18n.t('home.cta') }}
+      </a>
+      <a routerLink="/leaderboard" class="btn btn--outline btn--lg">
+        {{ i18n.t('nav.leaderboard') }}
+      </a>
+    </div>
+  </section>
+
+  <section class="features">
+    <div class="feature card">
+      <div class="feature__icon-wrapper">
+        <div class="feature__icon"><lucide-icon [img]="icons.Keyboard" [size]="28"></lucide-icon></div>
+      </div>
+      <h3 class="feature__title">{{ i18n.t('home.feature.typing.title') }}</h3>
+      <p class="feature__desc">
+        {{ i18n.t('home.feature.typing.desc') }}
+      </p>
+    </div>
+
+    <div class="feature card">
+      <div class="feature__icon-wrapper">
+        <div class="feature__icon"><lucide-icon [img]="icons.BarChart2" [size]="28"></lucide-icon></div>
+      </div>
+      <h3 class="feature__title">{{ i18n.t('home.feature.metrics.title') }}</h3>
+      <p class="feature__desc">
+        {{ i18n.t('home.feature.metrics.desc') }}
+      </p>
+    </div>
+
+    <div class="feature card">
+      <div class="feature__icon-wrapper">
+        <div class="feature__icon"><lucide-icon [img]="icons.BrainCircuit" [size]="28"></lucide-icon></div>
+      </div>
+      <h3 class="feature__title">{{ i18n.t('home.feature.concepts.title') }}</h3>
+      <p class="feature__desc">
+        {{ i18n.t('home.feature.concepts.desc') }}
+      </p>
+    </div>
+
+    <div class="feature card">
+      <div class="feature__icon-wrapper">
+        <div class="feature__icon"><lucide-icon [img]="icons.Crosshair" [size]="28"></lucide-icon></div>
+      </div>
+      <h3 class="feature__title">{{ i18n.t('home.feature.progressive.title') }}</h3>
+      <p class="feature__desc">
+        {{ i18n.t('home.feature.progressive.desc') }}
+      </p>
+    </div>
+  </section>
+
+  <section class="languages">
+    <div class="section-header">
+      <h2 class="languages__title">{{ i18n.t('home.languages.title') }}</h2>
+      <p class="section-desc">Choose your path and start mastering syntax</p>
+    </div>
+    
+    <div class="languages__grid">
+      @for (lang of languages; track lang.id) {
+        <a
+          [routerLink]="lang.soon ? null : ['/lessons']"
+          [queryParams]="lang.soon ? null : { lang: lang.id }"
+          class="lang-card card"
+          [class.lang-card--soon]="lang.soon"
+          [style]="getLangStyle(lang.id)"
+        >
+          <div class="lang-card__header">
+            <span class="lang-card__icon">{{ lang.icon }}</span>
+            <span class="badge badge--beginner" [class.badge--soon]="lang.soon">
+              {{ lang.soon ? i18n.t('home.languages.soon') : i18n.t('home.languages.available') }}
+            </span>
+          </div>
+          <div class="lang-card__content">
+            <h3>{{ lang.name }}</h3>
+            <p>{{ lang.soon ? i18n.t('home.languages.soon') : (lang.lessonCount + ' ' + i18n.t('home.lessons.count')) }}</p>
+          </div>
+          <div class="lang-card__footer">
+            <span class="link-arrow">
+              {{ lang.soon ? i18n.t('home.languages.soon') : 'Start Learning' }}
+              @if (!lang.soon) {
+                <lucide-icon [img]="icons.ArrowRight" [size]="14" style="vertical-align: middle;"></lucide-icon>
+              }
+            </span>
+          </div>
+        </a>
+      }
+      @if (languages.length === 0 && !loadingLangs) {
+        <div class="lang-card card lang-card--soon">
+          <span class="lang-card__icon"><lucide-icon [img]="icons.Timer" [size]="32"></lucide-icon></span>
+          <h3>{{ i18n.t('home.languages.loading') }}</h3>
+          <p>{{ i18n.t('home.languages.connecting') }}</p>
+        </div>
+      }
+    </div>
+  </section>
+
+  <section class="opensource">
+    <div class="opensource__content card">
+      <div class="opensource__grid">
+        <div class="opensource__info">
+          <h2 class="opensource__title">{{ i18n.t('opensource.title') }}</h2>
+          <p class="opensource__subtitle">{{ i18n.t('opensource.subtitle') }}</p>
+          <p class="opensource__desc">
+            {{ i18n.t('opensource.desc') }}
+          </p>
+          <div class="opensource__actions">
+            <a
+              href="https://github.com/Revolutionnnn/typer-programming"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn btn--primary"
+            >
+              <span class="btn__icon"><lucide-icon [img]="icons.Github" [size]="18"></lucide-icon></span>
+              {{ i18n.t('opensource.github') }}
+            </a>
+            <a
+              href="https://github.com/Revolutionnnn/typer-programming/blob/main/CONTRIBUTING.md"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn btn--secondary"
+            >
+              <span class="btn__icon"><lucide-icon [img]="icons.HeartHandshake" [size]="18"></lucide-icon></span>
+              {{ i18n.t('opensource.contribute') }}
+            </a>
+          </div>
+        </div>
+        <div class="opensource__stats">
+           <div class="stat-item">
+             <span class="stat-value">AGPL-3.0</span>
+             <span class="stat-label">License</span>
+           </div>
+           <div class="stat-item">
+             <span class="stat-value">100%</span>
+             <span class="stat-label">Open Source</span>
+           </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

@@ -1,0 +1,29 @@
+{
+    "id": "py-hello-world-01",
+    "title": "Hola Mundo en Python",
+    "title_en": "Hello World in Python",
+    "language": "python",
+    "concept": "hello-world",
+    "description": "Escribe tu primer programa en Python.",
+    "description_en": "Write your first Python program.",
+    "explanation": [
+        "Python es conocido por su sintaxis limpia y legible.",
+        "Para imprimir texto, usamos la función 'print()'.",
+        "A diferencia de otros lenguajes, no necesita punto y coma ni llaves para bloques simples."
+    ],
+    "explanation_en": [
+        "Python is known for its clean and readable syntax.",
+        "To print text, we use the 'print()' function.",
+        "Unlike other languages, it doesn't need semicolons or braces for simple blocks."
+    ],
+    "exclude": [
+        "print"
+    ],
+    "mode": "practice",
+    "difficulty": "beginner",
+    "order": 1,
+    "tags": [
+        "basics",
+        "hello-world"
+    ]
+}

@@ -1,0 +1,34 @@
+{
+    "id": "go-constants-01",
+    "title": "Constantes en Go",
+    "title_en": "Constants in Go",
+    "language": "go",
+    "concept": "constants",
+    "description": "Aprende a declarar constantes que no cambian.",
+    "description_en": "Learn how to declare constants that do not change.",
+    "explanation": [
+        "Las constantes se declaran con la palabra reservada 'const' en lugar de 'var'.",
+        "Una constante no puede cambiar su valor después de ser asignada.",
+        "Se usan para valores fijos como PI, configuraciones o textos que nunca cambian.",
+        "A diferencia de 'var', con 'const' no se puede usar ':='."
+    ],
+    "explanation_en": [
+        "Constants are declared with the reserved word 'const' instead of 'var'.",
+        "A constant cannot change its value after being assigned.",
+        "They are used for fixed values like PI, configurations, or texts that never change.",
+        "Unlike 'var', you cannot use ':=' with 'const'."
+    ],
+    "exclude": [
+        "package",
+        "import",
+        "func",
+        "const"
+    ],
+    "mode": "strict",
+    "difficulty": "beginner",
+    "order": 4,
+    "tags": [
+        "basics",
+        "constants"
+    ]
+}

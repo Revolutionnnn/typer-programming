@@ -28,6 +28,20 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'leaderboard',
+    loadComponent: () =>
+      import('./pages/leaderboard/leaderboard.component').then(
+        (m) => m.LeaderboardPageComponent
+      ),
+  },
+  {
+    path: 'user/:id',
+    loadComponent: () =>
+      import('./pages/user-profile/user-profile.component').then(
+        (m) => m.UserProfileComponent
+      ),
+  },
+  {
     path: '**',
     redirectTo: '',
   },

@@ -1,0 +1,33 @@
+{
+    "id": "py-classes-01",
+    "title": "Clases en Python",
+    "title_en": "Classes in Python",
+    "language": "python",
+    "concept": "classes",
+    "description": "Aprende a definir y usar clases en Python.",
+    "description_en": "Learn to define and use classes in Python.",
+    "explanation": [
+        "Las clases son plantillas para objetos.",
+        "Usa 'class' para definir, '__init__' para inicializar.",
+        "Los métodos son funciones dentro de clases."
+    ],
+    "explanation_en": [
+        "Classes are templates for objects.",
+        "Use 'class' to define, '__init__' to initialize.",
+        "Methods are functions inside classes."
+    ],
+    "exclude": [
+        "class",
+        "def",
+        "__init__",
+        "self"
+    ],
+    "mode": "practice",
+    "difficulty": "intermediate",
+    "order": 1,
+    "tags": [
+        "intermediate",
+        "oop",
+        "classes"
+    ]
+}

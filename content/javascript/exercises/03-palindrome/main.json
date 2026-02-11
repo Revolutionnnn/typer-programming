@@ -1,0 +1,33 @@
+{
+    "id": "js-palindrome-exercise-03",
+    "title": "Verificar Palíndromo",
+    "title_en": "Palindrome Check",
+    "language": "javascript",
+    "concept": "strings",
+    "description": "Verifica si una cadena es un palíndromo.",
+    "description_en": "Check if a string is a palindrome.",
+    "explanation": [
+        "Un palíndromo se lee igual al derecho y al revés.",
+        "Ignora mayúsculas y minúsculas.",
+        "Ejemplo: 'ana' es palíndromo."
+    ],
+    "explanation_en": [
+        "A palindrome reads the same forwards and backwards.",
+        "Ignore case.",
+        "Example: 'ana' is a palindrome."
+    ],
+    "exclude": [
+        "function",
+        "if",
+        "return",
+        "console.log"
+    ],
+    "mode": "practice",
+    "difficulty": "basic",
+    "order": 3,
+    "tags": [
+        "exercises",
+        "strings",
+        "algorithms"
+    ]
+}

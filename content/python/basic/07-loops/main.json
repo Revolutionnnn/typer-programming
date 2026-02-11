@@ -1,0 +1,32 @@
+{
+    "id": "py-loops-07",
+    "title": "Bucles en Python",
+    "title_en": "Loops in Python",
+    "language": "python",
+    "concept": "loops",
+    "description": "Aprende a usar bucles for y while en Python.",
+    "description_en": "Learn to use for and while loops in Python.",
+    "explanation": [
+        "Los bucles permiten repetir código.",
+        "'for' itera sobre secuencias, 'while' mientras una condición sea verdadera.",
+        "Usa 'break' para salir, 'continue' para saltar."
+    ],
+    "explanation_en": [
+        "Loops allow repeating code.",
+        "'for' iterates over sequences, 'while' while a condition is true.",
+        "Use 'break' to exit, 'continue' to skip."
+    ],
+    "exclude": [
+        "for",
+        "while",
+        "in",
+        "range"
+    ],
+    "mode": "practice",
+    "difficulty": "beginner",
+    "order": 7,
+    "tags": [
+        "basics",
+        "loops"
+    ]
+}

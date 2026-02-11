@@ -1,0 +1,36 @@
+{
+    "id": "go-fibonacci-exercise-01",
+    "title": "Secuencia de Fibonacci",
+    "title_en": "Fibonacci Sequence",
+    "language": "go",
+    "concept": "recursion",
+    "description": "Calcula números de Fibonacci usando recursividad.",
+    "description_en": "Calculate Fibonacci numbers using recursion.",
+    "explanation": [
+        "Implementa la secuencia de Fibonacci usando recursión.",
+        "La función se llama a sí misma con valores menores hasta llegar al caso base.",
+        "Caso base: si n es 0 o 1, devuelve n.",
+        "Recursión: fibonacci(n) = fibonacci(n-1) + fibonacci(n-2)."
+    ],
+    "explanation_en": [
+        "Implement the Fibonacci sequence using recursion.",
+        "The function calls itself with smaller values until it reaches the base case.",
+        "Base case: if n is 0 or 1, return n.",
+        "Recursion: fibonacci(n) = fibonacci(n-1) + fibonacci(n-2)."
+    ],
+    "exclude": [
+        "package",
+        "import",
+        "func",
+        "if",
+        "return"
+    ],
+    "mode": "practice",
+    "difficulty": "intermediate",
+    "order": 1,
+    "tags": [
+        "exercises",
+        "recursion",
+        "algorithms"
+    ]
+}

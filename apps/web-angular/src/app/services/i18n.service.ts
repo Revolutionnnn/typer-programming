@@ -7,8 +7,8 @@ type TranslationDict = Record<string, string>;
 const translations: Record<Locale, TranslationDict> = {
   es: {
     // ── Header ──
-    'nav.lessons': '📚 Lecciones',
-    'nav.progress': '📈 Progreso',
+    'nav.lessons': 'Lecciones',
+    'nav.progress': 'Progreso',
 
     // ── Home ──
     'home.title': 'Aprende a programar',
@@ -16,6 +16,7 @@ const translations: Record<Locale, TranslationDict> = {
     'home.subtitle':
       'Mejora tu velocidad, precisión y comprensión de la programación con typing guiado. Escribe código real, carácter por carácter, y aprende mientras practicas.',
     'home.cta': '🚀 Empezar ahora',
+    'home.opensource.badge': '🌟 Proyecto Open Source',
     'home.feature.typing.title': 'Typing guiado',
     'home.feature.typing.desc':
       'Escribe código carácter por carácter con feedback visual en tiempo real. Verde = correcto, rojo = incorrecto.',
@@ -30,9 +31,17 @@ const translations: Record<Locale, TranslationDict> = {
       'Lecciones cortas y ordenadas. Empieza con lo básico y avanza a tu ritmo.',
     'home.languages.title': 'Lenguajes disponibles',
     'home.languages.available': 'Disponible',
+    'home.languages.soon': 'PRONTO',
     'home.languages.loading': 'Cargando...',
     'home.languages.connecting': 'Conectando con el servidor',
     'home.lessons.count': 'lecciones',
+
+    // ── Open Source ──
+    'opensource.title': '🌟 Proyecto Open Source',
+    'opensource.subtitle': '¡Contribuye y ayuda a crecer la comunidad!',
+    'opensource.desc': 'Este proyecto es completamente open source. Puedes contribuir agregando nuevos ejercicios, mejorando el código, o simplemente ejecutándolo localmente.',
+    'opensource.contribute': 'Contribuir',
+    'opensource.github': 'Ver en GitHub',
 
     // ── Lesson List ──
     'lessonList.title': '📚 Lecciones',
@@ -43,7 +52,7 @@ const translations: Record<Locale, TranslationDict> = {
     'lessonList.loadingLanguages': 'Cargando lenguajes...',
     'lessonList.loadingLessons': 'Cargando lecciones...',
     'lessonList.retry': 'Reintentar',
-    'lessonList.noLessons': '🚧 Aún no hay lecciones para este lenguaje. ¡Pronto habrá más!',
+    'lessonList.noLessons': '🚧 Aún no hay lecciones para este lenguaje. ¡Pronto habrá más! <br> <a href="https://github.com/Revolutionnnn/typer-programming" target="_blank">Contribuye en GitHub</a>',
     'lessonList.errorLanguages': 'No se pudieron cargar los lenguajes. ¿Está corriendo el backend?',
     'lessonList.errorLessons': 'No se pudieron cargar las lecciones.',
     'lessonList.difficulty.beginner': 'Básico',
@@ -68,6 +77,7 @@ const translations: Record<Locale, TranslationDict> = {
     'lesson.accuracy': 'Precisión',
     'lesson.time': 'Tiempo',
     'lesson.errors': 'Errores',
+    'lesson.points': 'Puntos',
 
     // ── Typing Editor ──
     'editor.stat.wpm': 'WPM',
@@ -101,6 +111,7 @@ const translations: Record<Locale, TranslationDict> = {
     'editor.streak.75': '¡Leyenda!',
     'editor.streak.100': '¡GOD MODE!',
     'editor.streak.default': 'En racha',
+    'streak.days': 'días',
 
     // ── Results ──
     'results.title': '📈 Tu Progreso',
@@ -114,12 +125,55 @@ const translations: Record<Locale, TranslationDict> = {
     'results.attempts': 'intentos',
     'results.empty': 'Aún no has completado ninguna lección.',
     'results.startNow': '🚀 Empezar ahora',
+
+    // ── Share ──
+    'share.share': 'Compartir',
+    'share.shareProgress': 'Comparte tu progreso',
+    'share.message': '¡Acabo de completar "{{lesson}}" en Typing Code Learn! 🚀\n\nWPM: {{wpm}}\nPrecisión: {{accuracy}}%\nRacha diaria: {{streak}} días\n\n¿Te animas a probar?',
+    'share.copyLink': 'Copiar enlace',
+    'share.copied': '¡Copiado!',
+
+    // ── User Rank ──
+    'rank.yourRank': 'Tu posición',
+    'rank.daily': 'Hoy',
+    'rank.weekly': 'Esta semana',
+    'rank.unranked': 'Sin ranking',
+
+    // ── Leaderboard ──
+    'nav.leaderboard': 'Ranking',
+    'leaderboard.title': '🏆 Campeones del Teclado',
+    'leaderboard.daily': 'Diario',
+    'leaderboard.weekly': 'Semanal',
+    'leaderboard.monthly': 'Mensual',
+    'leaderboard.allTime': 'Histórico',
+    'leaderboard.rank': 'Rango',
+    'leaderboard.user': 'Usuario',
+    'leaderboard.points': 'Puntos',
+    'leaderboard.empty': 'No hay registros para este periodo. ¡Sé el primero!',
+    'leaderboard.cta': '¡Empieza a competir!',
+
+    // ── User Profile ──
+    'user.totalPoints': 'Puntos Totales',
+    'user.completedLessons': 'Lecciones Completadas',
+    'user.currentStreak': 'Racha de Días',
+    'user.avgWpm': 'WPM Promedio',
+    'user.accuracy': 'Precisión',
+    'user.bestWpm': 'Mejor WPM',
+    'user.badges': 'Insignias',
+    'user.recentProgress': 'Progreso Reciente',
+    'user.memberSince': 'Miembro desde',
+    'user.guest': 'Invitado',
+
+    // ── Common ──
+    'common.back': 'Volver',
+    'common.loading': 'Cargando...',
+    'common.goBack': 'Volver atrás',
   },
 
   en: {
     // ── Header ──
-    'nav.lessons': '📚 Lessons',
-    'nav.progress': '📈 Progress',
+    'nav.lessons': 'Lessons',
+    'nav.progress': 'Progress',
 
     // ── Home ──
     'home.title': 'Learn to code',
@@ -141,9 +195,17 @@ const translations: Record<Locale, TranslationDict> = {
       'Short, ordered lessons. Start with the basics and advance at your own pace.',
     'home.languages.title': 'Available languages',
     'home.languages.available': 'Available',
+    'home.languages.soon': 'SOON',
     'home.languages.loading': 'Loading...',
     'home.languages.connecting': 'Connecting to server',
     'home.lessons.count': 'lessons',
+
+    // ── Open Source ──
+    'opensource.title': '🌟 Open Source Project',
+    'opensource.subtitle': 'Contribute and help grow the community!',
+    'opensource.desc': 'This project is completely open source. You can contribute by adding new exercises, improving the code, or simply running it locally.',
+    'opensource.contribute': 'Contribute',
+    'opensource.github': 'View on GitHub',
 
     // ── Lesson List ──
     'lessonList.title': '📚 Lessons',
@@ -154,7 +216,7 @@ const translations: Record<Locale, TranslationDict> = {
     'lessonList.loadingLanguages': 'Loading languages...',
     'lessonList.loadingLessons': 'Loading lessons...',
     'lessonList.retry': 'Retry',
-    'lessonList.noLessons': '🚧 No lessons for this language yet. More coming soon!',
+    'lessonList.noLessons': '🚧 No lessons for this language yet. More coming soon! <br> <a href="https://github.com/Revolutionnnn/typer-programming" target="_blank">Contribute on GitHub</a>',
     'lessonList.errorLanguages': 'Could not load languages. Is the backend running?',
     'lessonList.errorLessons': 'Could not load lessons.',
     'lessonList.difficulty.beginner': 'Beginner',
@@ -179,6 +241,7 @@ const translations: Record<Locale, TranslationDict> = {
     'lesson.accuracy': 'Accuracy',
     'lesson.time': 'Time',
     'lesson.errors': 'Errors',
+    'lesson.points': 'Points',
 
     // ── Typing Editor ──
     'editor.stat.wpm': 'WPM',
@@ -212,6 +275,7 @@ const translations: Record<Locale, TranslationDict> = {
     'editor.streak.75': 'Legend!',
     'editor.streak.100': 'GOD MODE!',
     'editor.streak.default': 'On fire',
+    'streak.days': 'days',
 
     // ── Results ──
     'results.title': '📈 Your Progress',
@@ -225,6 +289,49 @@ const translations: Record<Locale, TranslationDict> = {
     'results.attempts': 'attempts',
     'results.empty': 'You haven\'t completed any lessons yet.',
     'results.startNow': '🚀 Start now',
+
+    // ── Share ──
+    'share.share': 'Share',
+    'share.shareProgress': 'Share your progress',
+    'share.message': 'I just completed "{{lesson}}" on Typing Code Learn! 🚀\n\nWPM: {{wpm}}\nAccuracy: {{accuracy}}%\nDaily streak: {{streak}} days\n\nThink you can beat that?',
+    'share.copyLink': 'Copy link',
+    'share.copied': 'Copied!',
+
+    // ── User Rank ──
+    'rank.yourRank': 'Your rank',
+    'rank.daily': 'Today',
+    'rank.weekly': 'This week',
+    'rank.unranked': 'Unranked',
+
+    // ── Leaderboard ──
+    'nav.leaderboard': 'Leaderboard',
+    'leaderboard.title': '🏆 Keyboard Champions',
+    'leaderboard.daily': 'Daily',
+    'leaderboard.weekly': 'Weekly',
+    'leaderboard.monthly': 'Monthly',
+    'leaderboard.allTime': 'All Time',
+    'leaderboard.rank': 'Rank',
+    'leaderboard.user': 'User',
+    'leaderboard.points': 'Points',
+    'leaderboard.empty': 'No records for this period. Be the first!',
+    'leaderboard.cta': 'Start Competing!',
+
+    // ── User Profile ──
+    'user.totalPoints': 'Total Points',
+    'user.completedLessons': 'Completed Lessons',
+    'user.currentStreak': 'Day Streak',
+    'user.avgWpm': 'Avg WPM',
+    'user.accuracy': 'Accuracy',
+    'user.bestWpm': 'Best WPM',
+    'user.badges': 'Badges',
+    'user.recentProgress': 'Recent Progress',
+    'user.memberSince': 'Member since',
+    'user.guest': 'Guest',
+
+    // ── Common ──
+    'common.back': 'Back',
+    'common.loading': 'Loading...',
+    'common.goBack': 'Go Back',
   },
 };
 

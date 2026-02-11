@@ -1,0 +1,32 @@
+{
+    "id": "py-read-file-exercise-04",
+    "title": "Leer Archivo",
+    "title_en": "Read File",
+    "language": "python",
+    "concept": "file-io",
+    "description": "Lee un archivo, parsea números y calcula la suma.",
+    "description_en": "Read a file, parse numbers, and calculate the sum.",
+    "explanation": [
+        "Lee un archivo línea por línea.",
+        "Convierte cada línea a número y suma.",
+        "Maneja errores de archivo y conversión."
+    ],
+    "explanation_en": [
+        "Read a file line by line.",
+        "Convert each line to number and sum.",
+        "Handle file and conversion errors."
+    ],
+    "exclude": [
+        "open",
+        "with",
+        "read",
+        "print"
+    ],
+    "mode": "practice",
+    "difficulty": "intermediate",
+    "order": 4,
+    "tags": [
+        "exercises",
+        "file-io"
+    ]
+}

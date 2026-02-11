@@ -1,15 +1,38 @@
+# ─── Development ───
+# Usage: make dev  or  docker compose up --build
+
 services:
+  db:
+    image: postgres:16-alpine
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-typer}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-typer}
+      POSTGRES_DB: ${POSTGRES_DB:-typer}
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-typer}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   api:
     build:
       context: .
       dockerfile: docker/Dockerfile.api
     ports:
-      - "8080:8080"
+      - "${API_PORT:-8080}:8080"
+    env_file: .env.dev
     environment:
       - PORT=8080
       - CONTENT_DIR=/app/content
-    volumes:
-      - api-data:/app/data
+      - DATABASE_URL=postgres://${POSTGRES_USER:-typer}:${POSTGRES_PASSWORD:-typer}@db:5432/${POSTGRES_DB:-typer}?sslmode=disable
+    depends_on:
+      db:
+        condition: service_healthy
     restart: unless-stopped
 
   web:
@@ -17,7 +40,7 @@ services:
       context: .
       dockerfile: docker/Dockerfile.web
     ports:
-      - "4200:4200"
+      - "${WEB_PORT:-4200}:4200"
     volumes:
       - ./apps/web-angular/src:/app/src:z
     depends_on:
@@ -25,4 +48,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  api-data:
+  pg-data:

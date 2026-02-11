@@ -1,0 +1,108 @@
+<header class="header">
+  <div class="header__inner container">
+    <!-- Logo -->
+    <a routerLink="/" class="header__logo">
+      <div class="logo-icon-wrapper">
+        <lucide-icon [img]="icons.Keyboard" class="header__logo-icon" [size]="20"></lucide-icon>
+      </div>
+      <span class="header__logo-text">Typing Code Learn</span>
+    </a>
+
+    <!-- Desktop Nav -->
+    <nav class="header__nav">
+      <a
+        routerLink="/lessons"
+        routerLinkActive="active"
+        class="header__link"
+      >
+        <span class="nav-icon"><lucide-icon [img]="icons.BookOpen" [size]="16"></lucide-icon></span>
+        {{ i18n.t('nav.lessons') }}
+      </a>
+      <a
+        routerLink="/results"
+        routerLinkActive="active"
+        class="header__link"
+      >
+        <span class="nav-icon"><lucide-icon [img]="icons.Activity" [size]="16"></lucide-icon></span>
+        {{ i18n.t('nav.progress') }}
+      </a>
+      <a
+        routerLink="/leaderboard"
+        routerLinkActive="active"
+        class="header__link"
+      >
+        <span class="nav-icon"><lucide-icon [img]="icons.Trophy" [size]="16"></lucide-icon></span>
+        {{ i18n.t('nav.leaderboard') }}
+      </a>
+    </nav>
+
+    <!-- User Auth -->
+    <div class="header__auth">
+      @if (currentUser$ | async; as user) {
+        <div class="user-info">
+          
+          <!-- Streak Pill -->
+          <div class="streak-pill" title="Current Day Streak">
+            <span class="streak-icon"><lucide-icon [img]="icons.Flame" [size]="14"></lucide-icon></span>
+            <span class="streak-count">{{ user.currentStreak }}</span>
+          </div>
+
+          <!-- User Profile -->
+          <div class="user-profile">
+            <span class="username">
+              <span class="user-icon"><lucide-icon [img]="icons.User" [size]="16"></lucide-icon></span>
+              {{ user.displayName }}
+              @if (user.isGuest) {
+                <span class="badge badge-guest">Guest</span>
+              }
+            </span>
+          </div>
+
+          <!-- Actions -->
+          <div class="auth-actions">
+            @if (user.isGuest) {
+              <button class="btn btn-outline btn-sm" (click)="showLoginModal()">
+                <lucide-icon [img]="icons.LogIn" [size]="14"></lucide-icon>
+                Login
+              </button>
+              <button class="btn btn-primary btn-sm" (click)="showRegisterModal()">
+                <lucide-icon [img]="icons.Save" [size]="14"></lucide-icon>
+                Save Progress
+              </button>
+            } @else {
+              <button class="btn btn-ghost btn-sm" (click)="onLogout()">
+                 <lucide-icon [img]="icons.LogOut" [size]="14"></lucide-icon>
+                 Logout
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</header>
+
+<!-- Modals -->
+@if (showLogin) {
+  <div class="modal-overlay" (click)="closeModals()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <app-login 
+        (loginSuccess)="closeModals()" 
+        (closeModal)="closeModals()"
+        (switchToRegister)="showRegisterModal()"
+      />
+    </div>
+  </div>
+}
+
+@if (showRegister) {
+  <div class="modal-overlay" (click)="closeModals()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <app-register 
+        (registerSuccess)="closeModals()"
+        (closeModal)="closeModals()"
+        (switchToLogin)="showLoginModal()"
+      />
+    </div>
+  </div>
+}

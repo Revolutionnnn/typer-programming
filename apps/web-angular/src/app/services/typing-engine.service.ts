@@ -13,36 +13,80 @@ export class TypingEngineService {
   private code = '';
   private mode: 'strict' | 'practice' = 'strict';
 
+  private lastLesson?: { code: string; mode?: 'strict' | 'practice'; exclude?: string[] };
   readonly state$ = new BehaviorSubject<TypingState>(this.createEmptyState());
   readonly finished$ = new BehaviorSubject<boolean>(false);
   totalErrorAttempts = 0;
 
   /** Initialize the engine with a code snippet */
-  init(code: string, mode: 'strict' | 'practice' = 'strict'): void {
+  init(lesson: { code: string; mode?: 'strict' | 'practice'; exclude?: string[] }): void {
+    this.lastLesson = lesson;
+    const code = lesson.code;
+    const mode = lesson.mode || 'strict';
+    const exclude = lesson.exclude || [];
+
     this.mode = mode;
 
-    // Parse [[hidden]] markers and build char array
+    // First, process any manual [[hidden]] markers
     const chars: CharState[] = [];
-    const regex = /\[\[(.*?)\]\]/g;
+    const manualRegex = /\[\[(.*?)\]\]/g;
     let match: RegExpExecArray | null;
     let lastIndex = 0;
+    const segments: { text: string; isHidden: boolean }[] = [];
 
-    while ((match = regex.exec(code)) !== null) {
-      // Normal text before the hidden segment
-      const before = code.substring(lastIndex, match.index);
-      for (const c of before) {
-        chars.push({ char: c, status: 'pending' as const });
+    while ((match = manualRegex.exec(code)) !== null) {
+      if (match.index > lastIndex) {
+        segments.push({ text: code.substring(lastIndex, match.index), isHidden: false });
       }
-      // Hidden segment (fill-in-the-blank)
-      for (const c of match[1]) {
-        chars.push({ char: c, status: 'pending' as const, isHidden: true });
-      }
-      lastIndex = regex.lastIndex;
+      segments.push({ text: match[1], isHidden: true });
+      lastIndex = manualRegex.lastIndex;
     }
-    // Remaining normal text
-    const remaining = code.substring(lastIndex);
-    for (const c of remaining) {
-      chars.push({ char: c, status: 'pending' as const });
+    if (lastIndex < code.length) {
+      segments.push({ text: code.substring(lastIndex), isHidden: false });
+    }
+
+    // Now, for each non-hidden segment, apply the exclude list
+    for (const seg of segments) {
+      if (seg.isHidden) {
+        for (const c of seg.text) {
+          chars.push({ char: c, status: 'pending', isHidden: true });
+        }
+      } else {
+        // If there's an exclude list, we need to mark those words
+        if (exclude.length > 0) {
+          // Build regex carefully: only use \b for words that start/end with word characters
+          const escapedWords = exclude.map(w => {
+            const escaped = w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const startBoundary = /^\w/.test(w) ? '\\b' : '';
+            const endBoundary = /\w$/.test(w) ? '\\b' : '';
+            return `${startBoundary}${escaped}${endBoundary}`;
+          });
+          const excludeRegex = new RegExp(`(${escapedWords.join('|')})`, 'g');
+
+          let segLastIndex = 0;
+          let segMatch: RegExpExecArray | null;
+
+          while ((segMatch = excludeRegex.exec(seg.text)) !== null) {
+            // Text before match
+            for (let i = segLastIndex; i < segMatch.index; i++) {
+              chars.push({ char: seg.text[i], status: 'pending' });
+            }
+            // The excluded word
+            for (const c of segMatch[1]) {
+              chars.push({ char: c, status: 'pending', isHidden: true });
+            }
+            segLastIndex = excludeRegex.lastIndex;
+          }
+          // Remaining text
+          for (let i = segLastIndex; i < seg.text.length; i++) {
+            chars.push({ char: seg.text[i], status: 'pending' });
+          }
+        } else {
+          for (const c of seg.text) {
+            chars.push({ char: c, status: 'pending' });
+          }
+        }
+      }
     }
 
     // Store the clean code (without [[ ]] markers)
@@ -237,8 +281,8 @@ export class TypingEngineService {
 
   /** Reset the engine */
   reset(): void {
-    if (this.code) {
-      this.init(this.code, this.mode);
+    if (this.lastLesson) {
+      this.init(this.lastLesson);
     }
   }
 

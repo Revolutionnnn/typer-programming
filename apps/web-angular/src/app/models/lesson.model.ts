@@ -1,15 +1,20 @@
 export interface Lesson {
   id: string;
   title: string;
+  title_en?: string;
   language: string;
   concept: string;
   description: string;
+  description_en?: string;
   explanation: string[];
+  explanation_en?: string[];
   code: string;
+  exclude?: string[];
   mode: 'strict' | 'practice';
   difficulty: 'beginner' | 'intermediate' | 'advanced';
   order: number;
   tags?: string[];
+  level?: string;
 }
 
 export interface LessonSummary {
@@ -29,4 +34,5 @@ export interface LanguageInfo {
   name: string;
   icon: string;
   lessonCount: number;
+  soon?: boolean;
 }

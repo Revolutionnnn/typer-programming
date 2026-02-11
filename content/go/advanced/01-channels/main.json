@@ -1,0 +1,39 @@
+{
+    "id": "go-channels-01",
+    "title": "Channels en Go",
+    "title_en": "Channels in Go",
+    "language": "go",
+    "concept": "concurrency",
+    "description": "Comunícate entre goroutines usando canales.",
+    "description_en": "Communicate between goroutines using channels.",
+    "explanation": [
+        "Los canales son conductos de comunicación entre goroutines con la palabra reservada 'chan'.",
+        "Se envían datos con el operador <-: canal <- valor.",
+        "Se reciben datos con el operador <-: valor := <-canal.",
+        "Cerrar un canal con 'close(canal)' indica que ya no se enviarán más datos."
+    ],
+    "explanation_en": [
+        "Channels are communication conduits between goroutines with the reserved word 'chan'.",
+        "Data is sent with the <- operator: channel <- value.",
+        "Data is received with the <- operator: value := <-channel.",
+        "Closing a channel with 'close(channel)' indicates that no more data will be sent."
+    ],
+    "exclude": [
+        "package",
+        "import",
+        "func",
+        "go",
+        "chan",
+        "make",
+        "close",
+        "range"
+    ],
+    "mode": "strict",
+    "difficulty": "advanced",
+    "order": 1,
+    "tags": [
+        "concurrency",
+        "channels",
+        "goroutines"
+    ]
+}

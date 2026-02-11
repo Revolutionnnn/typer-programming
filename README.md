@@ -16,32 +16,52 @@ Typer is built on the belief that education and the tools to achieve it should b
 
 ## 🛠️ Tech Stack
 
-- **Frontend:** Angular 19 (Standalone Components, RxJS, SCSS)
-- **Backend:** Go (API-Go)
-- **Infrastructure:** Docker & Docker Compose (Hot Reload enabled for development)
+- **Frontend:** Angular 19 (Standalone Components, Signals, SCSS)
+- **Backend:** Go (Chi Router, JWT Auth)
+- **Database:** PostgreSQL (with automated schema migration)
+- **Infrastructure:** Docker & Podman Compose (Ready for Development and Production)
 
 ## 🚦 Getting Started
 
 ### Prerequisites
 
-- Docker and Docker Compose installed on your machine.
+- Podman/Docker and Compose installed on your machine.
+- `make` (optional, but recommended).
 
-### Running the App
+### Commands (Makefile)
 
-1. Clone the repository:
+The project includes a `Makefile` to simplify environment management:
+
+- **Development** (Hot-reload, local ports):
+  ```bash
+  make dev
+  ```
+- **Production** (Optimized builds, Nginx, PostgreSQL):
+  ```bash
+  make prod
+  ```
+- **Stop everything**:
+  ```bash
+  make down
+  ```
+
+### Manual Run
+
+1. Clone the repository and navigate to the folder.
+2. For Development:
    ```bash
-   git clone https://github.com/your-username/typer.git
-   cd typer
+   podman compose --env-file .env.dev up --build
+   ```
+3. For Production:
+   ```bash
+   cp .env.prod.example .env.prod  # Fill in your secrets!
+   podman compose -f docker-compose.prod.yml --env-file .env.prod up -d
    ```
 
-2. Start the environment:
-   ```bash
-   docker-compose up --build
-   ```
+### Access
 
-3. Open your browser:
-   - **Frontend:** [http://localhost:4200](http://localhost:4200)
-   - **API:** [http://localhost:8080](http://localhost:8080)
+- **Frontend:** `http://localhost:4200` (Dev) / `http://localhost:80` (Prod)
+- **API:** `http://localhost:8080/api/v1`
 
 ## 📂 Project Structure
 

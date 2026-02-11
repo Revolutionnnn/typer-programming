@@ -1,0 +1,35 @@
+<div class="login-modal">
+  <div class="login-header">
+    <h2>Login</h2>
+    <button class="close-btn" (click)="onClose()" type="button">&times;</button>
+  </div>
+
+  <form (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input type="text" id="username" [(ngModel)]="username" name="username" placeholder="Enter your username"
+        [disabled]="loading" required />
+    </div>
+
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" [(ngModel)]="password" name="password" placeholder="Enter your password"
+        [disabled]="loading" required />
+    </div>
+
+    @if (error) {
+    <div class="error-message">{{ error }}</div>
+    }
+
+    <button type="submit" class="btn-primary" [disabled]="loading">
+      {{ loading ? 'Logging in...' : 'Login' }}
+    </button>
+
+    <div class="switch-mode">
+      Don't have an account?
+      <button type="button" class="link-btn" (click)="onSwitchToRegister()">
+        Register
+      </button>
+    </div>
+  </form>
+</div>

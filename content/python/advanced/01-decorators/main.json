@@ -1,0 +1,31 @@
+{
+    "id": "py-decorators-01",
+    "title": "Decoradores en Python",
+    "title_en": "Decorators in Python",
+    "language": "python",
+    "concept": "decorators",
+    "description": "Aprende a usar decoradores para modificar funciones.",
+    "description_en": "Learn to use decorators to modify functions.",
+    "explanation": [
+        "Los decoradores son funciones que modifican otras funciones.",
+        "Usa '@' para aplicar un decorador.",
+        "Permiten añadir funcionalidad sin cambiar el código original."
+    ],
+    "explanation_en": [
+        "Decorators are functions that modify other functions.",
+        "Use '@' to apply a decorator.",
+        "They allow adding functionality without changing original code."
+    ],
+    "exclude": [
+        "def",
+        "@",
+        "return"
+    ],
+    "mode": "practice",
+    "difficulty": "advanced",
+    "order": 1,
+    "tags": [
+        "advanced",
+        "decorators"
+    ]
+}

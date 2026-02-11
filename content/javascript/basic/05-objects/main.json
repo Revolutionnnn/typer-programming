@@ -1,0 +1,31 @@
+{
+    "id": "js-objects-05",
+    "title": "Objetos en JavaScript",
+    "title_en": "Objects in JavaScript",
+    "language": "javascript",
+    "concept": "objects",
+    "description": "Aprende a crear y manipular objetos en JavaScript.",
+    "description_en": "Learn to create and manipulate objects in JavaScript.",
+    "explanation": [
+        "Los objetos son pares clave-valor, similares a los diccionarios.",
+        "Se crean con llaves {} y se accede con punto (.) o corchetes ([]).",
+        "La desestructuración permite extraer valores fácilmente."
+    ],
+    "explanation_en": [
+        "Objects are key-value pairs, similar to dictionaries.",
+        "They are created with curly braces {} and accessed with dot (.) or square brackets ([]).",
+        "Destructuring allows extracting values easily."
+    ],
+    "exclude": [
+        "const",
+        "console.log",
+        "Object.keys"
+    ],
+    "mode": "strict",
+    "difficulty": "beginner",
+    "order": 5,
+    "tags": [
+        "basics",
+        "objects"
+    ]
+}

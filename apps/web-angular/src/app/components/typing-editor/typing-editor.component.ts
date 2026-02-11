@@ -15,6 +15,7 @@ import { CommonModule } from '@angular/common';
 import { TypingEngineService } from '../../services/typing-engine.service';
 import { I18nService } from '../../services/i18n.service';
 import { CharState, TypingState } from '../../models/typing.model';
+import { Lesson } from '../../models/lesson.model';
 
 /** A line with its chars and their global indices for cursor tracking */
 interface LineDef {
@@ -48,14 +49,17 @@ const STREAK_EMOJIS = ['🔥', '⚡', '🚀', '🏆', '👑'];
       [class.editor--shake]="shaking"
       [class.editor--game-over]="gameOver"
     >
-      <!-- Progress bar -->
-      <div class="editor__progress-bar">
-        <div
-          class="editor__progress-fill"
-          [style.width.%]="progressPercent"
-          [class.editor__progress-fill--danger]="liveAccuracy < 75"
-          [class.editor__progress-fill--warning]="liveAccuracy >= 75 && liveAccuracy < 90"
-        ></div>
+      <!-- macOS Window Header -->
+      <div class="editor__window-bar">
+        <div class="editor__window-controls">
+          <span class="editor__dot editor__dot--red"></span>
+          <span class="editor__dot editor__dot--yellow"></span>
+          <span class="editor__dot editor__dot--green"></span>
+        </div>
+        <div class="editor__window-title">
+          <span class="editor__filename">{{ lesson?.title || 'main.ts' }}</span>
+        </div>
+        <div class="editor__window-actions"></div>
       </div>
 
       <!-- Lives + streak header -->
@@ -80,6 +84,16 @@ const STREAK_EMOJIS = ['🔥', '⚡', '🚀', '🏆', '👑'];
           }
         </div>
       }
+
+      <!-- Progress bar -->
+      <div class="editor__progress-bar">
+        <div
+          class="editor__progress-fill"
+          [style.width.%]="progressPercent"
+          [class.editor__progress-fill--danger]="liveAccuracy < 75"
+          [class.editor__progress-fill--warning]="liveAccuracy >= 75 && liveAccuracy < 90"
+        ></div>
+      </div>
 
       <!-- Line numbers + code -->
       <div class="editor__content" #contentEl>
@@ -113,25 +127,29 @@ const STREAK_EMOJIS = ['🔥', '⚡', '🚀', '🏆', '👑'];
 
       <!-- Live stats bar -->
       <div class="editor__stats">
-        <div class="stat">
-          <span class="stat__icon">⚡</span>
-          <span class="stat__value">{{ liveWPM }}</span>
-          <span class="stat__label">{{ i18n.t('editor.stat.wpm') }}</span>
+        <div class="stat-group">
+          <div class="stat">
+            <span class="stat__icon">⚡</span>
+            <span class="stat__value">{{ liveWPM }} WPM</span>
+          </div>
+          <div class="stat">
+            <span class="stat__icon">🎯</span>
+            <span class="stat__value" [class.stat__value--danger]="liveAccuracy < 90">{{ liveAccuracy }}% ACC</span>
+          </div>
+          <div class="stat">
+            <span class="stat__icon">❌</span>
+            <span class="stat__value" [class.stat__value--danger]="errorCount > 0">{{ errorCount }} ERR</span>
+          </div>
         </div>
-        <div class="stat">
-          <span class="stat__icon">🎯</span>
-          <span class="stat__value" [class.stat__value--warning]="liveAccuracy < 90" [class.stat__value--danger]="liveAccuracy < 75">{{ liveAccuracy }}%</span>
-          <span class="stat__label">{{ i18n.t('editor.stat.accuracy') }}</span>
-        </div>
-        <div class="stat">
-          <span class="stat__icon">📊</span>
-          <span class="stat__value">{{ progressPercent }}%</span>
-          <span class="stat__label">{{ i18n.t('editor.stat.progress') }}</span>
-        </div>
-        <div class="stat">
-          <span class="stat__icon">❌</span>
-          <span class="stat__value" [class.stat__value--danger]="errorCount > 0">{{ errorCount }}</span>
-          <span class="stat__label">{{ i18n.t('editor.stat.errors') }}</span>
+        
+        <div class="stat-group stat-group--right">
+             <div class="stat">
+                <span>Ln {{ getCurrentLineNumber() }}, Col {{ getCurrentColNumber() }}</span>
+             </div>
+             <div class="stat">
+                <span class="stat__icon">{{ lesson?.language === 'python' ? '🐍' : lesson?.language === 'go' ? '🐹' : lesson?.language === 'javascript' || lesson?.language === 'typescript' ? '📜' : '📄' }}</span>
+                <span>{{ lesson?.language || 'Text' }}</span>
+             </div>
         </div>
       </div>
 
@@ -175,20 +193,90 @@ const STREAK_EMOJIS = ['🔥', '⚡', '🚀', '🏆', '👑'];
   styles: [
     `
       .editor {
-        background: var(--bg-secondary);
-        border: 2px solid var(--border-color);
-        border-radius: var(--border-radius);
+        display: flex;
+        flex-direction: column;
+        background: #1e1e1e;
+        border: 1px solid #333;
+        border-radius: 8px;
         overflow: hidden;
         outline: none;
         position: relative;
         font-family: var(--font-code);
-        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        transition: box-shadow 0.3s ease;
 
         &:focus {
-          border-color: var(--accent-primary);
-          box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2);
+           box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.3), 0 20px 50px rgba(0,0,0,0.5);
         }
       }
+
+      /* ── Window Bar ── */
+      .editor__window-bar {
+        display: flex;
+        align-items: center;
+        padding: 0.6rem 1rem;
+        background: #252526;
+        border-bottom: 1px solid #333;
+        user-select: none;
+        flex-shrink: 0;
+      }
+
+      .editor__window-controls {
+        display: flex;
+        gap: 8px;
+        width: 60px;
+      }
+
+      .editor__dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+      }
+      .editor__dot--red { background: #ff5f56; }
+      .editor__dot--yellow { background: #ffbd2e; }
+      .editor__dot--green { background: #27c93f; }
+
+      .editor__window-title {
+        flex: 1;
+        text-align: center;
+        color: #9da5b4;
+        font-size: 0.8rem;
+        opacity: 0.8;
+      }
+
+      .editor__window-actions { width: 60px; }
+
+      /* ── Status Bar (New Look) ── */
+      .editor__stats { 
+        display: flex;
+        justify-content: space-between !important;
+        background: #007acc !important;
+        color: white;
+        padding: 4px 12px !important;
+        font-size: 0.75rem;
+        font-family: var(--font-ui);
+        align-items: center;
+        border-top: none !important;
+        flex-wrap: nowrap !important;
+        min-height: 24px;
+      }
+      
+      .editor--finished .editor__stats { background: var(--accent-success) !important; }
+      .editor--game-over .editor__stats { background: var(--accent-error) !important; }
+
+      .stat-group { display: flex; gap: 1rem; align-items: center; }
+      .stat-group--right { margin-left: auto; }
+      
+      .stat { 
+        display: flex; 
+        align-items: center; 
+        gap: 0.4rem; 
+      }
+      .stat__label { display: none; }
+      .stat__value { font-family: var(--font-ui) !important; font-weight: normal; }
+      
+      .editor__content { background: #1e1e1e; }
+      .editor__line--active { background: #2c2c2d !important; border-left: 2px solid #58a6ff; }
 
       .editor--active {
         border-color: var(--accent-primary);
@@ -455,15 +543,8 @@ const STREAK_EMOJIS = ['🔥', '⚡', '🚀', '🏆', '👑'];
         50% { opacity: 0; }
       }
 
-      /* ── Stats bar ── */
-      .editor__stats {
-        display: flex;
-        gap: 1.5rem;
-        padding: 0.6rem 1rem;
-        background: var(--bg-tertiary);
-        border-top: 1px solid var(--border-color);
-        flex-wrap: wrap;
-      }
+      /* ── Stats bar (Overridden above) ── */
+      /* .editor__stats { ... } */
 
       .stat {
         display: flex;
@@ -635,8 +716,7 @@ const STREAK_EMOJIS = ['🔥', '⚡', '🚀', '🏆', '👑'];
   ],
 })
 export class TypingEditorComponent implements OnChanges, AfterViewInit {
-  @Input() code = '';
-  @Input() mode: 'strict' | 'practice' = 'strict';
+  @Input() lesson: Lesson | null = null;
   @Output() completed = new EventEmitter<void>();
 
   @ViewChild('editorEl') editorEl!: ElementRef<HTMLDivElement>;
@@ -690,10 +770,10 @@ export class TypingEditorComponent implements OnChanges, AfterViewInit {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['code'] && this.code) {
+    if (changes['lesson'] && this.lesson) {
       this.resetGame();
       this.clearSubscriptions();
-      this.engine.init(this.code, this.mode);
+      this.engine.init(this.lesson);
 
       this.stateSub = this.engine.state$.subscribe((state) => {
         this.state = state;
@@ -742,7 +822,9 @@ export class TypingEditorComponent implements OnChanges, AfterViewInit {
 
   retry(): void {
     this.resetGame();
-    this.engine.init(this.code, this.mode);
+    if (this.lesson) {
+      this.engine.init(this.lesson);
+    }
     this.focusEditor();
   }
 
@@ -903,6 +985,34 @@ export class TypingEditorComponent implements OnChanges, AfterViewInit {
     if (currentLine.length > 0) {
       this.lines.push({ chars: currentLine, globalIndices: currentIndices });
     }
+  }
+
+  getCurrentLineNumber(): number {
+    // Find line containing currentIndex
+    for (let i = 0; i < this.lines.length; i++) {
+        const line = this.lines[i];
+        if (line.globalIndices.length > 0) {
+            const first = line.globalIndices[0];
+            const last = line.globalIndices[line.globalIndices.length - 1];
+            // If current index is in this line (or at the very end of it, waiting for next char)
+            if (this.currentIndex >= first && this.currentIndex <= last + 1) {
+                return i + 1;
+            }
+        } else if (this.lines.length === 1) {
+            // Empty single line case
+            return 1;
+        }
+    }
+    return this.lines.length; // Default to last line
+  }
+
+  getCurrentColNumber(): number {
+      const lineNum = this.getCurrentLineNumber();
+      const line = this.lines[lineNum - 1];
+      if (!line || line.globalIndices.length === 0) return 1;
+      
+      const col = this.currentIndex - line.globalIndices[0] + 1;
+      return col > 0 ? col : 1;
   }
 
   private updateLiveStats(): void {
