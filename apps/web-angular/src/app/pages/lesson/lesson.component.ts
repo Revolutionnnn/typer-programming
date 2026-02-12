@@ -250,8 +250,35 @@ import { UserRankComponent } from '../../components/user-rank/user-rank.componen
       }
 
       @media (max-width: 600px) {
+        .lesson {
+          padding: 1.25rem 1rem;
+        }
+
+        .lesson__header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.75rem;
+        }
+
+        .lesson__meta {
+          flex-wrap: wrap;
+        }
+
         .results__grid {
           grid-template-columns: repeat(2, 1fr);
+        }
+
+        .results {
+          padding: 1.5rem;
+        }
+
+        .results__actions {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .results__actions .btn {
+          width: 100%;
         }
       }
     `,

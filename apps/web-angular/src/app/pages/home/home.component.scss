@@ -11,6 +11,7 @@
   max-width: 800px;
   margin: 0 auto;
   position: relative;
+  overflow: hidden;
   
   &::before {
     content: '';
@@ -457,6 +458,69 @@
   
   .languages__grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    padding: 2.5rem 0 3.5rem;
+  }
+
+  .hero__badge {
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .hero__subtitle {
+    font-size: 1.1rem;
+  }
+
+  .hero__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hero__actions .btn {
+    width: 100%;
+  }
+
+  .features {
+    gap: 1rem;
+    margin-bottom: 3.5rem;
+  }
+
+  .feature {
+    padding: 1.5rem;
+  }
+
+  .section-header {
+    margin-bottom: 2.5rem;
+
+    .languages__title {
+      font-size: 2rem;
+    }
+  }
+
+  .opensource__content {
+    padding: 1.5rem;
+  }
+
+  .opensource__actions {
+    flex-direction: column;
+  }
+
+  .opensource__actions .btn {
+    width: 100%;
+  }
+
+  .opensource__stats {
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+
+  .opensource__stats .stat-item .stat-value {
+    font-size: 1.5rem;
   }
 }
 .lang-card {

@@ -119,7 +119,7 @@ export class TypingEngineService {
 
     // Handle special keys
     if (event.key === 'Backspace') {
-      this.handleBackspace();
+      this.processBackspace();
       return;
     }
 
@@ -140,6 +140,28 @@ export class TypingEngineService {
     }
 
     this.processChar(typed);
+  }
+
+  /**
+   * Process text coming from an <input>/<textarea> (mobile virtual keyboards, IME, etc).
+   * This bypasses KeyboardEvent and feeds characters directly.
+   */
+  handleTextInput(text: string): void {
+    if (this.state.finished) return;
+    if (!text) return;
+
+    // Normalize CRLF and stray CR
+    const normalized = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    for (const ch of normalized) {
+      this.processChar(ch);
+      if (this.state.finished) return;
+    }
+  }
+
+  /** Handle backspace coming from an <input>/<textarea> */
+  handleBackspaceInput(): void {
+    if (this.state.finished) return;
+    this.processBackspace();
   }
 
   /** Process a single character */
@@ -200,7 +222,7 @@ export class TypingEngineService {
   }
 
   /** Handle backspace */
-  private handleBackspace(): void {
+  private processBackspace(): void {
     if (this.state.currentIndex <= 0) return;
 
     // Only allow backspace in practice mode or when current char is incorrect

@@ -43,12 +43,27 @@ const STREAK_EMOJIS = ['🔥', '⚡', '🚀', '🏆', '👑'];
       tabindex="0"
       #editorEl
       (click)="focusEditor()"
-      (keydown)="onKeyDown($event)"
+      (pointerdown)="focusEditor()"
       [class.editor--finished]="state?.finished"
       [class.editor--active]="state?.started && !state?.finished"
       [class.editor--shake]="shaking"
       [class.editor--game-over]="gameOver"
     >
+      <textarea
+        #inputEl
+        class="editor__input"
+        inputmode="text"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+        aria-label="Typing input"
+        (keydown)="onKeyDown($event)"
+        (beforeinput)="onBeforeInput($event)"
+        (input)="onInput($event)"
+        (paste)="onPaste($event)"
+      ></textarea>
+
       <!-- macOS Window Header -->
       <div class="editor__window-bar">
         <div class="editor__window-controls">
@@ -205,9 +220,28 @@ const STREAK_EMOJIS = ['🔥', '⚡', '🚀', '🏆', '👑'];
         box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         transition: box-shadow 0.3s ease;
 
-        &:focus {
+        &:focus-within {
            box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.3), 0 20px 50px rgba(0,0,0,0.5);
         }
+      }
+
+      /* Hidden input to capture mobile virtual keyboard typing */
+      .editor__input {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        pointer-events: none;
+        background: transparent;
+        color: transparent;
+        caret-color: transparent;
+        resize: none;
+        border: 0;
+        outline: none;
+        padding: 0;
+        margin: 0;
+        z-index: 1;
       }
 
       /* ── Window Bar ── */
@@ -259,6 +293,38 @@ const STREAK_EMOJIS = ['🔥', '⚡', '🚀', '🏆', '👑'];
         border-top: none !important;
         flex-wrap: nowrap !important;
         min-height: 24px;
+      }
+
+      @media (max-width: 480px) {
+        .editor__stats {
+          padding: 6px 10px !important;
+          flex-wrap: wrap !important;
+          gap: 0.5rem;
+          justify-content: flex-start !important;
+        }
+
+        .stat-group {
+          flex-wrap: wrap;
+          gap: 0.5rem;
+        }
+
+        .stat-group--right {
+          margin-left: 0;
+        }
+
+        .editor__line-number {
+          width: 2.25rem;
+          padding-right: 0.5rem;
+          font-size: 0.75rem;
+        }
+
+        .editor__line-code {
+          font-size: 0.875rem;
+        }
+
+        .editor__overlay-content {
+          padding: 1.25rem 1.5rem;
+        }
       }
       
       .editor--finished .editor__stats { background: var(--accent-success) !important; }
@@ -721,6 +787,7 @@ export class TypingEditorComponent implements OnChanges, AfterViewInit {
 
   @ViewChild('editorEl') editorEl!: ElementRef<HTMLDivElement>;
   @ViewChild('contentEl') contentEl!: ElementRef<HTMLDivElement>;
+  @ViewChild('inputEl') inputEl!: ElementRef<HTMLTextAreaElement>;
 
   state: TypingState | null = null;
   lines: LineDef[] = [];
@@ -754,6 +821,8 @@ export class TypingEditorComponent implements OnChanges, AfterViewInit {
   private stateSub: Subscription | null = null;
   private finishedSub: Subscription | null = null;
 
+  private suppressNextBackspaceKeydown = false;
+
   i18n: I18nService;
 
   constructor(
@@ -766,7 +835,7 @@ export class TypingEditorComponent implements OnChanges, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.editorEl?.nativeElement.focus();
+    this.focusEditor();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -796,28 +865,85 @@ export class TypingEditorComponent implements OnChanges, AfterViewInit {
   }
 
   onKeyDown(event: KeyboardEvent): void {
-    // Detect Caps Lock state
-    this.capsLockOn = event.getModifierState('CapsLock');
+    // Detect Caps Lock state (best-effort; may be false on mobile)
+    this.capsLockOn = event.getModifierState?.('CapsLock') || false;
 
     if (this.gameOver) {
       event.preventDefault();
       return;
     }
 
-    if (event.key.length === 1 || event.key === 'Backspace' || event.key === 'Tab' || event.key === 'Enter') {
+    // If beforeinput already handled backspace, don't double-apply it.
+    if (event.key === 'Backspace' && this.suppressNextBackspaceKeydown) {
+      this.suppressNextBackspaceKeydown = false;
       event.preventDefault();
+      return;
     }
-    this.engine.handleKey(event);
+
+    // Special keys that won't reliably arrive via `input`
+    if (event.key === 'Backspace') {
+      event.preventDefault();
+      this.engine.handleBackspaceInput();
+      return;
+    }
+
+    if (event.key === 'Tab') {
+      event.preventDefault();
+      this.engine.handleTextInput('\t');
+      return;
+    }
+
+    // For printable characters / Enter, rely on (input) to avoid double-processing.
+  }
+
+  onBeforeInput(event: Event): void {
+    if (this.gameOver) return;
+
+    const e = event as InputEvent;
+    if (e.inputType === 'deleteContentBackward') {
+      this.suppressNextBackspaceKeydown = true;
+      e.preventDefault();
+      this.engine.handleBackspaceInput();
+      return;
+    }
+
+    // Prevent paste/drag-drop insertions from injecting full text.
+    if (e.inputType === 'insertFromPaste' || e.inputType === 'insertFromDrop') {
+      e.preventDefault();
+    }
+  }
+
+  onInput(event: Event): void {
+    if (this.gameOver) return;
+
+    const e = event as InputEvent;
+    if (e.isComposing) return;
+
+    const el = event.target as HTMLTextAreaElement | null;
+    if (!el) return;
+
+    const value = el.value;
+    if (!value) return;
+
+    this.engine.handleTextInput(value);
+
+    // Keep textarea empty so next input event only contains new chars.
+    el.value = '';
+  }
+
+  onPaste(event: ClipboardEvent): void {
+    event.preventDefault();
   }
 
   focusEditor(): void {
-    this.editorEl?.nativeElement.focus();
+    // Focus the hidden textarea to open the virtual keyboard on mobile.
+    this.inputEl?.nativeElement.focus();
   }
 
   dismissOverlay(event: Event): void {
     event.stopPropagation();
     this.ready = true;
-    this.editorEl?.nativeElement.focus();
+    this.focusEditor();
   }
 
   retry(): void {
