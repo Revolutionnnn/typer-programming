@@ -239,6 +239,20 @@
 }
 
 @media (max-width: 768px) {
+  .header {
+    height: auto;
+    padding: 0.5rem 0;
+  }
+
+  .header__inner {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .header__logo {
+    min-width: 0;
+  }
+
   .header__nav {
     display: none; /* Hide nav on mobile for now - future chore: mobile menu */
   }
@@ -256,6 +270,31 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .user-info {
+    gap: 0.75rem;
+  }
+
+  .auth-actions {
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .auth-actions .btn {
+    white-space: nowrap;
+  }
+
+  .btn-sm {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .header__logo .header__logo-text {
+    display: none;
   }
 }
 

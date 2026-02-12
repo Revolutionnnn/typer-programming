@@ -897,21 +897,9 @@ export class TypingEditorComponent implements OnChanges, AfterViewInit {
       return;
     }
 
-    // Prefer keydown for printable characters/Enter on desktop and on some mobile
-    // keyboards. Prevent default so the textarea doesn't accumulate value.
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      this.ignoreNextInput = true;
-      this.engine.handleTextInput('\n');
-      return;
-    }
-
-    if (event.key.length === 1) {
-      event.preventDefault();
-      this.ignoreNextInput = true;
-      this.engine.handleTextInput(event.key);
-      return;
-    }
+    // For regular characters / Enter: avoid handling in keydown.
+    // Mobile keyboards may emit keydown + beforeinput + input, which causes duplicates.
+    // We handle text via beforeinput/input/compositionend instead.
   }
 
   onBeforeInput(event: Event): void {
@@ -930,7 +918,6 @@ export class TypingEditorComponent implements OnChanges, AfterViewInit {
     if (
       e.inputType === 'insertText'
       || e.inputType === 'insertReplacementText'
-      || e.inputType === 'insertCompositionText'
     ) {
       const data = e.data ?? '';
       if (data) {
