@@ -61,6 +61,7 @@ const STREAK_EMOJIS = ['🔥', '⚡', '🚀', '🏆', '👑'];
         (keydown)="onKeyDown($event)"
         (beforeinput)="onBeforeInput($event)"
         (input)="onInput($event)"
+        (compositionstart)="onCompositionStart()"
         (compositionend)="onCompositionEnd($event)"
         (paste)="onPaste($event)"
       ></textarea>
@@ -825,6 +826,8 @@ export class TypingEditorComponent implements OnChanges, AfterViewInit {
 
   private suppressNextBackspaceKeydown = false;
   private ignoreNextInput = false;
+  private isInComposition = false;
+  private lastCompositionLength = 0;
 
   i18n: I18nService;
 
@@ -883,6 +886,10 @@ export class TypingEditorComponent implements OnChanges, AfterViewInit {
       return;
     }
 
+    // During composition let the browser handle all keys natively;
+    // we track changes incrementally in onInput.
+    if (this.isInComposition || event.isComposing) return;
+
     // Special keys that won't reliably arrive via `input`
     if (event.key === 'Backspace') {
       event.preventDefault();
@@ -906,6 +913,11 @@ export class TypingEditorComponent implements OnChanges, AfterViewInit {
     if (this.gameOver) return;
 
     const e = event as InputEvent;
+
+    // During composition, let the browser update the textarea natively.
+    // We process new characters incrementally inside onInput.
+    if (this.isInComposition || e.isComposing) return;
+
     if (e.inputType === 'deleteContentBackward') {
       this.suppressNextBackspaceKeydown = true;
       e.preventDefault();
@@ -914,7 +926,7 @@ export class TypingEditorComponent implements OnChanges, AfterViewInit {
       return;
     }
 
-    // Capture inserted text here for best mobile support (Gboard/iOS composition/prediction).
+    // Capture inserted text here for best desktop/mobile support.
     if (
       e.inputType === 'insertText'
       || e.inputType === 'insertReplacementText'
@@ -944,38 +956,66 @@ export class TypingEditorComponent implements OnChanges, AfterViewInit {
   onInput(event: Event): void {
     if (this.gameOver) return;
 
-    const e = event as InputEvent;
-    // If the keyboard is composing and we didn't intercept via beforeinput,
-    // let it finish and handle it on compositionend.
-    if (e.isComposing) return;
-
     const el = event.target as HTMLTextAreaElement | null;
     if (!el) return;
 
     if (this.ignoreNextInput) {
       this.ignoreNextInput = false;
-      el.value = '';
+      if (!this.isInComposition) {
+        el.value = '';
+      }
+      this.lastCompositionLength = el.value.length;
       return;
     }
 
     const value = el.value;
+    const composing = this.isInComposition;
+
+    if (composing) {
+      // Process new characters incrementally during composition
+      // (mobile virtual keyboards such as Gboard keep composition mode
+      //  active for regular letter input).
+      if (value.length > this.lastCompositionLength) {
+        const newText = value.substring(this.lastCompositionLength);
+        this.engine.handleTextInput(newText);
+      } else if (value.length < this.lastCompositionLength) {
+        // User deleted characters during composition (backspace)
+        const deletedCount = this.lastCompositionLength - value.length;
+        for (let i = 0; i < deletedCount; i++) {
+          this.engine.handleBackspaceInput();
+        }
+      }
+      this.lastCompositionLength = value.length;
+      return;
+    }
+
+    // Not composing — process full value and clear
     if (!value) return;
-
     this.engine.handleTextInput(value);
-
-    // Keep textarea empty so next input event only contains new chars.
     el.value = '';
+    this.lastCompositionLength = 0;
+  }
+
+  onCompositionStart(): void {
+    this.isInComposition = true;
   }
 
   onCompositionEnd(event: CompositionEvent): void {
+    this.isInComposition = false;
     if (this.gameOver) return;
 
     const el = event.target as HTMLTextAreaElement | null;
     if (!el) return;
-    if (!el.value) return;
 
-    this.engine.handleTextInput(el.value);
+    // Process any remaining characters not yet handled incrementally
+    const value = el.value;
+    if (value.length > this.lastCompositionLength) {
+      const remaining = value.substring(this.lastCompositionLength);
+      this.engine.handleTextInput(remaining);
+    }
+
     el.value = '';
+    this.lastCompositionLength = 0;
   }
 
   onPaste(event: ClipboardEvent): void {
