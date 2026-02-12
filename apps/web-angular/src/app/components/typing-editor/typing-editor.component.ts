@@ -921,7 +921,30 @@ export class TypingEditorComponent implements OnChanges, AfterViewInit {
     if (e.inputType === 'deleteContentBackward') {
       this.suppressNextBackspaceKeydown = true;
       e.preventDefault();
+      this.ignoreNextInput = true;
       this.engine.handleBackspaceInput();
+      return;
+    }
+
+    // Capture inserted text here for best mobile support (Gboard/iOS composition/prediction).
+    if (
+      e.inputType === 'insertText'
+      || e.inputType === 'insertReplacementText'
+      || e.inputType === 'insertCompositionText'
+    ) {
+      const data = e.data ?? '';
+      if (data) {
+        e.preventDefault();
+        this.ignoreNextInput = true;
+        this.engine.handleTextInput(data);
+        return;
+      }
+    }
+
+    if (e.inputType === 'insertLineBreak' || e.inputType === 'insertParagraph') {
+      e.preventDefault();
+      this.ignoreNextInput = true;
+      this.engine.handleTextInput('\n');
       return;
     }
 
@@ -935,6 +958,8 @@ export class TypingEditorComponent implements OnChanges, AfterViewInit {
     if (this.gameOver) return;
 
     const e = event as InputEvent;
+    // If the keyboard is composing and we didn't intercept via beforeinput,
+    // let it finish and handle it on compositionend.
     if (e.isComposing) return;
 
     const el = event.target as HTMLTextAreaElement | null;

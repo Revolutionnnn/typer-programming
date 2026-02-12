@@ -251,7 +251,7 @@
     display: none;
   }
 
-  .header__logo-text {
+  .header__logo .header__logo-text {
     max-width: 42vw;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -260,7 +260,7 @@
 }
 
 @media (max-width: 360px) {
-  .header__logo-text {
+  .header__logo .header__logo-text {
     display: none;
   }
 }
