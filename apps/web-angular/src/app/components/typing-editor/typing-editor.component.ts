@@ -963,41 +963,45 @@ export class TypingEditorComponent implements OnChanges, AfterViewInit {
       this.ignoreNextInput = false;
       if (!this.isInComposition) {
         el.value = '';
+        this.lastCompositionLength = 0;
+      } else {
+        this.lastCompositionLength = el.value.length;
       }
-      this.lastCompositionLength = el.value.length;
       return;
     }
 
     const value = el.value;
-    const composing = this.isInComposition;
 
-    if (composing) {
-      // Process new characters incrementally during composition
-      // (mobile virtual keyboards such as Gboard keep composition mode
-      //  active for regular letter input).
-      if (value.length > this.lastCompositionLength) {
-        const newText = value.substring(this.lastCompositionLength);
-        this.engine.handleTextInput(newText);
-      } else if (value.length < this.lastCompositionLength) {
-        // User deleted characters during composition (backspace)
-        const deletedCount = this.lastCompositionLength - value.length;
-        for (let i = 0; i < deletedCount; i++) {
-          this.engine.handleBackspaceInput();
-        }
+    // Always use incremental diff regardless of composition state.
+    // This avoids double-processing characters that were already handled
+    // during composition after compositionEnd fires.
+    if (value.length > this.lastCompositionLength) {
+      const newText = value.substring(this.lastCompositionLength);
+      this.engine.handleTextInput(newText);
+    } else if (value.length < this.lastCompositionLength) {
+      // User deleted characters (e.g., backspace during composition)
+      const deletedCount = this.lastCompositionLength - value.length;
+      for (let i = 0; i < deletedCount; i++) {
+        this.engine.handleBackspaceInput();
       }
-      this.lastCompositionLength = value.length;
-      return;
     }
+    this.lastCompositionLength = value.length;
 
-    // Not composing — process full value and clear
-    if (!value) return;
-    this.engine.handleTextInput(value);
-    el.value = '';
-    this.lastCompositionLength = 0;
+    // Clear the textarea when not composing to keep it tidy
+    if (!this.isInComposition) {
+      el.value = '';
+      this.lastCompositionLength = 0;
+    }
   }
 
   onCompositionStart(): void {
     this.isInComposition = true;
+    // Sync tracking with current textarea content so incremental diff
+    // works correctly even if a previous composition wasn't fully cleared.
+    const el = this.inputEl?.nativeElement;
+    if (el) {
+      this.lastCompositionLength = el.value.length;
+    }
   }
 
   onCompositionEnd(event: CompositionEvent): void {
@@ -1013,9 +1017,18 @@ export class TypingEditorComponent implements OnChanges, AfterViewInit {
       const remaining = value.substring(this.lastCompositionLength);
       this.engine.handleTextInput(remaining);
     }
+    this.lastCompositionLength = value.length;
 
-    el.value = '';
-    this.lastCompositionLength = 0;
+    // Defer clearing the textarea. On mobile, pressing Shift can trigger
+    // compositionend → compositionstart in quick succession. Clearing
+    // synchronously disrupts the keyboard's IME state and causes the
+    // first uppercase character to be swallowed.
+    setTimeout(() => {
+      if (!this.isInComposition) {
+        el.value = '';
+        this.lastCompositionLength = 0;
+      }
+    }, 0);
   }
 
   onPaste(event: ClipboardEvent): void {
