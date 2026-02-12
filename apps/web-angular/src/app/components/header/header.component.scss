@@ -250,4 +250,17 @@
   .user-profile .username {
     display: none;
   }
+
+  .header__logo-text {
+    max-width: 42vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 360px) {
+  .header__logo-text {
+    display: none;
+  }
 }

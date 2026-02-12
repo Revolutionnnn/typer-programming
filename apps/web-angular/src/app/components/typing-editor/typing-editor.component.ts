@@ -61,6 +61,7 @@ const STREAK_EMOJIS = ['🔥', '⚡', '🚀', '🏆', '👑'];
         (keydown)="onKeyDown($event)"
         (beforeinput)="onBeforeInput($event)"
         (input)="onInput($event)"
+        (compositionend)="onCompositionEnd($event)"
         (paste)="onPaste($event)"
       ></textarea>
 
@@ -228,11 +229,12 @@ const STREAK_EMOJIS = ['🔥', '⚡', '🚀', '🏆', '👑'];
       /* Hidden input to capture mobile virtual keyboard typing */
       .editor__input {
         position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
+        top: 0;
+        left: 0;
+        width: 1px;
+        height: 1px;
         opacity: 0;
-        pointer-events: none;
+        pointer-events: auto;
         background: transparent;
         color: transparent;
         caret-color: transparent;
@@ -822,6 +824,7 @@ export class TypingEditorComponent implements OnChanges, AfterViewInit {
   private finishedSub: Subscription | null = null;
 
   private suppressNextBackspaceKeydown = false;
+  private ignoreNextInput = false;
 
   i18n: I18nService;
 
@@ -889,11 +892,26 @@ export class TypingEditorComponent implements OnChanges, AfterViewInit {
 
     if (event.key === 'Tab') {
       event.preventDefault();
+      this.ignoreNextInput = true;
       this.engine.handleTextInput('\t');
       return;
     }
 
-    // For printable characters / Enter, rely on (input) to avoid double-processing.
+    // Prefer keydown for printable characters/Enter on desktop and on some mobile
+    // keyboards. Prevent default so the textarea doesn't accumulate value.
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      this.ignoreNextInput = true;
+      this.engine.handleTextInput('\n');
+      return;
+    }
+
+    if (event.key.length === 1) {
+      event.preventDefault();
+      this.ignoreNextInput = true;
+      this.engine.handleTextInput(event.key);
+      return;
+    }
   }
 
   onBeforeInput(event: Event): void {
@@ -922,12 +940,29 @@ export class TypingEditorComponent implements OnChanges, AfterViewInit {
     const el = event.target as HTMLTextAreaElement | null;
     if (!el) return;
 
+    if (this.ignoreNextInput) {
+      this.ignoreNextInput = false;
+      el.value = '';
+      return;
+    }
+
     const value = el.value;
     if (!value) return;
 
     this.engine.handleTextInput(value);
 
     // Keep textarea empty so next input event only contains new chars.
+    el.value = '';
+  }
+
+  onCompositionEnd(event: CompositionEvent): void {
+    if (this.gameOver) return;
+
+    const el = event.target as HTMLTextAreaElement | null;
+    if (!el) return;
+    if (!el.value) return;
+
+    this.engine.handleTextInput(el.value);
     el.value = '';
   }
 
